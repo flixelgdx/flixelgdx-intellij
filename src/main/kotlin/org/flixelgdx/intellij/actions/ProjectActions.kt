@@ -67,14 +67,18 @@ object ProjectActions {
    *
    * @param title the title of the background task and of the notifications, such as "Adding library".
    * @param args the command and its flags.
+   * @param onChanged called on the EDT after a successful run that changed the project, once the refresh is scheduled.
    */
-  fun runChange(project: Project, title: String, args: List<String>) {
+  fun runChange(project: Project, title: String, args: List<String>, onChanged: () -> Unit = {}) {
     val dir = baseDir(project) ?: return
     FlxgdxTasks.run(project, title, args, dir) { result ->
       if (result.isSuccess) {
         val change = ChangeResult.parse(result.data)
         report(project, title, change)
-        if (!change.unchanged) refresh(project)
+        if (!change.unchanged) {
+          refresh(project)
+          onChanged()
+        }
       }
     }
   }

@@ -36,6 +36,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.flixelgdx.intellij.cli.FlxgdxNotifier
 import org.flixelgdx.intellij.cli.FlxgdxTasks
+import org.flixelgdx.intellij.runconfig.RunConfigSync
 import org.jetbrains.plugins.gradle.service.project.open.linkAndSyncGradleProject
 import java.nio.file.Files
 import java.nio.file.Path
@@ -73,6 +74,7 @@ class NewProjectRunner(private val project: Project, private val scope: Coroutin
             service<FlxgdxNotifier>().info(project, TITLE, parsed.notes.joinToString("\n"))
           }
           importGradle(dir)
+          project.service<RunConfigSync>().sync()
         }
       },
     )

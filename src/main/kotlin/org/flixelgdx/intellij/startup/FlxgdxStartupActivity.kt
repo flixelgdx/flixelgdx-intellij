@@ -31,10 +31,12 @@ import kotlinx.coroutines.withContext
 import org.flixelgdx.intellij.cli.FlxgdxCli
 import org.flixelgdx.intellij.cli.FlxgdxNotifier
 import org.flixelgdx.intellij.cli.FlxgdxProject
+import org.flixelgdx.intellij.runconfig.RunConfigSync
 
 /**
  * Runs when a project opens. If it is a FlixelGDX project (it has a `project.toml` in its root), it checks the
- * installed `flxgdx` in the background and explains the fix when something is wrong.
+ * installed `flxgdx` in the background and explains the fix when something is wrong. It also makes sure the Gradle run
+ * configurations exist (see [RunConfigSync]).
  */
 class FlxgdxStartupActivity : ProjectActivity {
 
@@ -42,5 +44,6 @@ class FlxgdxStartupActivity : ProjectActivity {
     if (!FlxgdxProject.isFlixelProject(project)) return
     val status = withContext(Dispatchers.IO) { service<FlxgdxCli>().status() }
     FlxgdxNotifier.getInstance().notifyCliProblem(project, status)
+    project.service<RunConfigSync>().sync()
   }
 }

@@ -28,6 +28,7 @@ import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import org.flixelgdx.intellij.cli.FlxgdxNotifier
 import org.flixelgdx.intellij.model.CommandArgs
+import org.flixelgdx.intellij.runconfig.RunConfigSync
 
 /** Tools > FlixelGDX > Add Platform: offers the platforms that are not enabled yet. */
 class AddPlatformAction : FlxgdxAction() {
@@ -42,7 +43,9 @@ class AddPlatformAction : FlxgdxAction() {
       }
       val dialog = ChoiceDialog(project, "Add Platform", "Platform:", options, { it }, okText = "Add")
       if (dialog.showAndGet()) {
-        dialog.choice?.let { ProjectActions.runChange(project, TITLE, CommandArgs.addPlatform(it)) }
+        dialog.choice?.let {
+          ProjectActions.runChange(project, TITLE, CommandArgs.addPlatform(it)) { syncRunConfigs(project) }
+        }
       }
     }
   }
@@ -75,11 +78,20 @@ class RemovePlatformAction : FlxgdxAction() {
       okText = "Remove",
     )
     if (dialog.showAndGet()) {
-      dialog.choice?.let { ProjectActions.runChange(project, TITLE, CommandArgs.removePlatform(it, dialog.checked)) }
+      dialog.choice?.let {
+        ProjectActions.runChange(project, TITLE, CommandArgs.removePlatform(it, dialog.checked)) {
+          syncRunConfigs(project)
+        }
+      }
     }
   }
 
   private companion object {
     const val TITLE = "Removing platform"
   }
+}
+
+/** Updates the run configurations after a platform was added or removed. */
+private fun syncRunConfigs(project: Project) {
+  project.service<RunConfigSync>().sync()
 }
