@@ -50,8 +50,26 @@ class FlxgdxSettings : SimplePersistentStateComponent<FlxgdxSettings.State>(Stat
       }
     }
 
+  /** The repositories that were used last, newest first. Dialogs offer them again so they need not be retyped. */
+  val recentRepos: List<String> get() = state.recentRepos.toList()
+
+  /** Puts [repo] at the top of [recentRepos] (a repeated entry moves up) and keeps the list short. Blank is ignored. */
+  fun rememberRepo(repo: String) {
+    val value = repo.trim()
+    if (value.isEmpty()) return
+    val list = state.recentRepos
+    list.remove(value)
+    list.add(0, value)
+    while (list.size > MAX_RECENT) list.removeAt(list.size - 1)
+  }
+
   /** The data that is written to disk. */
   class State : BaseState() {
     var executablePath by string("")
+    var recentRepos by list<String>()
+  }
+
+  companion object {
+    private const val MAX_RECENT = 10
   }
 }
