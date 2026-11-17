@@ -1,5 +1,5 @@
 <idea-plugin>
-  <id>org.flixelgdx.intellij</id>
+  <id>org.flixelgdx.ide</id>
   <name>FlixelGDX</name>
   <vendor url="https://github.com/flixelgdx">FlixelGDX</vendor>
 
