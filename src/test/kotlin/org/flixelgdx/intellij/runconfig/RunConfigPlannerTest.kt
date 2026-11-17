@@ -24,6 +24,7 @@
 package org.flixelgdx.intellij.runconfig
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -122,5 +123,62 @@ class RunConfigPlannerTest {
   @Test
   fun noPlatformsMeansNothingToCreate() {
     assertTrue(RunConfigPlanner.plan(emptyList(), emptyList(), emptyList()).isEmpty)
+  }
+
+  @Test
+  fun debugToolsConfigurationsGetTheDebuggerStepWhenItIsInstalled() {
+    val plan = RunConfigPlanner.plan(desktopWeb, emptyList(), emptyList(), debuggerInstalled = true)
+    assertEquals(
+      mapOf(
+        "Desktop" to false,
+        "Desktop (Debug Tools)" to true,
+        "Web" to false,
+        "Web (Debug Tools)" to true,
+      ),
+      plan.create.associate { it.name to it.openDebugger },
+    )
+  }
+
+  @Test
+  fun noDebuggerStepWhenTheDebuggerIsNotInstalled() {
+    val plan = RunConfigPlanner.plan(desktopWeb, emptyList(), emptyList())
+    assertTrue(plan.create.none { it.openDebugger })
+  }
+
+  @Test
+  fun existingConfigurationsNeverGetTheDebuggerStep() {
+    val existing = listOf(RunExisting("Desktop (Debug Tools)", listOf(":desktop:debug", "--info")))
+    val plan = RunConfigPlanner.plan(listOf("desktop"), existing, emptyList(), debuggerInstalled = true)
+    assertEquals(listOf("Desktop"), plan.create.map { it.name })
+    assertTrue(plan.create.none { it.openDebugger })
+  }
+
+  @Test
+  fun aUserConfigurationOnTheDebugTaskIsLeftAlone() {
+    val existing = listOf(RunExisting("My debug", listOf(":desktop:debug")))
+    val plan = RunConfigPlanner.plan(listOf("desktop"), existing, emptyList(), debuggerInstalled = true)
+    assertTrue(plan.create.none { it.task == ":desktop:debug" })
+  }
+
+  @Test
+  fun aDeletedDebugConfigurationIsNotBroughtBackWithTheStep() {
+    val specs = RunConfigPlanner.specs("desktop")
+    val plan = RunConfigPlanner.plan(listOf("desktop"), emptyList(), tracked(*specs.toTypedArray()), true)
+    assertTrue(plan.isEmpty)
+  }
+
+  @Test
+  fun theSettingOffStillCreatesNothing() {
+    val plan = RunConfigPlanner.planIfEnabled(false, desktopWeb, emptyList(), emptyList(), debuggerInstalled = true)
+    assertTrue(plan.isEmpty)
+  }
+
+  @Test
+  fun recognizesTheDebugToolsTasks() {
+    assertTrue(RunConfigPlanner.isDebugTools(listOf(":desktop:debug")))
+    assertTrue(RunConfigPlanner.isDebugTools(listOf(":html5:debug", "--info")))
+    assertFalse(RunConfigPlanner.isDebugTools(listOf(":desktop:run")))
+    assertFalse(RunConfigPlanner.isDebugTools(listOf(":android:installDebug")))
+    assertFalse(RunConfigPlanner.isDebugTools(emptyList()))
   }
 }

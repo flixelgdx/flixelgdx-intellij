@@ -29,8 +29,10 @@ package org.flixelgdx.intellij.runconfig
  * @property platform the platform it belongs to (`desktop`, `html5` or `android`).
  * @property name the name shown in the run configuration list.
  * @property task the Gradle task it runs, with its project path (for example `:desktop:run`).
+ * @property openDebugger whether it should get the "Open FlixelGDX Debugger" before-launch task when it is created.
+ * The planner sets it only for debug-tools configurations, and only when the debugger is installed.
  */
-data class RunSpec(val platform: String, val name: String, val task: String)
+data class RunSpec(val platform: String, val name: String, val task: String, val openDebugger: Boolean = false)
 
 /**
  * A run configuration that already exists in the IDE, reduced to what the planner compares.
@@ -81,6 +83,12 @@ object RunConfigPlanner {
     else -> emptyList()
   }
 
+  /** The Gradle tasks that start the game in the framework's debug mode, which the debugger connects to. */
+  val DEBUG_TASKS = listOf(":desktop:debug", ":html5:debug")
+
+  /** Whether [tasks] (the task list of a Gradle run configuration) contains a debug-tools task. */
+  fun isDebugTools(tasks: List<String>): Boolean = tasks.any { it in DEBUG_TASKS }
+
   /** The configurations wanted for [platforms]: Desktop, Web, then Android, whatever order the input has. */
   fun desired(platforms: List<String>): List<RunSpec> =
     ORDER.filter { it in platforms }.flatMap { specs(it) }
@@ -94,17 +102,28 @@ object RunConfigPlanner {
    *   exists under the same name, and its task list is still exactly the task the plugin gave it.
    * - A remembered configuration for a removed platform that is gone or was edited is simply forgotten.
    *
+   * - A configuration that is created and runs a debug-tools task is marked to open the debugger with the run, but only
+   *   when [debuggerInstalled] is `true`. Existing configurations are never given the task, because the planner cannot
+   *   tell a configuration the user left alone from one they set up on purpose.
+   *
    * @param platforms the enabled platforms.
    * @param existing the Gradle run configurations of the project.
    * @param tracked the configurations the plugin remembers it created.
+   * @param debuggerInstalled whether the FlixelGDX Debugger was found on this computer.
    */
-  fun plan(platforms: List<String>, existing: List<RunExisting>, tracked: List<RunTracked>): RunPlan {
+  fun plan(
+    platforms: List<String>,
+    existing: List<RunExisting>,
+    tracked: List<RunTracked>,
+    debuggerInstalled: Boolean = false,
+  ): RunPlan {
     val wanted = desired(platforms)
     val create = ArrayList<RunSpec>()
     for (spec in wanted) {
       val taken = existing.any { it.name == spec.name || it.tasks == listOf(spec.task) }
       val remembered = tracked.any { it.name == spec.name }
-      if (!taken && !remembered) create += spec
+      if (taken || remembered) continue
+      create += spec.copy(openDebugger = debuggerInstalled && isDebugTools(listOf(spec.task)))
     }
 
     val remove = ArrayList<RunTracked>()
@@ -130,7 +149,9 @@ object RunConfigPlanner {
     platforms: List<String>,
     existing: List<RunExisting>,
     tracked: List<RunTracked>,
-  ): RunPlan = if (enabled) plan(platforms, existing, tracked) else RunPlan(emptyList(), emptyList(), tracked)
+    debuggerInstalled: Boolean = false,
+  ): RunPlan =
+    if (enabled) plan(platforms, existing, tracked, debuggerInstalled) else RunPlan(emptyList(), emptyList(), tracked)
 
   /**
    * The name of the configuration to select when nothing is selected: Desktop when it is enabled, otherwise the first
