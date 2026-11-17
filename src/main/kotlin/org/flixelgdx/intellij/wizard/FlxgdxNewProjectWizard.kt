@@ -23,6 +23,7 @@
  */
 package org.flixelgdx.intellij.wizard
 
+import com.intellij.icons.AllIcons
 import com.intellij.ide.util.projectWizard.WizardContext
 import com.intellij.ide.wizard.GeneratorNewProjectWizard
 import com.intellij.ide.wizard.NewProjectWizardBaseStep
@@ -30,7 +31,6 @@ import com.intellij.ide.wizard.NewProjectWizardChainStep.Companion.nextStep
 import com.intellij.ide.wizard.NewProjectWizardStep
 import com.intellij.ide.wizard.RootNewProjectWizardStep
 import javax.swing.Icon
-import org.flixelgdx.intellij.FlixelIcons
 
 /**
  * Adds "FlixelGDX" to the list on the left of File > New > Project.
@@ -45,7 +45,8 @@ class FlxgdxNewProjectWizard : GeneratorNewProjectWizard {
 
   override val name: String = "FlixelGDX"
 
-  override val icon: Icon = FlixelIcons.FLIXELGDX
+  // The plain Java icon, the same one the built-in Java project wizard shows.
+  override val icon: Icon = AllIcons.FileTypes.Java
 
   override val description: String = "Create a game with the FlixelGDX framework."
 

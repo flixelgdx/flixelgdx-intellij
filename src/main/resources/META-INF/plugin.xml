@@ -28,7 +28,6 @@
         id="FlixelGDX"
         anchor="bottom"
         canCloseContents="false"
-        icon="org.flixelgdx.intellij.FlixelIcons.TOOL_WINDOW"
         factoryClass="org.flixelgdx.intellij.doctor.DoctorToolWindowFactory"/>
     <localInspection
         language="UAST"
