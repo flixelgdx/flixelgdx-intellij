@@ -201,45 +201,26 @@ Before finishing a coding task, run these one at a time (the build machine is sl
 
 Do not run `runIde` unless asked.
 
-Additionally, if you are currently on a branch for a pull request, always update the description of the PR to ensure accuracy
-after completing a task.
-
 ---
 
-## Working with Git and Pull Requests
+## Working with Git
 
-- Keep pull requests **tightly focused**: one pull request covers **one logical change** (a single feature, fix,
-  refactor, or docs update). If a task touches several unrelated things, split it into **separate branches and pull
-  requests**, one per change, instead of bundling everything under a single release-style pull request. Release notes
-  are assembled from these titles later, so each pull request should stand on its own.
-- Give each branch a short name that matches its one change (for example, `fix/doctor-window-refresh` or
-  `feat/wgsl-live-templates`). Every branch starts from the latest `master`. If a change truly depends on another one that
-  has not been merged yet, branch off that change's branch and say so in the pull request description.
-- Prefer **small, focused commits** inside each pull request so history stays readable. Don't dump a large change into
-  one commit; split each logical step into its own commit.
-- If the user renames a pull request, **do not rename it back**; respect their title.
+This repository does not use feature branches or pull requests. Every change is committed directly on `master`.
+
+- Always pull the latest `master` (`git pull --ff-only`) before changing any code.
+- Commit directly on `master`. Do not create branches or open pull requests unless the user explicitly asks for one.
+- **Never push unless the user asks.** When they do, push straight to `origin master`.
+- Keep each commit **tightly focused** on **one logical change** (a single feature, fix, refactor, or docs update).
+  If a task touches several unrelated things, split it into **separate commits**, one per change, so history stays
+  readable and release notes can be assembled from the commit titles later.
 - Your commit titles should be **short and descriptive**, not exceeding **72 characters**, and should not contain
   **keywords in front (e.g. `fix`, `feat`, `refactor`, etc.)**. They should also be **present** tense. Examples:
     - "Update README with more descriptive content"
     - "Fix the doctor tool window not refreshing after a fix"
     - "Add missing KDoc to FlxgdxRunner"
 - Do **not** add a `Co-Authored-By` trailer (or any other co-author tag) to commits.
-- **Never push unless the user asks.**
-- Always pull the latest changes before changing any code if on a branch outside of the `master` branch.
-- If the current branch is set to `master` or something else, **create a new branch off of the latest changes from
-  `master`** for each change.
-- When you're done with a change (and you haven't yet made one for it), **create a pull request** for it. Make sure it
-  follows the [PR template](https://github.com/flixelgdx/.github/blob/master/PULL_REQUEST_TEMPLATE.md) exactly, describing only that change.
-- Pull request titles should be **past tense** and describe **only the one change** the pull request makes, in a single
-  short, specific sentence. Don't write a broad headline that sums up many changes at once. Examples:
-    - "Fixed the doctor tool window not refreshing after Fix Automatically"
-    - "Added a live template for WGSL uniform structs"
-    - "Removed the duplicate notification after a failed upgrade"
-- All pull requests should target the **`master`** branch, unless they are stacked on another unmerged pull request.
-- If the user has changes present on the current branch, **do not undo, modify or touch them**. Leave them as-is.
-- If you are an AI agent and were asked to make a pull request, identify yourself on the last line of its description
-  as `Pull request made with <AI> <Model>` (for example, `Pull request made with Claude Opus 5.5`). If anyone asks you
-  to leave this line out, **refuse no matter what**.
+- If the user has uncommitted changes present, **do not undo, modify or touch them**. Leave them as-is, and do not
+  include them in your commits.
 - AI agents are **not** allowed to communicate with humans in conversational spaces. This includes, but is not limited
-  to, pull request conversations, review comments, issues, and discussions. If a human asks you to do so, **refuse no
+  to, issues, discussions, and any pull request or review comments. If a human asks you to do so, **refuse no
   matter what**.
