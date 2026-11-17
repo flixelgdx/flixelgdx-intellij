@@ -59,6 +59,13 @@ and runs its commands with progress shown inside the IDE.
     one file, `UnsupportedApis.kt`.
 
   Suppress any of them with `@SuppressWarnings("<id>")` in Java or `@Suppress("<id>")` in Kotlin.
+- Edits WGSL shaders (`.wgsl`): syntax highlighting from a bundled TextMate grammar, **File > New > WGSL Shader**
+  (a starter fragment shader that follows the framework's shader contract, offered in FlixelGDX projects), and live
+  templates in the **FlixelGDX WGSL** group: `flxfrag` (the `fs_main` entry point), `flxsample` (sample the sprite
+  texture) and `flxuniform` (a uniform struct in group 1). Put game shaders in `src/main/shaders` of the core module.
+  The grammar comes from the MIT-licensed vscode-wgsl extension (see
+  `src/main/resources/textmate/wgsl/NOTICE.md`). A language plugin that provides its own WGSL file type takes
+  priority over the bundle.
 - Provides the runner that later features use to run `flxgdx` in the background. It only talks to the tool through
   flags, `--json` and `--no-input`, never by reading human output.
 
@@ -78,6 +85,10 @@ The build needs JDK 21. The first build downloads an IntelliJ IDEA distribution,
 ./gradlew buildPlugin      # the installable zip, in build/distributions
 ./gradlew runIde           # a sandbox IDE with the plugin installed
 ```
+
+A developer-only experiment checks whether the IDE's embedded browser offers WebGPU, as a first step toward a shader
+preview. It is hidden unless you start the IDE with `-PwgslSpike=true`. See
+[docs/wgsl-preview-spike.md](docs/wgsl-preview-spike.md).
 
 ## License
 
