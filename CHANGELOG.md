@@ -10,6 +10,8 @@
 - Gradle run configurations for each enabled platform (Desktop, Desktop (Debug Tools), Web, Web (Debug Tools) and Android) in a FlixelGDX folder, created when a project opens and after the platforms change.
 - A project setting, Create run configurations automatically, under Tools > FlixelGDX > Project.
 - A list of recently used repositories in the add and handbook dialogs.
+- Four inspections for Java and Kotlin under Editor > Inspections > FlixelGDX: allocation in per-frame code, standard Java collections, reflection, and APIs missing on Android or the web. They only run in modules that use the framework.
+- Quick fixes to move a per-frame local variable to a field and to replace a standard collection with the FlixelGDX one.
 
 ## [1.0.0]
 

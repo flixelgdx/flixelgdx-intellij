@@ -35,6 +35,30 @@ and runs its commands with progress shown inside the IDE.
   Platform. Only missing ones are created, Desktop is selected when nothing else is, and when a platform is removed
   only the configurations the plugin created for it (and that you did not edit) are removed. Turn it off with
   **Create run configurations automatically** under **Settings > Tools > FlixelGDX > Project**.
+- Adds four inspections under **Settings > Editor > Inspections > FlixelGDX** for Java and Kotlin. They only run in
+  modules that have the framework on their classpath, and each one has a description that explains why it matters:
+  - **Allocation in per-frame code** (`FlixelGdxAllocation`, weak warning): `new` objects, arrays, string
+    concatenation, boxing into collections, and capturing lambdas or anonymous classes inside methods that override
+    the framework's `update(float)` or `draw(...)`. Java files get the quick fix **Move to a field** for a local
+    variable whose initializer does not depend on the method.
+  - **Standard Java collection** (`FlixelGdxCollection`, weak warning): `java.util` collections in fields, locals,
+    parameters and `new` expressions, plus Kotlin's `mutableListOf` and friends. For a Java field or local
+    created with a no-argument or capacity constructor the quick fix **Replace with FlixelArray** (or `FlixelSet`,
+    `FlixelMap`, `FlixelIntMap`, `FlixelIntArray` and so on) rewrites the declaration. The mapping is
+    `List`/`ArrayList` to `FlixelArray` (or a primitive array for boxed numbers), `Set`/`HashSet` to `FlixelSet`
+    (`FlixelIntSet` and `FlixelLongSet` for `Integer` and `Long`), `Map`/`HashMap` to `FlixelMap` (`FlixelIntMap` and
+    `FlixelLongMap` for `Integer` and `Long` keys, `FlixelObjectIntMap` and `FlixelObjectFloatMap` for number values)
+    and `IdentityHashMap` to `FlixelIdentityMap`. Ordered and sorted collections are only reported. The calls that
+    use the variable are not rewritten, because the method names differ.
+  - **Reflection** (`FlixelGdxReflection`, warning): `java.lang.reflect`, `Class.forName`, `getDeclaredMethod` and
+    similar, proxies, `MethodHandles.Lookup.find*` and `kotlin.reflect.full`, which break on the web and on Android
+    with R8.
+  - **API missing on Android or the web** (`FlixelGdxUnsupportedApi`, warning): `java.lang.foreign`,
+    `ScopedValue`, `StructuredTaskScope`, virtual threads, `java.lang.classfile`, the Java 21 sequenced collection
+    methods, `Math.clamp`, `StringBuilder.repeat`, `HexFormat`, `Thread.threadId` and `Locale.of`. The list lives in
+    one file, `UnsupportedApis.kt`.
+
+  Suppress any of them with `@SuppressWarnings("<id>")` in Java or `@Suppress("<id>")` in Kotlin.
 - Provides the runner that later features use to run `flxgdx` in the background. It only talks to the tool through
   flags, `--json` and `--no-input`, never by reading human output.
 
