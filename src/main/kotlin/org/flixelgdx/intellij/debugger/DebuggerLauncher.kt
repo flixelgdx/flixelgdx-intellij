@@ -109,7 +109,7 @@ object DebuggerLauncher {
       val handler = OSProcessHandler(cmd)
       handler.setShouldDestroyProcessRecursively(false)
       handler.startNotify()
-      runCatching { handler.processInput?.close() }
+      runCatching { handler.processInput.close() }
       LaunchOutcome.Started(path)
     } catch (e: ExecutionException) {
       LaunchOutcome.Failed(path, e.message ?: "unknown error")

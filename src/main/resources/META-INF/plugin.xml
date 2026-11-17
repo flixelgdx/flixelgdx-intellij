@@ -22,6 +22,7 @@
         instance="org.flixelgdx.intellij.settings.FlxgdxProjectConfigurable"
         displayName="Project"
         nonDefaultProject="true"/>
+    <stepsBeforeRunProvider implementation="org.flixelgdx.intellij.runconfig.DebuggerBeforeRunProvider"/>
     <newProjectWizard.generator implementation="org.flixelgdx.intellij.wizard.FlxgdxNewProjectWizard"/>
     <postStartupActivity implementation="org.flixelgdx.intellij.startup.FlxgdxStartupActivity"/>
     <toolWindow

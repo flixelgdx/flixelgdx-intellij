@@ -24,6 +24,7 @@
 package org.flixelgdx.intellij.runconfig
 
 import com.intellij.execution.RunManager
+import com.intellij.execution.RunManagerEx
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.ModalityState
 import com.intellij.openapi.components.Service
@@ -37,6 +38,7 @@ import org.flixelgdx.intellij.cli.CliStatus
 import org.flixelgdx.intellij.cli.FlxgdxCli
 import org.flixelgdx.intellij.cli.FlxgdxProject
 import org.flixelgdx.intellij.cli.FlxgdxRunner
+import org.flixelgdx.intellij.debugger.DebuggerLocator
 import org.flixelgdx.intellij.model.CommandArgs
 import org.flixelgdx.intellij.model.ProjectInfo
 import org.flixelgdx.intellij.model.ProjectToml
@@ -76,8 +78,9 @@ class RunConfigSync(private val project: Project, private val scope: CoroutineSc
     val base = project.basePath ?: return
     scope.launch {
       val platforms = withContext(Dispatchers.IO) { readPlatforms(Paths.get(base)) } ?: return@launch
+      val debugger = withContext(Dispatchers.IO) { service<DebuggerLocator>().find() != null }
       ApplicationManager.getApplication()
-        .invokeLater({ apply(base, platforms) }, ModalityState.nonModal(), project.disposed)
+        .invokeLater({ apply(base, platforms, debugger) }, ModalityState.nonModal(), project.disposed)
     }
   }
 
@@ -96,8 +99,8 @@ class RunConfigSync(private val project: Project, private val scope: CoroutineSc
     return ProjectToml.platforms(text)
   }
 
-  /** Applies the plan on the EDT. */
-  private fun apply(base: String, platforms: List<String>) {
+  /** Applies the plan on the EDT. [debuggerInstalled] decides if debug-tools configurations get the debugger step. */
+  private fun apply(base: String, platforms: List<String>, debuggerInstalled: Boolean) {
     val settings = project.service<FlxgdxProjectSettings>()
     if (!settings.autoRunConfigs) return
     val manager = RunManager.getInstance(project)
@@ -108,7 +111,7 @@ class RunConfigSync(private val project: Project, private val scope: CoroutineSc
       val config = entry.configuration as? GradleRunConfiguration ?: continue
       existing += RunExisting(entry.name, config.settings.taskNames.orEmpty())
     }
-    val plan = RunConfigPlanner.plan(platforms, existing, settings.tracked)
+    val plan = RunConfigPlanner.plan(platforms, existing, settings.tracked, debuggerInstalled)
 
     for (entry in plan.remove) {
       manager.findConfigurationByTypeAndName(type, entry.name)?.let { manager.removeConfiguration(it) }
@@ -119,6 +122,11 @@ class RunConfigSync(private val project: Project, private val scope: CoroutineSc
       config.settings.externalProjectPath = base
       config.rawCommandLine = spec.task
       created.folderName = RunConfigPlanner.FOLDER
+      if (spec.openDebugger) {
+        val step = DebuggerBeforeRunTask()
+        step.isEnabled = true
+        RunManagerEx.getInstanceEx(project).setBeforeRunTasks(config, listOf(step))
+      }
       manager.addConfiguration(created)
     }
     if (manager.selectedConfiguration == null) {
