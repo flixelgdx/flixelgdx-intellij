@@ -50,6 +50,13 @@ class FlxgdxSettings : SimplePersistentStateComponent<FlxgdxSettings.State>(Stat
       }
     }
 
+  /** The path of the FlixelGDX Debugger executable. An empty value means "find it automatically". */
+  var debuggerPath: String
+    get() = state.debuggerPath.orEmpty()
+    set(value) {
+      state.debuggerPath = value
+    }
+
   /** The repositories that were used last, newest first. Dialogs offer them again so they need not be retyped. */
   val recentRepos: List<String> get() = state.recentRepos.toList()
 
@@ -66,6 +73,7 @@ class FlxgdxSettings : SimplePersistentStateComponent<FlxgdxSettings.State>(Stat
   /** The data that is written to disk. */
   class State : BaseState() {
     var executablePath by string("")
+    var debuggerPath by string("")
     var recentRepos by list<String>()
   }
 
