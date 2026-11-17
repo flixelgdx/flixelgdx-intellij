@@ -6,6 +6,7 @@
   <depends>com.intellij.modules.platform</depends>
   <depends>com.intellij.modules.java</depends>
   <depends>org.jetbrains.plugins.gradle</depends>
+  <depends>org.jetbrains.plugins.textmate</depends>
 
   <extensions defaultExtensionNs="com.intellij">
     <notificationGroup id="FlixelGDX" displayType="BALLOON"/>
@@ -60,9 +61,11 @@
         enabledByDefault="true"
         level="WARNING"
         implementationClass="org.flixelgdx.intellij.inspections.FlixelUnsupportedApiInspection"/>
+    <textmate.bundleProvider implementation="org.flixelgdx.intellij.wgsl.WgslBundleProvider"/>
   </extensions>
 
   <actions>
+
     <group
         id="org.flixelgdx.intellij.FlixelGdxGroup"
         class="org.flixelgdx.intellij.actions.FlxgdxActionGroup"

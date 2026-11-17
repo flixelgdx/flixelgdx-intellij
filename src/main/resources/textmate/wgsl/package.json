@@ -1,0 +1,24 @@
+{
+  "name": "wgsl",
+  "displayName": "WGSL",
+  "description": "Syntax highlighting for WGSL, the WebGPU shading language.",
+  "version": "1.0.0",
+  "license": "MIT",
+  "contributes": {
+    "languages": [
+      {
+        "id": "wgsl",
+        "aliases": ["WGSL", "wgsl"],
+        "extensions": [".wgsl"],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "wgsl",
+        "path": "./syntaxes/wgsl.tmLanguage.json",
+        "scopeName": "source.wgsl"
+      }
+    ]
+  }
+}
