@@ -100,6 +100,10 @@ object CommandArgs {
     return args
   }
 
+  /** `install debugger`, with `--force` to download and unpack it again even when it is already installed. */
+  fun installDebugger(force: Boolean): List<String> =
+    if (force) listOf("install", "debugger", "--force") else listOf("install", "debugger")
+
   /** `uninstall handbook --repo <repo>`. */
   fun uninstallHandbook(repo: String): List<String> = listOf("uninstall", "handbook", "--repo", repo)
 

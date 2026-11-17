@@ -49,6 +49,9 @@ object FlxgdxTasks {
    * @param listener receives events on a background thread while the command runs.
    * @param reportError decides whether a failed result is shown as an error notification. Pass a function that returns
    * `false` for commands whose failure still carries a useful result, such as `doctor` finding an error.
+   * @param logFraction turns a `log` event into a progress fraction between 0 and 1 (or `null` for "no change"). It
+   * receives the number and total of the latest `progress` step and the `data` of the log event. Used for downloads
+   * that report how many bytes arrived.
    * @param onFinished called on the EDT with the result when the task ends, whatever the outcome.
    */
   fun run(
@@ -58,6 +61,7 @@ object FlxgdxTasks {
     workDir: Path? = null,
     listener: CliEventListener? = null,
     reportError: (CliResult) -> Boolean = { true },
+    logFraction: ((step: Int, total: Int?, data: JsonObject?) -> Double?)? = null,
     onFinished: ((CliResult) -> Unit)? = null,
   ) {
     ProgressManager.getInstance().run(object : Task.Backgroundable(project, title, true) {
@@ -74,7 +78,12 @@ object FlxgdxTasks {
         }
 
         val progressListener = object : CliEventListener {
+          private var lastStep = 0
+          private var lastTotal: Int? = null
+
           override fun onProgress(step: Int, total: Int?, message: String) {
+            lastStep = step
+            lastTotal = total
             indicator.text = message
             if (total != null && total > 0) {
               indicator.isIndeterminate = false
@@ -84,6 +93,10 @@ object FlxgdxTasks {
           }
 
           override fun onLog(message: String, data: JsonObject?) {
+            logFraction?.invoke(lastStep, lastTotal, data)?.let {
+              indicator.isIndeterminate = false
+              indicator.fraction = it
+            }
             listener?.onLog(message, data)
           }
 
