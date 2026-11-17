@@ -23,6 +23,7 @@
 package org.flixelgdx.intellij.wizard
 
 import com.google.gson.JsonObject
+import org.flixelgdx.intellij.cli.CliNotes
 import org.flixelgdx.intellij.cli.stringAt
 
 /**
@@ -42,15 +43,7 @@ data class NewProjectResult(val dir: String?, val installed: Int, val notes: Lis
     fun parse(data: JsonObject?): NewProjectResult {
       if (data == null) return NewProjectResult(null, 0, emptyList())
       val installed = data.get("installed")?.takeIf { it.isJsonArray }?.asJsonArray?.size() ?: 0
-      val notes = ArrayList<String>()
-      data.get("notes")?.takeIf { it.isJsonArray }?.asJsonArray?.forEach { item ->
-        val text = item.stringAt("text")
-        if (!text.isNullOrBlank()) {
-          val pkg = item.stringAt("package")
-          notes += if (pkg.isNullOrBlank()) text else "$pkg: $text"
-        }
-      }
-      return NewProjectResult(data.stringAt("dir"), installed, notes)
+      return NewProjectResult(data.stringAt("dir"), installed, CliNotes.parse(data))
     }
   }
 }
