@@ -19,6 +19,7 @@
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
  */
 package org.flixelgdx.intellij.wizard
 
@@ -28,8 +29,8 @@ import com.intellij.ide.wizard.NewProjectWizardBaseStep
 import com.intellij.ide.wizard.NewProjectWizardChainStep.Companion.nextStep
 import com.intellij.ide.wizard.NewProjectWizardStep
 import com.intellij.ide.wizard.RootNewProjectWizardStep
-import com.intellij.openapi.util.IconLoader
 import javax.swing.Icon
+import org.flixelgdx.intellij.FlixelIcons
 
 /**
  * Adds "FlixelGDX" to the list on the left of File > New > Project.
@@ -44,7 +45,7 @@ class FlxgdxNewProjectWizard : GeneratorNewProjectWizard {
 
   override val name: String = "FlixelGDX"
 
-  override val icon: Icon = IconLoader.getIcon("/META-INF/pluginIcon.svg", FlxgdxNewProjectWizard::class.java)
+  override val icon: Icon = FlixelIcons.FLIXELGDX
 
   override val description: String = "Create a game with the FlixelGDX framework."
 
