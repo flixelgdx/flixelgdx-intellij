@@ -35,6 +35,8 @@ dependencies {
     create(platformType, platformVersion)
     bundledPlugins("com.intellij.java", "org.jetbrains.plugins.gradle")
     testFramework(TestFrameworkType.Platform)
+    testFramework(TestFrameworkType.Plugin.Java)
+    testBundledPlugin("org.jetbrains.kotlin")
   }
 }
 
