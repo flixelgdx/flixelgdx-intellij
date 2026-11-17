@@ -1,0 +1,45 @@
+<html>
+<body>
+Reports code that creates new objects inside the per-frame methods of a FlixelGDX game.
+<!-- tooltip end -->
+<p>
+  A game redraws many times a second. The methods that run every frame (the ones that override
+  <code>update(float)</code> or <code>draw(...)</code>) are called so often that anything created inside them becomes
+  garbage almost immediately. When the garbage collector cleans up, the game pauses for a moment, and that shows up
+  as a stutter, most of all on phones and in the browser.
+</p>
+<p>
+  This inspection reports, inside those methods: <code>new</code> objects, arrays, text built with <code>+</code>,
+  numbers boxed into a collection (for example <code>list.add(5)</code> on a list of <code>Integer</code>), and
+  lambdas or anonymous classes that use variables from the surrounding code. Constants, enum values and string
+  literals are fine, and code inside <code>throw</code> is ignored. A Kotlin lambda passed to a standard library
+  function such as <code>forEach</code> is ignored as well, because the compiler usually inlines it.
+</p>
+<p>
+  The fix is to create the object once and reuse it. For a local variable whose initializer does not depend on
+  anything in the method, Java files get the quick fix <b>Move to a field</b>.
+</p>
+<p>Before:</p>
+<pre>
+public void update(float elapsed) {
+  super.update(elapsed);
+  Vector2 offset = new Vector2(4, 4);
+  follow(offset);
+}
+</pre>
+<p>After:</p>
+<pre>
+private Vector2 offset = new Vector2(4, 4);
+
+public void update(float elapsed) {
+  super.update(elapsed);
+  follow(offset);
+}
+</pre>
+<p>
+  The object is now shared by every frame, so do not keep a reference to it after the method returns. To silence the
+  warning on purpose, use <code>@SuppressWarnings("FlixelGdxAllocation")</code> (Java) or
+  <code>@Suppress("FlixelGdxAllocation")</code> (Kotlin).
+</p>
+</body>
+</html>

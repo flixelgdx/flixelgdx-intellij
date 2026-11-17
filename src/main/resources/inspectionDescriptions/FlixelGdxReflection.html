@@ -1,0 +1,34 @@
+<html>
+<body>
+Reports reflection, which breaks on the web and on Android with R8.
+<!-- tooltip end -->
+<p>
+  Reflection means looking up classes, methods or fields by name while the game runs, for example
+  <code>Class.forName("Enemy")</code> or <code>getDeclaredMethod("update")</code>. It works on a desktop JVM, but
+  some platforms compile the game ahead of time and remove, rename or never see the things reflection looks for:
+  the web build (TeaVM) has no reflection at all, and Android's R8 shrinker renames and deletes code it thinks is
+  unused. The result is a crash that only happens on the device or in the browser, which is hard to debug.
+</p>
+<p>
+  This inspection reports <code>java.lang.reflect</code>, the lookup methods of <code>Class</code>
+  (<code>forName</code>, <code>getDeclaredMethod(s)</code>, <code>getDeclaredField(s)</code>,
+  <code>getDeclaredConstructor(s)</code>, <code>getMethod(s)</code>, <code>newInstance</code> and similar), proxies,
+  <code>MethodHandles.Lookup.find*</code> and Kotlin's <code>kotlin.reflect.full</code>.
+</p>
+<p>
+  Write the code explicitly instead, or let the framework's annotation processors generate it at build time.
+</p>
+<p>Before:</p>
+<pre>
+Enemy enemy = (Enemy) Class.forName("game.Enemy").getDeclaredConstructor().newInstance();
+</pre>
+<p>After:</p>
+<pre>
+Enemy enemy = new Enemy();
+</pre>
+<p>
+  Suppress with <code>@SuppressWarnings("FlixelGdxReflection")</code> (Java) or
+  <code>@Suppress("FlixelGdxReflection")</code> (Kotlin), for code that only runs on the desktop.
+</p>
+</body>
+</html>

@@ -1,0 +1,49 @@
+<html>
+<body>
+Reports standard Java collections (<code>ArrayList</code>, <code>HashMap</code>, <code>HashSet</code> and friends) in a FlixelGDX game.
+<!-- tooltip end -->
+<p>
+  Java's collections were built for general programs, not for games. Every for-each loop over them creates an
+  iterator object, every <code>int</code> or <code>float</code> you store is wrapped in an object (boxing), and they
+  keep extra bookkeeping per entry. In a game those small costs add up to a steady stream of garbage, and garbage
+  collection pauses make the game stutter.
+</p>
+<p>
+  FlixelGDX has its own collections in <code>org.flixelgdx.collections</code> that allocate nothing while a game
+  runs, and iterating over them is safe to do every frame. This inspection reports the <code>java.util</code>
+  collection types in fields, local variables, parameters and <code>new</code> expressions, and the Kotlin helpers
+  such as <code>mutableListOf</code> and <code>hashMapOf</code>. Parameters of overriding methods are skipped, because
+  their type is decided by the method they override.
+</p>
+<p>The closest FlixelGDX collection is:</p>
+<ul>
+  <li><code>List</code> or <code>ArrayList</code>: <code>FlixelArray&lt;T&gt;</code>, or a primitive array such as
+    <code>FlixelIntArray</code> or <code>FlixelFloatArray</code> when the elements are boxed numbers</li>
+  <li><code>Set</code> or <code>HashSet</code>: <code>FlixelSet&lt;T&gt;</code>, <code>FlixelIntSet</code> for
+    <code>Integer</code>, <code>FlixelLongSet</code> for <code>Long</code></li>
+  <li><code>Map</code> or <code>HashMap</code>: <code>FlixelMap&lt;K, V&gt;</code>; <code>FlixelIntMap&lt;V&gt;</code>
+    and <code>FlixelLongMap&lt;V&gt;</code> for <code>Integer</code> and <code>Long</code> keys;
+    <code>FlixelObjectIntMap&lt;K&gt;</code> and <code>FlixelObjectFloatMap&lt;K&gt;</code> for number values</li>
+  <li><code>IdentityHashMap</code>: <code>FlixelIdentityMap&lt;K, V&gt;</code></li>
+</ul>
+<p>
+  For a field or local variable that is created with a no-argument or a capacity constructor, the quick fix
+  <b>Replace with ...</b> rewrites the declaration. It does not rewrite the calls, because the method names differ
+  (for example <code>getSize()</code> instead of <code>size()</code>), so the IDE will show errors on those lines until
+  you update them. Ordered and sorted collections (<code>LinkedHashMap</code>, <code>TreeMap</code>,
+  <code>LinkedList</code> and so on) have no exact equivalent, so they are only reported.
+</p>
+<p>Before:</p>
+<pre>
+private final Map&lt;Integer, Enemy&gt; enemies = new HashMap&lt;&gt;();
+</pre>
+<p>After:</p>
+<pre>
+private final FlixelIntMap&lt;Enemy&gt; enemies = new FlixelIntMap&lt;&gt;();
+</pre>
+<p>
+  Suppress with <code>@SuppressWarnings("FlixelGdxCollection")</code> (Java) or
+  <code>@Suppress("FlixelGdxCollection")</code> (Kotlin).
+</p>
+</body>
+</html>

@@ -28,6 +28,38 @@
         canCloseContents="false"
         icon="AllIcons.Toolwindows.ToolWindowBuild"
         factoryClass="org.flixelgdx.intellij.doctor.DoctorToolWindowFactory"/>
+    <localInspection
+        language="UAST"
+        shortName="FlixelGdxAllocation"
+        displayName="Allocation in per-frame code"
+        groupName="FlixelGDX"
+        enabledByDefault="true"
+        level="WEAK WARNING"
+        implementationClass="org.flixelgdx.intellij.inspections.FlixelAllocationInspection"/>
+    <localInspection
+        language="UAST"
+        shortName="FlixelGdxCollection"
+        displayName="Standard Java collection"
+        groupName="FlixelGDX"
+        enabledByDefault="true"
+        level="WEAK WARNING"
+        implementationClass="org.flixelgdx.intellij.inspections.FlixelCollectionInspection"/>
+    <localInspection
+        language="UAST"
+        shortName="FlixelGdxReflection"
+        displayName="Reflection"
+        groupName="FlixelGDX"
+        enabledByDefault="true"
+        level="WARNING"
+        implementationClass="org.flixelgdx.intellij.inspections.FlixelReflectionInspection"/>
+    <localInspection
+        language="UAST"
+        shortName="FlixelGdxUnsupportedApi"
+        displayName="API missing on Android or the web"
+        groupName="FlixelGDX"
+        enabledByDefault="true"
+        level="WARNING"
+        implementationClass="org.flixelgdx.intellij.inspections.FlixelUnsupportedApiInspection"/>
   </extensions>
 
   <actions>

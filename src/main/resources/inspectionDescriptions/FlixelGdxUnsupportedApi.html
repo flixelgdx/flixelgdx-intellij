@@ -1,0 +1,36 @@
+<html>
+<body>
+Reports library APIs that are missing on Android or the web.
+<!-- tooltip end -->
+<p>
+  A FlixelGDX game runs on the desktop, on Android and in the browser, but the three do not share one Java library.
+  Android's runtime only has the Java 17 library, and the web build only has the classes TeaVM provides. A call
+  that compiles fine on a new desktop JDK can therefore crash the game on a phone or in a browser, and you only find
+  out when you run it there.
+</p>
+<p>
+  The inspection reports: <code>java.lang.foreign</code>, <code>ScopedValue</code>, <code>StructuredTaskScope</code>,
+  virtual threads (<code>Thread.ofVirtual</code>, <code>Thread.startVirtualThread</code>,
+  <code>Executors.newVirtualThreadPerTaskExecutor</code>), <code>java.lang.classfile</code>, the Java 21 sequenced
+  collection methods (<code>getFirst</code>, <code>getLast</code>, <code>reversed</code>, <code>addFirst</code>,
+  <code>addLast</code>, <code>removeFirst</code>, <code>removeLast</code> on lists and sets), <code>Math.clamp</code>,
+  <code>StringBuilder.repeat</code>, <code>HexFormat</code>, <code>Thread.threadId</code> and <code>Locale.of</code>.
+  The message names a replacement when there is one.
+</p>
+<p>Before:</p>
+<pre>
+float x = Math.clamp(value, 0f, 1f);
+Item last = items.getLast();
+</pre>
+<p>After:</p>
+<pre>
+float x = FlixelMath.clamp(value, 0f, 1f);
+Item last = items.get(items.size() - 1);
+</pre>
+<p>
+  If a module never runs on Android or the web, suppress the warning with
+  <code>@SuppressWarnings("FlixelGdxUnsupportedApi")</code> (Java) or <code>@Suppress("FlixelGdxUnsupportedApi")</code>
+  (Kotlin).
+</p>
+</body>
+</html>
