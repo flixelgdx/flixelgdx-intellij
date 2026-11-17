@@ -13,6 +13,9 @@
 - Four inspections for Java and Kotlin under Editor > Inspections > FlixelGDX: allocation in per-frame code, standard Java collections, reflection, and APIs missing on Android or the web. They only run in modules that use the framework.
 - Quick fixes to move a per-frame local variable to a field and to replace a standard collection with the FlixelGDX one.
 - WGSL editing: syntax highlighting for `.wgsl` files, File > New > WGSL Shader (a starter fragment shader that follows the framework's shader contract), and a FlixelGDX WGSL group of live templates (`flxfrag`, `flxsample`, `flxuniform`).
+- A Debugger executable setting and an Install Debugger button under Tools > FlixelGDX, which find the FlixelGDX Debugger from the settings, the install that flxgdx recorded, or PATH.
+- Tools > FlixelGDX > Install Debugger... (flxgdx install debugger, with download progress) and Open Debugger.
+- An Open FlixelGDX Debugger step for the Before launch list of Gradle run configurations that run the debug-tools tasks, added automatically to new Debug Tools configurations when the debugger is installed.
 
 ## [1.0.0]
 
