@@ -20,6 +20,13 @@ and runs its commands with progress shown inside the IDE.
   Fields are checked while you type with the same rules as `flxgdx`, and the package follows the company and title.
   Creating the project runs `flxgdx new` with progress and a Cancel button, then imports it as a Gradle project and
   shows the notes of the installed packages. The wizard cannot finish while `flxgdx` is missing or too old.
+- Adds a **FlixelGDX** menu under Tools (and in the project view menu when you select the project root) in FlixelGDX
+  projects. It has Add Library, Add Plugin, Remove Library or Plugin, Add Platform, Remove Platform, Install Handbook,
+  Uninstall Handbook, Upgrade and Run Doctor. Adding a library or plugin works from a repository (`owner/repo`, a
+  GitHub URL or a local folder) or by hand with Maven coordinates. Upgrade shows the planned changes before it applies
+  them. After a change the project files are refreshed and Gradle is synced, and the notes of the packages are shown.
+- Adds a **FlixelGDX** tool window (bottom) with the results of `flxgdx doctor` grouped by category. Its toolbar can
+  run the checks again, fix what is safe to fix automatically, and switch the offline mode.
 - Provides the runner that later features use to run `flxgdx` in the background. It only talks to the tool through
   flags, `--json` and `--no-input`, never by reading human output.
 
