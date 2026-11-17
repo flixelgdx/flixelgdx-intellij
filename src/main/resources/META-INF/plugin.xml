@@ -6,4 +6,13 @@
   <depends>com.intellij.modules.platform</depends>
   <depends>com.intellij.modules.java</depends>
   <depends>org.jetbrains.plugins.gradle</depends>
+
+  <extensions defaultExtensionNs="com.intellij">
+    <notificationGroup id="FlixelGDX" displayType="BALLOON"/>
+    <applicationConfigurable
+        parentId="tools"
+        id="org.flixelgdx.intellij.settings"
+        instance="org.flixelgdx.intellij.settings.FlxgdxConfigurable"
+        displayName="FlixelGDX"/>
+  </extensions>
 </idea-plugin>
