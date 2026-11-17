@@ -76,6 +76,8 @@ intellijPlatform {
   }
 
   pluginVerification {
+    // The requested plugin ID contains the word "intellij", which the verifier flags for new Marketplace plugins.
+    freeArgs = listOf("-mute", "TemplateWordInPluginId")
     ides {
       // Set -PverifyLocal=true to check only the IDE the plugin is built against.
       if (providers.gradleProperty("verifyLocal").orNull == "true") {
