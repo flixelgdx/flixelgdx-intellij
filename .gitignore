@@ -5,5 +5,8 @@ build/
 out/
 .idea/
 *.iml
+*.ipr
+*.iws
 .DS_Store
 local.properties
+hs_err_pid*
