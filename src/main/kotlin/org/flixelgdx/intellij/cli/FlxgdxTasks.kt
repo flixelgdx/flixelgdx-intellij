@@ -47,6 +47,8 @@ object FlxgdxTasks {
    * @param args the command and its flags, without `--json` and `--no-input`.
    * @param workDir the working directory of the command.
    * @param listener receives events on a background thread while the command runs.
+   * @param reportError decides whether a failed result is shown as an error notification. Pass a function that returns
+   * `false` for commands whose failure still carries a useful result, such as `doctor` finding an error.
    * @param onFinished called on the EDT with the result when the task ends, whatever the outcome.
    */
   fun run(
@@ -55,6 +57,7 @@ object FlxgdxTasks {
     args: List<String>,
     workDir: Path? = null,
     listener: CliEventListener? = null,
+    reportError: (CliResult) -> Boolean = { true },
     onFinished: ((CliResult) -> Unit)? = null,
   ) {
     ProgressManager.getInstance().run(object : Task.Backgroundable(project, title, true) {
@@ -100,7 +103,9 @@ object FlxgdxTasks {
 
         val notifier = service<FlxgdxNotifier>()
         if (result.warnings.isNotEmpty()) notifier.warning(project, title, result.warnings.joinToString("\n"))
-        if (!result.isSuccess && !result.cancelled) notifier.error(project, title, result.describe())
+        if (!result.isSuccess && !result.cancelled && reportError(result)) {
+          notifier.error(project, title, result.describe())
+        }
       }
 
       override fun onFinished() {
