@@ -14,6 +14,12 @@ and runs its commands with progress shown inside the IDE.
   `~/go/bin` and `~/.local/bin`.
 - Checks that the installed `flxgdx` is new enough and shows a notification with next steps when it is missing or too
   old (only once per IDE session, and only for FlixelGDX projects, which have a `project.toml` in the project root).
+- Adds **FlixelGDX** to File > New > Project. The wizard asks for the game title, company, version, package, window
+  size, language (Java or Kotlin), platforms (Desktop, Web, Android), extra libraries and plugins, and a few options
+  (suggested packages, the handbook, a Git repository, and under Advanced the framework version and the template).
+  Fields are checked while you type with the same rules as `flxgdx`, and the package follows the company and title.
+  Creating the project runs `flxgdx new` with progress and a Cancel button, then imports it as a Gradle project and
+  shows the notes of the installed packages. The wizard cannot finish while `flxgdx` is missing or too old.
 - Provides the runner that later features use to run `flxgdx` in the background. It only talks to the tool through
   flags, `--json` and `--no-input`, never by reading human output.
 
