@@ -44,8 +44,14 @@ import java.nio.file.Path
 @Service(Service.Level.APP)
 class DebuggerLocator {
 
-  /** Searches now (nothing is cached, because installing or deleting the debugger must show up at once). */
-  fun find(): DetectedDebugger? = DebuggerDetector.detect(service<FlxgdxSettings>().debuggerPath, environment())
+  /**
+   * Searches now (nothing is cached, because installing or deleting the debugger must show up at once).
+   *
+   * @param configured the path to try first. It defaults to the one saved in the settings; the settings page passes
+   * what is typed in its field so the answer follows the field before it is applied.
+   */
+  fun find(configured: String = service<FlxgdxSettings>().debuggerPath): DetectedDebugger? =
+    DebuggerDetector.detect(configured, environment())
 
   private fun environment() = DebuggerEnvironment(
     pathVariable = EnvironmentUtil.getValue("PATH"),
