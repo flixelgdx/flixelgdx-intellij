@@ -27,8 +27,8 @@ import com.google.gson.JsonObject
 import com.intellij.execution.ExecutionException
 import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.execution.process.OSProcessHandler
-import com.intellij.execution.process.ProcessAdapter
 import com.intellij.execution.process.ProcessEvent
+import com.intellij.execution.process.ProcessListener
 import com.intellij.execution.process.ProcessOutputTypes
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.Service
@@ -75,7 +75,7 @@ class FlxgdxRunner {
     executable: Path? = null,
     timeoutMs: Long = 0,
   ): CliResult {
-    ApplicationManager.getApplication()?.assertIsNonDispatchThread()
+    check(ApplicationManager.getApplication()?.isDispatchThread != true) { "flxgdx must not run on the EDT." }
 
     val exe = executable ?: service<FlxgdxLocator>().find()?.path
       ?: return CliResult(-1, startFailure = "flxgdx was not found.")
@@ -125,7 +125,7 @@ class FlxgdxRunner {
   }
 
   /** Collects process output, cuts it into lines, and forwards each decoded event. */
-  private class Collector(private val listener: CliEventListener?) : ProcessAdapter() {
+  private class Collector(private val listener: CliEventListener?) : ProcessListener {
     val results = ArrayList<JsonObject>()
     val warnings = ArrayList<String>()
     val stderr = StringBuilder()
