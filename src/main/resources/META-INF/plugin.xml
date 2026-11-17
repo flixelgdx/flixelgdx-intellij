@@ -63,6 +63,10 @@
         implementationClass="org.flixelgdx.intellij.inspections.FlixelUnsupportedApiInspection"/>
     <textmate.bundleProvider implementation="org.flixelgdx.intellij.wgsl.WgslBundleProvider"/>
     <internalFileTemplate name="WGSL Shader"/>
+    <liveTemplateContext
+        contextId="FLIXELGDX_WGSL"
+        implementation="org.flixelgdx.intellij.wgsl.WgslContext"/>
+    <defaultLiveTemplates file="liveTemplates/FlixelGDX WGSL"/>
   </extensions>
 
   <actions>

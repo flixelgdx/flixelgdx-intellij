@@ -1,0 +1,29 @@
+<templateSet group="FlixelGDX WGSL">
+  <template name="flxfrag"
+            value="@fragment&#10;fn fs_main(in: FlixelVertexOutput) -&gt; @location(0) vec4f {&#10;  let c = textureSample(flixelTexture, flixelSampler, in.uv) * in.color;&#10;  $END$&#10;  return c;&#10;}"
+            description="Fragment entry point fs_main of a FlixelGDX shader"
+            toReformat="false" toShortenFQNames="false">
+    <context>
+      <option name="FLIXELGDX_WGSL" value="true"/>
+    </context>
+  </template>
+  <template name="flxsample"
+            value="let $COLOR$ = textureSample(flixelTexture, flixelSampler, in.uv) * in.color;$END$"
+            description="Sample the sprite texture, tinted by the sprite color"
+            toReformat="false" toShortenFQNames="false">
+    <variable name="COLOR" expression="" defaultValue="&quot;c&quot;" alwaysStopAt="true"/>
+    <context>
+      <option name="FLIXELGDX_WGSL" value="true"/>
+    </context>
+  </template>
+  <template name="flxuniform"
+            value="struct Params {&#10;  $MEMBER$: $TYPE$,&#10;}&#10;@group(1) @binding(0) var&lt;uniform&gt; params: Params;$END$"
+            description="Uniform struct in the shader group, settable from Java with setUniform"
+            toReformat="false" toShortenFQNames="false">
+    <variable name="MEMBER" expression="" defaultValue="&quot;amount&quot;" alwaysStopAt="true"/>
+    <variable name="TYPE" expression="" defaultValue="&quot;f32&quot;" alwaysStopAt="true"/>
+    <context>
+      <option name="FLIXELGDX_WGSL" value="true"/>
+    </context>
+  </template>
+</templateSet>
