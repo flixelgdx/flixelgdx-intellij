@@ -27,6 +27,14 @@ and runs its commands with progress shown inside the IDE.
   them. After a change the project files are refreshed and Gradle is synced, and the notes of the packages are shown.
 - Adds a **FlixelGDX** tool window (bottom) with the results of `flxgdx doctor` grouped by category. Its toolbar can
   run the checks again, fix what is safe to fix automatically, and switch the offline mode.
+- Creates Gradle run configurations in a **FlixelGDX** folder for each enabled platform, so the green Run and Debug
+  buttons work right away: **Desktop** (`:desktop:run`), **Desktop (Debug Tools)** (`:desktop:debug`, the framework's
+  debug mode with its debugging tools), **Web** (`:html5:run`), **Web (Debug Tools)** (`:html5:debug`) and
+  **Android** (`:android:installDebug`). The IDE's own Debug button on a configuration attaches the Java debugger as
+  usual. They are created when a FlixelGDX project opens, after the wizard finishes, and after Add Platform or Remove
+  Platform. Only missing ones are created, Desktop is selected when nothing else is, and when a platform is removed
+  only the configurations the plugin created for it (and that you did not edit) are removed. Turn it off with
+  **Create run configurations automatically** under **Settings > Tools > FlixelGDX > Project**.
 - Provides the runner that later features use to run `flxgdx` in the background. It only talks to the tool through
   flags, `--json` and `--no-input`, never by reading human output.
 

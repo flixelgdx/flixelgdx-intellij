@@ -7,6 +7,8 @@
 - A FlixelGDX menu under Tools and in the project view with Add Library, Add Plugin, Remove Library or Plugin, Add Platform, Remove Platform, Install Handbook, Uninstall Handbook, Upgrade and Run Doctor.
 - A FlixelGDX tool window that shows the results of flxgdx doctor, with Run Again, Fix Automatically and Offline buttons.
 - A Gradle sync after the project actions change the build.
+- Gradle run configurations for each enabled platform (Desktop, Desktop (Debug Tools), Web, Web (Debug Tools) and Android) in a FlixelGDX folder, created when a project opens and after the platforms change.
+- A project setting, Create run configurations automatically, under Tools > FlixelGDX > Project.
 - A list of recently used repositories in the add and handbook dialogs.
 
 ## [1.0.0]
