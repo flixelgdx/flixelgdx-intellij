@@ -130,6 +130,13 @@ The build needs JDK 21. The first build downloads an IntelliJ IDEA distribution,
 A live WGSL preview inside the IDE is not possible today: the IDE's embedded browser does not offer WebGPU. See
 [docs/wgsl-preview-spike.md](docs/wgsl-preview-spike.md) for what was tried.
 
+## Contributing and building
+
+- **[COMPILING.md](COMPILING.md)** - how to build the plugin, run the tests and the plugin verifier, and try it in a
+  sandbox IDE.
+- **[CONTRIBUTING.md](CONTRIBUTING.md)** - contribution guidelines (shared with the main framework).
+- **[ARCHITECTURE.md](ARCHITECTURE.md)** - the package layout and how the plugin talks to `flxgdx`.
+
 ## License
 
 MIT. See [LICENSE](LICENSE).
