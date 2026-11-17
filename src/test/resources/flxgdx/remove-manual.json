@@ -1,0 +1,3 @@
+{"protocol":1,"type":"progress","message":"Finding the installed package","step":1,"total":2}
+{"protocol":1,"type":"progress","message":"Removing tiny-lib","step":2,"total":2}
+{"protocol":1,"type":"result","message":"Removed tiny-lib from the project.\n  removed from the project: tiny-lib","data":{"dir":"/path/to/fx-game","action":"removed","package":"tiny-lib","kind":"library","tag":"1.2.3","libraries":[],"plugins":[],"repositories":[],"removed":["tiny-lib"],"updated":[],"notes":[],"suggestions":[],"warnings":[],"files":["gradle/libs.versions.toml","project.toml"]}}

@@ -1,0 +1,2 @@
+{"protocol":1,"type":"progress","message":"Looking for newer releases","step":1}
+{"protocol":1,"type":"result","message":"Everything is up to date, so there is nothing to upgrade.","data":{"dir":"/path/to/fx-game","action":"none","updates":[],"manual":[],"handbooks":[],"warnings":[],"files":[],"dry_run":true,"applied":false}}
