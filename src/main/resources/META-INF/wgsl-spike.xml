@@ -1,0 +1,11 @@
+<idea-plugin>
+  <actions>
+    <action id="org.flixelgdx.intellij.WgslPreviewSpike"
+            class="org.flixelgdx.intellij.spike.WgslPreviewSpikeAction"
+            internal="true"
+            text="FlixelGDX: WebGPU Probe (Spike)"
+            description="Developer-only: checks whether the IDE browser offers WebGPU. Needs -Dflixelgdx.wgslSpike=true">
+      <add-to-group group-id="ToolsMenu" anchor="last"/>
+    </action>
+  </actions>
+</idea-plugin>

@@ -33,7 +33,7 @@ dependencies {
 
   intellijPlatform {
     create(platformType, platformVersion)
-    bundledPlugins("com.intellij.java", "org.jetbrains.plugins.gradle", "org.jetbrains.plugins.textmate")
+    bundledPlugins("com.intellij.java", "org.jetbrains.plugins.gradle", "org.jetbrains.plugins.textmate", "com.intellij.modules.jcef")
     testFramework(TestFrameworkType.Platform)
     testFramework(TestFrameworkType.Plugin.Java)
     testBundledPlugin("org.jetbrains.kotlin")
@@ -90,6 +90,14 @@ intellijPlatform {
 }
 
 tasks {
+  // Developer-only switches for the WebGPU spike (see docs/wgsl-preview-spike.md). Normal runs are not affected.
+  runIde {
+    if (providers.gradleProperty("wgslSpike").orNull == "true") {
+      jvmArgs("-Dflixelgdx.wgslSpike=true")
+      providers.gradleProperty("jcefArgs").orNull?.let { jvmArgs("-Dide.browser.jcef.extra.args=$it") }
+    }
+  }
+
   wrapper {
     gradleVersion = "9.5.1"
   }
