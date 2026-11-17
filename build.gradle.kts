@@ -90,14 +90,6 @@ intellijPlatform {
 }
 
 tasks {
-  // Developer-only switches for the WebGPU spike (see docs/wgsl-preview-spike.md). Normal runs are not affected.
-  runIde {
-    if (providers.gradleProperty("wgslSpike").orNull == "true") {
-      jvmArgs("-Dflixelgdx.wgslSpike=true")
-      providers.gradleProperty("jcefArgs").orNull?.let { jvmArgs("-Dide.browser.jcef.extra.args=$it") }
-    }
-  }
-
   wrapper {
     gradleVersion = "9.5.1"
   }

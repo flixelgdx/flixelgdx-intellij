@@ -127,9 +127,8 @@ The build needs JDK 21. The first build downloads an IntelliJ IDEA distribution,
 ./gradlew runIde           # a sandbox IDE with the plugin installed
 ```
 
-A developer-only experiment checks whether the IDE's embedded browser offers WebGPU, as a first step toward a shader
-preview. It is hidden unless you start the IDE with `-PwgslSpike=true`. See
-[docs/wgsl-preview-spike.md](docs/wgsl-preview-spike.md).
+A live WGSL preview inside the IDE is not possible today: the IDE's embedded browser does not offer WebGPU. See
+[docs/wgsl-preview-spike.md](docs/wgsl-preview-spike.md) for what was tried.
 
 ## License
 
