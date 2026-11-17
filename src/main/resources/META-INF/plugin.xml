@@ -16,5 +16,62 @@
         displayName="FlixelGDX"/>
     <newProjectWizard.generator implementation="org.flixelgdx.intellij.wizard.FlxgdxNewProjectWizard"/>
     <postStartupActivity implementation="org.flixelgdx.intellij.startup.FlxgdxStartupActivity"/>
+    <toolWindow
+        id="FlixelGDX"
+        anchor="bottom"
+        canCloseContents="false"
+        icon="AllIcons.Toolwindows.ToolWindowBuild"
+        factoryClass="org.flixelgdx.intellij.doctor.DoctorToolWindowFactory"/>
   </extensions>
+
+  <actions>
+    <group
+        id="org.flixelgdx.intellij.FlixelGdxGroup"
+        class="org.flixelgdx.intellij.actions.FlxgdxActionGroup"
+        text="FlixelGDX"
+        popup="true">
+      <add-to-group group-id="ToolsMenu" anchor="last"/>
+      <add-to-group group-id="ProjectViewPopupMenu" anchor="last"/>
+
+      <action id="org.flixelgdx.intellij.AddLibrary"
+              class="org.flixelgdx.intellij.actions.AddLibraryAction"
+              text="Add Library..."
+              description="Add a library to the FlixelGDX project with flxgdx"/>
+      <action id="org.flixelgdx.intellij.AddPlugin"
+              class="org.flixelgdx.intellij.actions.AddPluginAction"
+              text="Add Plugin..."
+              description="Add a Gradle plugin to the FlixelGDX project with flxgdx"/>
+      <action id="org.flixelgdx.intellij.RemovePackage"
+              class="org.flixelgdx.intellij.actions.RemovePackageAction"
+              text="Remove Library or Plugin..."
+              description="Remove an installed library or plugin with flxgdx"/>
+      <separator/>
+      <action id="org.flixelgdx.intellij.AddPlatform"
+              class="org.flixelgdx.intellij.actions.AddPlatformAction"
+              text="Add Platform..."
+              description="Add a platform (desktop, web or Android) to the project"/>
+      <action id="org.flixelgdx.intellij.RemovePlatform"
+              class="org.flixelgdx.intellij.actions.RemovePlatformAction"
+              text="Remove Platform..."
+              description="Remove a platform from the project"/>
+      <separator/>
+      <action id="org.flixelgdx.intellij.InstallHandbook"
+              class="org.flixelgdx.intellij.actions.InstallHandbookAction"
+              text="Install Handbook..."
+              description="Copy the documentation of a repository into the handbooks folder"/>
+      <action id="org.flixelgdx.intellij.UninstallHandbook"
+              class="org.flixelgdx.intellij.actions.UninstallHandbookAction"
+              text="Uninstall Handbook..."
+              description="Remove a handbook that was installed with flxgdx"/>
+      <separator/>
+      <action id="org.flixelgdx.intellij.Upgrade"
+              class="org.flixelgdx.intellij.actions.UpgradeAction"
+              text="Upgrade..."
+              description="Upgrade the installed packages to their latest release"/>
+      <action id="org.flixelgdx.intellij.RunDoctor"
+              class="org.flixelgdx.intellij.doctor.RunDoctorAction"
+              text="Run Doctor"
+              description="Check that this computer and the project are ready to build"/>
+    </group>
+  </actions>
 </idea-plugin>
