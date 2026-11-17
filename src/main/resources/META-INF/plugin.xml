@@ -62,9 +62,14 @@
         level="WARNING"
         implementationClass="org.flixelgdx.intellij.inspections.FlixelUnsupportedApiInspection"/>
     <textmate.bundleProvider implementation="org.flixelgdx.intellij.wgsl.WgslBundleProvider"/>
+    <internalFileTemplate name="WGSL Shader"/>
   </extensions>
 
   <actions>
+    <action id="org.flixelgdx.intellij.NewWgslShader"
+            class="org.flixelgdx.intellij.wgsl.NewWgslShaderAction">
+      <add-to-group group-id="NewGroup" anchor="last"/>
+    </action>
 
     <group
         id="org.flixelgdx.intellij.FlixelGdxGroup"

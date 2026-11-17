@@ -1,0 +1,26 @@
+// A FlixelGDX fragment shader. It runs once for every pixel of the sprite, camera or screen it is applied to.
+//
+// The framework adds the following names in front of this file, so do not declare them yourself:
+//   flixelTexture      the texture being drawn (a texture_2d<f32>)
+//   flixelSampler      how the texture is read (nearest or linear)
+//   flixel.proj        the projection matrix (used by the default vertex stage)
+//   flixel.texSize     the texture size in pixels
+//   flixel.texelSize   the size of one texel, so you can step by exactly one pixel
+//   FlixelVertexOutput what reaches this function: uv (position in the texture) and color (the tint)
+//
+// This file must define a fragment function named fs_main. Return straight (not premultiplied) color, like the
+// texture you sample. The framework premultiplies the result before blending.
+//
+// For settings you can change from Java, declare one uniform struct in group 1, binding 0, then call
+// shader.setUniform("amount", 0.5f) with a member name:
+//
+//   struct Params {
+//     amount: f32,
+//   }
+//   @group(1) @binding(0) var<uniform> params: Params;
+
+@fragment
+fn fs_main(in: FlixelVertexOutput) -> @location(0) vec4f {
+  let c = textureSample(flixelTexture, flixelSampler, in.uv) * in.color;
+  return c;
+}
