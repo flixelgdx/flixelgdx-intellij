@@ -33,7 +33,13 @@ dependencies {
 
   intellijPlatform {
     create(platformType, platformVersion)
-    bundledPlugins("com.intellij.java", "org.jetbrains.plugins.gradle", "org.jetbrains.plugins.textmate", "com.intellij.modules.jcef")
+    bundledPlugins(
+      "com.intellij.java",
+      "org.jetbrains.plugins.gradle",
+      "org.jetbrains.plugins.textmate",
+      "org.toml.lang",
+      "com.intellij.modules.jcef",
+    )
     testFramework(TestFrameworkType.Platform)
     testFramework(TestFrameworkType.Plugin.Java)
     testBundledPlugin("org.jetbrains.kotlin")
