@@ -26,7 +26,6 @@ package org.flixelgdx.intellij.game
 import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType
 import com.intellij.openapi.components.Service
-import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 
 /**
@@ -39,11 +38,6 @@ import com.intellij.openapi.project.Project
  */
 @Service(Service.Level.APP)
 class FlixelNotifier {
-
-  /** Shows a warning about something that worked only in part. */
-  fun warning(project: Project?, title: String, message: String) {
-    group().createNotification(title, message, NotificationType.WARNING).notify(project)
-  }
 
   /** Shows an error that an action ended with. */
   fun error(project: Project?, title: String, message: String) {
@@ -60,7 +54,5 @@ class FlixelNotifier {
   companion object {
     /** The id of the notification group, declared in `plugin.xml`. */
     const val GROUP_ID = "FlixelGDX"
-
-    fun getInstance(): FlixelNotifier = service()
   }
 }

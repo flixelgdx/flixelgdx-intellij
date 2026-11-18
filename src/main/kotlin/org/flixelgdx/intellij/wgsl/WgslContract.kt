@@ -38,9 +38,6 @@ object WgslContract {
   /** The fragment entry point every shader file must define. */
   const val FRAGMENT_ENTRY = "fs_main"
 
-  /** The optional vertex entry point. Without it the framework uses its own. */
-  const val VERTEX_ENTRY = "vs_main"
-
   /** The struct that reaches the fragment stage, with `uv` and `color` members. */
   const val VERTEX_OUTPUT = "FlixelVertexOutput"
 

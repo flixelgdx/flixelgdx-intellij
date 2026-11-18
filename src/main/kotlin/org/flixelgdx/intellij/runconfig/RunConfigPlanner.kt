@@ -141,19 +141,6 @@ object RunConfigPlanner {
   }
 
   /**
-   * Like [plan], but returns a plan that changes nothing (and keeps [tracked] as it is) when [enabled] is `false`,
-   * which is how the "Create run configurations automatically" setting switches the feature off.
-   */
-  fun planIfEnabled(
-    enabled: Boolean,
-    platforms: List<String>,
-    existing: List<RunExisting>,
-    tracked: List<RunTracked>,
-    debuggerInstalled: Boolean = false,
-  ): RunPlan =
-    if (enabled) plan(platforms, existing, tracked, debuggerInstalled) else RunPlan(emptyList(), emptyList(), tracked)
-
-  /**
    * The name of the configuration to select when nothing is selected: Desktop when it is enabled, otherwise the first
    * of [platforms]' configurations, or `null` when there are none.
    */

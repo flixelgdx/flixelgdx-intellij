@@ -113,14 +113,6 @@ class RunConfigPlannerTest {
   }
 
   @Test
-  fun doesNothingWhenTheSettingIsOff() {
-    val known = tracked(RunConfigPlanner.specs("html5")[0])
-    val plan = RunConfigPlanner.planIfEnabled(false, listOf("desktop"), emptyList(), known)
-    assertTrue(plan.isEmpty)
-    assertEquals(known, plan.tracked)
-  }
-
-  @Test
   fun noPlatformsMeansNothingToCreate() {
     assertTrue(RunConfigPlanner.plan(emptyList(), emptyList(), emptyList()).isEmpty)
   }
@@ -164,12 +156,6 @@ class RunConfigPlannerTest {
   fun aDeletedDebugConfigurationIsNotBroughtBackWithTheStep() {
     val specs = RunConfigPlanner.specs("desktop")
     val plan = RunConfigPlanner.plan(listOf("desktop"), emptyList(), tracked(*specs.toTypedArray()), true)
-    assertTrue(plan.isEmpty)
-  }
-
-  @Test
-  fun theSettingOffStillCreatesNothing() {
-    val plan = RunConfigPlanner.planIfEnabled(false, desktopWeb, emptyList(), emptyList(), debuggerInstalled = true)
     assertTrue(plan.isEmpty)
   }
 

@@ -60,17 +60,17 @@ class GameProjectTomlTest : BasePlatformTestCase() {
   fun testAddAndRemovePlatformKeepTheRestOfTheFile() {
     val text = render(GameLanguage.JAVA, "desktop").getValue(GameProjectToml.PATH)
     val file = toml("project.toml", text)
-    val added = TomlEdits.applyTo(text, GameProjectToml(file).addPlatform("html5"))
+    val added = applyEdits(text, GameProjectToml(file).addPlatform("html5"))
     assertEquals(text.replace("platforms = [\"desktop\"]", "platforms = [\"desktop\", \"html5\"]"), added)
     assertEquals(emptyList<TextEdit>(), GameProjectToml(file).addPlatform("desktop"))
-    val removed = TomlEdits.applyTo(added, GameProjectToml(toml("project.toml", added)).removePlatform("desktop"))
+    val removed = applyEdits(added, GameProjectToml(toml("project.toml", added)).removePlatform("desktop"))
     assertEquals(text.replace("platforms = [\"desktop\"]", "platforms = [\"html5\"]"), removed)
   }
 
   fun testMissingPlatformsKeyIsAddedAtTheTop() {
     val text = "[app]\ntitle = \"x\"\n"
     val edits = GameProjectToml(toml("project.toml", text)).addPlatform("android")
-    assertEquals("platforms = [\"android\"]\n$text", TomlEdits.applyTo(text, edits))
+    assertEquals("platforms = [\"android\"]\n$text", applyEdits(text, edits))
   }
 
   /** Merging the rendered catalog of a bigger platform set into a smaller one gives the bigger one's entries. */
@@ -78,7 +78,7 @@ class GameProjectTomlTest : BasePlatformTestCase() {
     for (language in GameLanguage.entries) {
       val before = render(language, "desktop").getValue(VersionCatalog.PATH)
       val after = render(language, "desktop", "html5", "android").getValue(VersionCatalog.PATH)
-      val merged = TomlEdits.applyTo(before, CatalogMerge.missing(toml("a.toml", before), toml("b.toml", after)))
+      val merged = applyEdits(before, CatalogMerge.missing(toml("a.toml", before), toml("b.toml", after)))
       val catalog = VersionCatalog(toml("merged.toml", merged))
       val wanted = VersionCatalog(toml("wanted.toml", after))
       assertEquals(wanted.libraries().map { it.alias }.toSet(), catalog.libraries().map { it.alias }.toSet())

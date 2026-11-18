@@ -60,7 +60,7 @@ class CatalogTextTest {
     val text = "plugins {\n  id(\"org.flixelgdx.project\") version \"0.7.2\"\n}\n"
     assertEquals("0.7.2", SettingsPluginVersion.find(text))
     val edit = SettingsPluginVersion.edit(text, "0.8.0")!!
-    assertEquals(text.replace("0.7.2", "0.8.0"), TomlEdits.applyTo(text, listOf(edit)))
+    assertEquals(text.replace("0.7.2", "0.8.0"), applyEdits(text, listOf(edit)))
     assertNull(SettingsPluginVersion.edit("plugins {}", "1"))
   }
 }

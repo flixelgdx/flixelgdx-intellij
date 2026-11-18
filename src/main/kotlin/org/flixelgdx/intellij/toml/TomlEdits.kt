@@ -177,13 +177,6 @@ object TomlEdits {
     }
   }
 
-  /** Applies [edits] to plain text, the same way [apply] changes a document. Useful for tests and previews. */
-  fun applyTo(text: String, edits: List<TextEdit>): String {
-    val sb = StringBuilder(text)
-    for (edit in edits.sortedByDescending { it.start }) sb.replace(edit.start, edit.end, edit.text)
-    return sb.toString()
-  }
-
   /** Removes the quotes around a key or string and resolves the common escapes of basic strings. */
   private fun unquote(text: String): String {
     if (text.length < 2) return text

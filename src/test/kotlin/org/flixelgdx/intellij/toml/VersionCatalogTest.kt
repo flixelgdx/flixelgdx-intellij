@@ -32,7 +32,7 @@ class VersionCatalogTest : BasePlatformTestCase() {
 
   private fun edit(text: String, plan: (VersionCatalog) -> List<TextEdit>): String {
     val file = file(text)
-    return TomlEdits.applyTo(file.text, plan(VersionCatalog(file)))
+    return applyEdits(file.text, plan(VersionCatalog(file)))
   }
 
   fun testReadsLibrariesBundlesAndVersions() {
