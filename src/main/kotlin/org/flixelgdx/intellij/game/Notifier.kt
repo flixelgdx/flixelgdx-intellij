@@ -33,11 +33,11 @@ import com.intellij.openapi.project.Project
  *
  * Example:
  * ```
- * service<FlixelNotifier>().info(project, "Add Library", "Added flixelgdx-ui to the core bundle.")
+ * service<Notifier>().info(project, "Add Library", "Added flixelgdx-ui to the core bundle.")
  * ```
  */
 @Service(Service.Level.APP)
-class FlixelNotifier {
+class Notifier {
 
   /** Shows an error that an action ended with. */
   fun error(project: Project?, title: String, message: String) {

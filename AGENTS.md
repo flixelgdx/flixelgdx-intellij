@@ -19,7 +19,7 @@ The source lives in one Gradle module under `src/main/kotlin/org/flixelgdx/intel
 - **`toml`**: Comment-preserving edits of the TOML files of a game (`TomlEdits`, `VersionCatalog`, `GameProjectToml`,
   `CatalogMerge`) and `DocumentEdits`, which applies them as one undoable command.
 - **`maven`**: The latest release of an artifact from Maven Central's `maven-metadata.xml`.
-- **`game`**: Recognizing a FlixelGDX game (`GameProject`), the notifications (`FlixelNotifier`), and the Gradle sync
+- **`game`**: Recognizing a FlixelGDX game (`GameProject`), the notifications (`Notifier`), and the Gradle sync
   after a change (`GradleRefresh`).
 - **`wizard`**: The FlixelGDX entry in File > New > Project, which renders the templates and imports the result.
 - **`actions`**: The Tools > FlixelGDX menu and its dialogs (libraries, platforms, debugger, upgrade).

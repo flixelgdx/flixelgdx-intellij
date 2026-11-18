@@ -73,7 +73,7 @@ Everything lives in one Gradle module, under `src/main/kotlin/org/flixelgdx/inte
   `Coordinates`, `SettingsPluginVersion`, `DocumentEdits` (applies edits through the IDE's documents), and
   `ProjectToml` (a plain-text reader of the platforms for the startup check).
 - **`maven`**: `MavenCentral` reads `maven-metadata.xml` to find the latest release of an artifact.
-- **`game`**: `GameProject` (a project is a FlixelGDX game when its root has a `project.toml`), `FlixelNotifier`
+- **`game`**: `GameProject` (a project is a FlixelGDX game when its root has a `project.toml`), `Notifier`
   (the plugin's notifications) and `GradleRefresh`.
 - **`wizard`**: The FlixelGDX entry in File > New > Project. `NewGameStep` collects the settings and validates
   them with `ProjectValidation` (the same rules as the framework's settings plugin), `NewProjectSpec` holds the

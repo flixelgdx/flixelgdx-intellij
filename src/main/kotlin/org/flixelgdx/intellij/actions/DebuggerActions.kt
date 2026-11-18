@@ -35,7 +35,7 @@ import com.intellij.ui.dsl.builder.panel
 import org.flixelgdx.intellij.debugger.DebuggerInstaller
 import org.flixelgdx.intellij.debugger.DebuggerLauncher
 import org.flixelgdx.intellij.debugger.LaunchOutcome
-import org.flixelgdx.intellij.game.FlixelNotifier
+import org.flixelgdx.intellij.game.Notifier
 import javax.swing.JComponent
 
 /** Asks whether the debugger should be downloaded again even when it is already installed. */
@@ -97,7 +97,7 @@ class OpenDebuggerAction : GameAction() {
   }
 
   private fun report(project: Project, outcome: LaunchOutcome) {
-    val notifier = service<FlixelNotifier>()
+    val notifier = service<Notifier>()
     when (outcome) {
       is LaunchOutcome.NotInstalled -> DebuggerInstaller.offer(project)
       is LaunchOutcome.AlreadyRunning -> notifier.info(project, TITLE, "The debugger is already running.")

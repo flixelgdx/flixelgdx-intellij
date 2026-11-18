@@ -29,8 +29,8 @@ import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
-import org.flixelgdx.intellij.game.FlixelNotifier
 import org.flixelgdx.intellij.game.GameProject
+import org.flixelgdx.intellij.game.Notifier
 import org.flixelgdx.intellij.maven.MavenCentral
 import org.flixelgdx.intellij.toml.DocumentEdits
 import org.flixelgdx.intellij.toml.FileChange
@@ -51,7 +51,7 @@ private object Catalog {
     val path = path(project) ?: return null
     val result = DocumentEdits.readToml(project, path) { read(VersionCatalog(it)) }
     if (result == null) {
-      service<FlixelNotifier>().error(project, title, "The version catalog ${VersionCatalog.PATH} was not found.")
+      service<Notifier>().error(project, title, "The version catalog ${VersionCatalog.PATH} was not found.")
     }
     return result
   }
@@ -83,7 +83,7 @@ class AddLibraryAction : GameAction() {
     if (dialog.bundle == BUILDSRC) {
       lines += "If it is a Gradle plugin, add its id(\"...\") line to the plugins block of the module that uses it."
     }
-    service<FlixelNotifier>().info(project, TITLE, lines.joinToString("\n"))
+    service<Notifier>().info(project, TITLE, lines.joinToString("\n"))
     GameProject.refresh(project)
   }
 
@@ -109,7 +109,7 @@ class RemoveLibraryAction : GameAction() {
       listOf(FileChange.toml(path) { VersionCatalog(it).removeLibrary(library.alias) }),
     )
     if (!changed) return
-    service<FlixelNotifier>().info(project, TITLE, "Removed ${library.alias} from the version catalog.")
+    service<Notifier>().info(project, TITLE, "Removed ${library.alias} from the version catalog.")
     GameProject.refresh(project)
   }
 
@@ -134,7 +134,7 @@ class UpgradeAction : GameAction() {
       )
     } ?: return
     if (current.isEmpty()) {
-      service<FlixelNotifier>().error(project, TITLE, "The version catalog has no flixelgdx version to upgrade.")
+      service<Notifier>().error(project, TITLE, "The version catalog has no flixelgdx version to upgrade.")
       return
     }
     ProgressManager.getInstance().run(object : Task.Backgroundable(project, "Looking for FlixelGDX upgrades", true) {
@@ -156,7 +156,7 @@ class UpgradeAction : GameAction() {
   }
 
   private fun review(project: Project, choices: List<VersionChoice>) {
-    val notifier = service<FlixelNotifier>()
+    val notifier = service<Notifier>()
     if (choices.all { it.latest == it.current }) {
       notifier.info(project, TITLE, "FlixelGDX is up to date.")
       return

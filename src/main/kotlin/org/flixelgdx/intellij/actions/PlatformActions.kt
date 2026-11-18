@@ -33,8 +33,8 @@ import com.intellij.openapi.util.io.NioFiles
 import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.psi.PsiFileFactory
-import org.flixelgdx.intellij.game.FlixelNotifier
 import org.flixelgdx.intellij.game.GameProject
+import org.flixelgdx.intellij.game.Notifier
 import org.flixelgdx.intellij.runconfig.RunConfigSync
 import org.flixelgdx.intellij.template.GameTemplateData
 import org.flixelgdx.intellij.template.GameTemplates
@@ -63,7 +63,7 @@ class AddPlatformAction : GameAction() {
   override fun actionPerformed(e: AnActionEvent) {
     val project = e.project ?: return
     val dir = GameProject.baseDir(project) ?: return
-    val notifier = service<FlixelNotifier>()
+    val notifier = service<Notifier>()
     val settings = DocumentEdits.readToml(project, dir.resolve(GameProjectToml.PATH)) { GameProjectToml(it).settings() }
     if (settings == null) {
       notifier.error(project, TITLE, "${GameProjectToml.PATH} was not found.")
@@ -165,7 +165,7 @@ class RemovePlatformAction : GameAction() {
   override fun actionPerformed(e: AnActionEvent) {
     val project = e.project ?: return
     val dir = GameProject.baseDir(project) ?: return
-    val notifier = service<FlixelNotifier>()
+    val notifier = service<Notifier>()
     val path = dir.resolve(GameProjectToml.PATH)
     val platforms = DocumentEdits.readToml(project, path) { GameProjectToml(it).platforms() }
     if (platforms == null) {
@@ -203,7 +203,7 @@ class RemovePlatformAction : GameAction() {
       }
 
       override fun onThrowable(error: Throwable) {
-        service<FlixelNotifier>().error(project, TITLE, error.message ?: error.toString())
+        service<Notifier>().error(project, TITLE, error.message ?: error.toString())
       }
     })
   }
