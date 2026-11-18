@@ -38,7 +38,7 @@ import org.flixelgdx.intellij.runconfig.RunTracked
  */
 @Service(Service.Level.PROJECT)
 @State(name = "FlixelGdxProjectSettings", storages = [Storage("flixelgdx.xml")])
-class FlxgdxProjectSettings : SimplePersistentStateComponent<FlxgdxProjectSettings.State>(State()) {
+class PluginProjectSettings : SimplePersistentStateComponent<PluginProjectSettings.State>(State()) {
 
   /** Whether run configurations are created and kept in sync automatically. On by default. */
   var autoRunConfigs: Boolean

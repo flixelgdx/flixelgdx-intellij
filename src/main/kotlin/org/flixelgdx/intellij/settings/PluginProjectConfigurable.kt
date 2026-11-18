@@ -23,26 +23,28 @@
  */
 package org.flixelgdx.intellij.settings
 
-import com.intellij.openapi.components.BaseState
-import com.intellij.openapi.components.Service
-import com.intellij.openapi.components.SimplePersistentStateComponent
-import com.intellij.openapi.components.State
-import com.intellij.openapi.components.Storage
+import com.intellij.openapi.components.service
+import com.intellij.openapi.options.BoundSearchableConfigurable
+import com.intellij.openapi.project.Project
+import com.intellij.openapi.ui.DialogPanel
+import com.intellij.ui.dsl.builder.bindSelected
+import com.intellij.ui.dsl.builder.panel
 
-/** The plugin's application-level settings, stored in `flixelgdx.xml` in the IDE config folder. */
-@Service(Service.Level.APP)
-@State(name = "FlixelGdxSettings", storages = [Storage("flixelgdx.xml")])
-class FlxgdxSettings : SimplePersistentStateComponent<FlxgdxSettings.State>(State()) {
+/** The settings page under Tools > FlixelGDX > Project, with the choices that belong to the open project. */
+class PluginProjectConfigurable(private val project: Project) :
+  BoundSearchableConfigurable("Project", "org.flixelgdx.intellij.settings.project") {
 
-  /** The path of the FlixelGDX Debugger executable. An empty value means "find it automatically". */
-  var debuggerPath: String
-    get() = state.debuggerPath.orEmpty()
-    set(value) {
-      state.debuggerPath = value
+  override fun createPanel(): DialogPanel {
+    val settings = project.service<PluginProjectSettings>()
+    return panel {
+      row {
+        checkBox("Create run configurations automatically")
+          .bindSelected(settings::autoRunConfigs)
+          .comment(
+            "Adds Desktop, Web and Android run configurations in a FlixelGDX folder for each enabled platform. " +
+              "Configurations you edited are never changed or removed.",
+          )
+      }
     }
-
-  /** The data that is written to disk. */
-  class State : BaseState() {
-    var debuggerPath by string("")
   }
 }

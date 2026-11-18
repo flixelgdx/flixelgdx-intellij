@@ -42,7 +42,7 @@ import org.flixelgdx.intellij.debugger.DebuggerSource
 import javax.swing.event.DocumentEvent
 
 /** The settings page under Tools > FlixelGDX. */
-class FlxgdxConfigurable : BoundSearchableConfigurable("FlixelGDX", "org.flixelgdx.intellij.settings") {
+class PluginConfigurable : BoundSearchableConfigurable("FlixelGDX", "org.flixelgdx.intellij.settings") {
 
   private lateinit var debuggerField: TextFieldWithBrowseButton
   private val debuggerLabel = JBLabel()
@@ -52,7 +52,7 @@ class FlxgdxConfigurable : BoundSearchableConfigurable("FlixelGDX", "org.flixelg
   private var detectRound = 0
 
   override fun createPanel(): DialogPanel {
-    val settings = service<FlxgdxSettings>()
+    val settings = service<PluginSettings>()
     return panel {
       group("FlixelGDX Debugger") {
         row("Debugger executable:") {

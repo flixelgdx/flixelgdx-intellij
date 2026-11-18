@@ -98,9 +98,9 @@ When explaining code or introducing patterns:
 
 - **Keep hot paths cheap.** Code the IDE calls constantly (inspection visitors, `AnAction.update()`, live template
   contexts, startup activities) must not allocate in loops, run processes, or do slow I/O. Do the cheapest check
-  first (for example `FlixelScope` before any resolve) and cache results that do not change.
+  first (for example `FrameworkScope` before any resolve) and cache results that do not change.
 - `update()` of an action runs often. Keep it to a quick check, such as the single `project.toml` lookup in
-  `FlxgdxAction`.
+  `GameAction`.
 - Standard Kotlin and Java collections are fine here. The framework's ban on them is about game code at runtime; the
   plugin runs inside the IDE and does not depend on the framework.
 

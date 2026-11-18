@@ -21,30 +21,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.flixelgdx.intellij.settings
+package org.flixelgdx.intellij.startup
 
 import com.intellij.openapi.components.service
-import com.intellij.openapi.options.BoundSearchableConfigurable
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.ui.DialogPanel
-import com.intellij.ui.dsl.builder.bindSelected
-import com.intellij.ui.dsl.builder.panel
+import com.intellij.openapi.startup.ProjectActivity
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import org.flixelgdx.intellij.game.GameProject
+import org.flixelgdx.intellij.runconfig.RunConfigSync
 
-/** The settings page under Tools > FlixelGDX > Project, with the choices that belong to the open project. */
-class FlxgdxProjectConfigurable(private val project: Project) :
-  BoundSearchableConfigurable("Project", "org.flixelgdx.intellij.settings.project") {
+/**
+ * Runs when a project opens. If it is a FlixelGDX project (it has a `project.toml` in its root), it makes sure the
+ * Gradle run configurations exist (see [RunConfigSync]).
+ */
+class GameStartupActivity : ProjectActivity {
 
-  override fun createPanel(): DialogPanel {
-    val settings = project.service<FlxgdxProjectSettings>()
-    return panel {
-      row {
-        checkBox("Create run configurations automatically")
-          .bindSelected(settings::autoRunConfigs)
-          .comment(
-            "Adds Desktop, Web and Android run configurations in a FlixelGDX folder for each enabled platform. " +
-              "Configurations you edited are never changed or removed.",
-          )
-      }
-    }
+  override suspend fun execute(project: Project) {
+    if (!withContext(Dispatchers.IO) { GameProject.isGame(project) }) return
+    project.service<RunConfigSync>().sync()
   }
 }

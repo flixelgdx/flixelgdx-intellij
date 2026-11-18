@@ -23,9 +23,9 @@
  */
 package org.flixelgdx.intellij.inspections
 
-class UnsupportedApiInspectionTest : FlixelFixtureTest() {
+class UnsupportedApiInspectionTest : FrameworkFixtureTest() {
 
-  private val tool = FlixelUnsupportedApiInspection()
+  private val tool = UnsupportedApiInspection()
   private val head =
       "import java.util.*; import java.util.concurrent.*; " +
       "class Foo { void m(List<String> list, Deque<String> dq) throws Exception {\n"

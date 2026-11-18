@@ -21,24 +21,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.flixelgdx.intellij.startup
+package org.flixelgdx.intellij.settings
 
-import com.intellij.openapi.components.service
-import com.intellij.openapi.project.Project
-import com.intellij.openapi.startup.ProjectActivity
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import org.flixelgdx.intellij.game.GameProject
-import org.flixelgdx.intellij.runconfig.RunConfigSync
+import com.intellij.openapi.components.BaseState
+import com.intellij.openapi.components.Service
+import com.intellij.openapi.components.SimplePersistentStateComponent
+import com.intellij.openapi.components.State
+import com.intellij.openapi.components.Storage
 
-/**
- * Runs when a project opens. If it is a FlixelGDX project (it has a `project.toml` in its root), it makes sure the
- * Gradle run configurations exist (see [RunConfigSync]).
- */
-class FlxgdxStartupActivity : ProjectActivity {
+/** The plugin's application-level settings, stored in `flixelgdx.xml` in the IDE config folder. */
+@Service(Service.Level.APP)
+@State(name = "FlixelGdxSettings", storages = [Storage("flixelgdx.xml")])
+class PluginSettings : SimplePersistentStateComponent<PluginSettings.State>(State()) {
 
-  override suspend fun execute(project: Project) {
-    if (!withContext(Dispatchers.IO) { GameProject.isFlixelProject(project) }) return
-    project.service<RunConfigSync>().sync()
+  /** The path of the FlixelGDX Debugger executable. An empty value means "find it automatically". */
+  var debuggerPath: String
+    get() = state.debuggerPath.orEmpty()
+    set(value) {
+      state.debuggerPath = value
+    }
+
+  /** The data that is written to disk. */
+  class State : BaseState() {
+    var debuggerPath by string("")
   }
 }

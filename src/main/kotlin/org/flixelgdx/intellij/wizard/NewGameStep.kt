@@ -57,7 +57,7 @@ import java.nio.file.Path
  *
  * @param parent the step before this one, which owns the project name, the location and the Git checkbox.
  */
-class FlxgdxWizardStep(private val parent: GitNewProjectWizardStep) : AbstractNewProjectWizardStep(parent) {
+class NewGameStep(private val parent: GitNewProjectWizardStep) : AbstractNewProjectWizardStep(parent) {
 
   private val titleProp = propertyGraph.property(parent.name)
   private val companyProp = propertyGraph.property("")
@@ -69,7 +69,7 @@ class FlxgdxWizardStep(private val parent: GitNewProjectWizardStep) : AbstractNe
   private val desktopProp = propertyGraph.property(true)
   private val html5Prop = propertyGraph.property(true)
   private val androidProp = propertyGraph.property(false)
-  private val tagProp = propertyGraph.property("")
+  private val frameworkVersionProp = propertyGraph.property("")
   private val templateProp = propertyGraph.property(GameTemplates.DEFAULT)
   private val androidWarnProp = propertyGraph.property(false)
   private val folderShownProp = propertyGraph.property(false)
@@ -155,7 +155,7 @@ class FlxgdxWizardStep(private val parent: GitNewProjectWizardStep) : AbstractNe
 
       collapsibleGroup("Advanced") {
         row("Framework version:") {
-          textField().bindText(tagProp).columns(COLUMNS)
+          textField().bindText(frameworkVersionProp).columns(COLUMNS)
             .comment("A version such as 0.7.2. Leave empty for the latest release on Maven Central.")
             .checked { frameworkVersionProblem(it) }
         }
@@ -181,7 +181,7 @@ class FlxgdxWizardStep(private val parent: GitNewProjectWizardStep) : AbstractNe
       desktop = desktopProp.get(),
       html5 = html5Prop.get(),
       android = androidProp.get(),
-      frameworkVersion = tagProp.get(),
+      frameworkVersion = frameworkVersionProp.get(),
       template = templateProp.get(),
     )
     project.service<NewProjectRunner>().create(spec)

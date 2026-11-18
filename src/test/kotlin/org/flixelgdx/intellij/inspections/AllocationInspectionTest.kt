@@ -23,9 +23,9 @@
  */
 package org.flixelgdx.intellij.inspections
 
-class AllocationInspectionTest : FlixelFixtureTest() {
+class AllocationInspectionTest : FrameworkFixtureTest() {
 
-  private val tool = FlixelAllocationInspection()
+  private val tool = AllocationInspection()
 
   private fun check(body: String, members: String = ""): List<String> {
     addFramework()

@@ -33,7 +33,7 @@ import java.io.File
  *
  * The Kotlin standard library of the test IDE is added to the test module so the Kotlin code resolves.
  */
-class KotlinInspectionTest : FlixelFixtureTest() {
+class KotlinInspectionTest : FrameworkFixtureTest() {
 
   override fun setUp() {
     super.setUp()
@@ -72,7 +72,7 @@ class KotlinInspectionTest : FlixelFixtureTest() {
     """.trimIndent()
     assertEquals(
       listOf("Object()", "\"a\" + elapsed", "\"x ${'$'}elapsed\"", "Runnable { count++ }"),
-      problems("Foo.kt", source, FlixelAllocationInspection()),
+      problems("Foo.kt", source, AllocationInspection()),
     )
   }
 
@@ -97,7 +97,7 @@ class KotlinInspectionTest : FlixelFixtureTest() {
           }
       }
     """.trimIndent()
-    assertEquals(listOf("FlixelVector()"), problems("PlayState.kt", source, FlixelAllocationInspection()))
+    assertEquals(listOf("FlixelVector()"), problems("PlayState.kt", source, AllocationInspection()))
   }
 
   fun testCollectionsInKotlin() {
@@ -112,11 +112,11 @@ class KotlinInspectionTest : FlixelFixtureTest() {
     """.trimIndent()
     assertEquals(
       listOf("MutableList<String>", "mutableListOf", "hashMapOf"),
-      problems("Foo.kt", source, FlixelCollectionInspection()),
+      problems("Foo.kt", source, CollectionInspection()),
     )
   }
 
-  private val replace = FlixelCollectionInspection()
+  private val replace = CollectionInspection()
 
   fun testKotlinFixReplacesAnArrayListOfField() {
     fix(
@@ -185,7 +185,7 @@ class KotlinInspectionTest : FlixelFixtureTest() {
     """.trimIndent()
     assertEquals(
       listOf("import kotlin.reflect.full.memberProperties", "forName"),
-      problems("Foo.kt", source, FlixelReflectionInspection()),
+      problems("Foo.kt", source, ReflectionInspection()),
     )
   }
 
@@ -198,7 +198,7 @@ class KotlinInspectionTest : FlixelFixtureTest() {
           }
       }
     """.trimIndent()
-    assertEquals(listOf("removeLast", "clamp"), problems("Foo.kt", source, FlixelUnsupportedApiInspection()))
+    assertEquals(listOf("removeLast", "clamp"), problems("Foo.kt", source, UnsupportedApiInspection()))
   }
 
   fun testSuppressInKotlin() {
@@ -212,6 +212,6 @@ class KotlinInspectionTest : FlixelFixtureTest() {
           }
       }
     """.trimIndent()
-    assertEquals(emptyList<String>(), problems("Foo.kt", source, FlixelAllocationInspection()))
+    assertEquals(emptyList<String>(), problems("Foo.kt", source, AllocationInspection()))
   }
 }

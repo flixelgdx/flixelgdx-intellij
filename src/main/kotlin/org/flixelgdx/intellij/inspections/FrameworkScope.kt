@@ -43,21 +43,21 @@ import com.intellij.psi.util.CachedValuesManager
  * The check looks for the framework base class [BASE_CLASS] in the module's classpath. The answer is cached per
  * module and thrown away when the project's libraries or modules change, so it costs almost nothing per file.
  */
-object FlixelScope {
+object FrameworkScope {
 
   /** The framework class every game object extends. Its presence means the framework is on the classpath. */
   const val BASE_CLASS = "org.flixelgdx.FlixelBasic"
 
-  private val KEY = Key.create<CachedValue<Boolean>>("org.flixelgdx.intellij.inspections.flixelModule")
+  private val KEY = Key.create<CachedValue<Boolean>>("org.flixelgdx.intellij.inspections.frameworkModule")
 
   /** Returns true when [file] is in a module that has the FlixelGDX core on its classpath. */
-  fun isFlixelFile(file: PsiFile): Boolean {
+  fun isFrameworkFile(file: PsiFile): Boolean {
     val module = ModuleUtilCore.findModuleForPsiElement(file) ?: return false
-    return isFlixelModule(module)
+    return isFrameworkModule(module)
   }
 
   /** Returns true when [module] (including its dependencies) can see [BASE_CLASS]. */
-  fun isFlixelModule(module: Module): Boolean {
+  fun isFrameworkModule(module: Module): Boolean {
     val project = module.project
     return CachedValuesManager.getManager(project).getCachedValue(module, KEY, {
       val scope = module.getModuleWithDependenciesAndLibrariesScope(false)

@@ -14,17 +14,17 @@
     <applicationConfigurable
         parentId="tools"
         id="org.flixelgdx.intellij.settings"
-        instance="org.flixelgdx.intellij.settings.FlxgdxConfigurable"
+        instance="org.flixelgdx.intellij.settings.PluginConfigurable"
         displayName="FlixelGDX"/>
     <projectConfigurable
         parentId="org.flixelgdx.intellij.settings"
         id="org.flixelgdx.intellij.settings.project"
-        instance="org.flixelgdx.intellij.settings.FlxgdxProjectConfigurable"
+        instance="org.flixelgdx.intellij.settings.PluginProjectConfigurable"
         displayName="Project"
         nonDefaultProject="true"/>
     <stepsBeforeRunProvider implementation="org.flixelgdx.intellij.runconfig.DebuggerBeforeRunProvider"/>
-    <newProjectWizard.generator implementation="org.flixelgdx.intellij.wizard.FlxgdxNewProjectWizard"/>
-    <postStartupActivity implementation="org.flixelgdx.intellij.startup.FlxgdxStartupActivity"/>
+    <newProjectWizard.generator implementation="org.flixelgdx.intellij.wizard.NewGameWizard"/>
+    <postStartupActivity implementation="org.flixelgdx.intellij.startup.GameStartupActivity"/>
     <localInspection
         language="UAST"
         shortName="FlixelGdxAllocation"
@@ -32,7 +32,7 @@
         groupName="FlixelGDX"
         enabledByDefault="true"
         level="WEAK WARNING"
-        implementationClass="org.flixelgdx.intellij.inspections.FlixelAllocationInspection"/>
+        implementationClass="org.flixelgdx.intellij.inspections.AllocationInspection"/>
     <localInspection
         language="UAST"
         shortName="FlixelGdxCollection"
@@ -40,7 +40,7 @@
         groupName="FlixelGDX"
         enabledByDefault="true"
         level="WEAK WARNING"
-        implementationClass="org.flixelgdx.intellij.inspections.FlixelCollectionInspection"/>
+        implementationClass="org.flixelgdx.intellij.inspections.CollectionInspection"/>
     <localInspection
         language="UAST"
         shortName="FlixelGdxReflection"
@@ -48,7 +48,7 @@
         groupName="FlixelGDX"
         enabledByDefault="true"
         level="WARNING"
-        implementationClass="org.flixelgdx.intellij.inspections.FlixelReflectionInspection"/>
+        implementationClass="org.flixelgdx.intellij.inspections.ReflectionInspection"/>
     <localInspection
         language="UAST"
         shortName="FlixelGdxUnsupportedApi"
@@ -56,7 +56,7 @@
         groupName="FlixelGDX"
         enabledByDefault="true"
         level="WARNING"
-        implementationClass="org.flixelgdx.intellij.inspections.FlixelUnsupportedApiInspection"/>
+        implementationClass="org.flixelgdx.intellij.inspections.UnsupportedApiInspection"/>
     <textmate.bundleProvider implementation="org.flixelgdx.intellij.wgsl.WgslBundleProvider"/>
     <internalFileTemplate name="WGSL Shader"/>
     <liveTemplateContext
@@ -72,8 +72,8 @@
     </action>
 
     <group
-        id="org.flixelgdx.intellij.FlixelGdxGroup"
-        class="org.flixelgdx.intellij.actions.FlxgdxActionGroup"
+        id="org.flixelgdx.intellij.ActionGroup"
+        class="org.flixelgdx.intellij.actions.GameActionGroup"
         text="FlixelGDX"
         popup="true">
       <add-to-group group-id="ToolsMenu" anchor="last"/>

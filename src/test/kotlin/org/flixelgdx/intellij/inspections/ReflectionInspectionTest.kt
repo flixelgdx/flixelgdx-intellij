@@ -23,9 +23,9 @@
  */
 package org.flixelgdx.intellij.inspections
 
-class ReflectionInspectionTest : FlixelFixtureTest() {
+class ReflectionInspectionTest : FrameworkFixtureTest() {
 
-  private val tool = FlixelReflectionInspection()
+  private val tool = ReflectionInspection()
 
   private fun found(body: String): List<String> {
     addFramework()

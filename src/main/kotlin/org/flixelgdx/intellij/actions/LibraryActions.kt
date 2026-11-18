@@ -36,6 +36,8 @@ import org.flixelgdx.intellij.toml.DocumentEdits
 import org.flixelgdx.intellij.toml.FileChange
 import org.flixelgdx.intellij.toml.SettingsPluginVersion
 import org.flixelgdx.intellij.toml.VersionCatalog
+import org.flixelgdx.intellij.toml.VersionCatalog.Companion.FRAMEWORK_VERSION
+import org.flixelgdx.intellij.toml.VersionCatalog.Companion.KTX_VERSION
 import java.nio.file.Path
 
 /** Helpers shared by the library actions. */
@@ -59,7 +61,7 @@ private object Catalog {
  * Tools > FlixelGDX > Add Library: adds Maven coordinates to the version catalog and to the bundle of a module, then
  * syncs Gradle.
  */
-class AddLibraryAction : FlxgdxAction() {
+class AddLibraryAction : GameAction() {
 
   override fun actionPerformed(e: AnActionEvent) {
     val project = e.project ?: return
@@ -92,7 +94,7 @@ class AddLibraryAction : FlxgdxAction() {
 }
 
 /** Tools > FlixelGDX > Remove Library: lists the catalog's libraries and removes the one that is picked. */
-class RemoveLibraryAction : FlxgdxAction() {
+class RemoveLibraryAction : GameAction() {
 
   override fun actionPerformed(e: AnActionEvent) {
     val project = e.project ?: return
@@ -121,14 +123,14 @@ class RemoveLibraryAction : FlxgdxAction() {
  * the game uses, and after the person confirms, changes `[versions]` in the catalog and the settings plugin version in
  * `settings.gradle.kts`. A Kotlin game's extension version is offered too.
  */
-class UpgradeAction : FlxgdxAction() {
+class UpgradeAction : GameAction() {
 
   override fun actionPerformed(e: AnActionEvent) {
     val project = e.project ?: return
     val current = Catalog.read(project, TITLE) { catalog ->
       listOfNotNull(
-        catalog.version(VersionCatalog.FLIXEL_VERSION)?.let { Triple("FlixelGDX", VersionCatalog.FLIXEL_VERSION, it) },
-        catalog.version(VersionCatalog.KTX_VERSION)?.let { Triple("Kotlin extension", VersionCatalog.KTX_VERSION, it) },
+        catalog.version(FRAMEWORK_VERSION)?.let { Triple("FlixelGDX", FRAMEWORK_VERSION, it) },
+        catalog.version(KTX_VERSION)?.let { Triple("Kotlin extension", KTX_VERSION, it) },
       )
     } ?: return
     if (current.isEmpty()) {
@@ -140,8 +142,9 @@ class UpgradeAction : FlxgdxAction() {
 
       override fun run(indicator: ProgressIndicator) {
         choices = current.map { (label, key, version) ->
-          val artifact = if (key == VersionCatalog.KTX_VERSION) MavenCentral.KTX_CORE else MavenCentral.FLIXEL_CORE
-          val latest = runCatching { MavenCentral.latest(MavenCentral.FLIXEL_GROUP, artifact, indicator) }.getOrNull()
+          val artifact = if (key == KTX_VERSION) MavenCentral.KTX_CORE else MavenCentral.FRAMEWORK_CORE
+          val latest = runCatching { MavenCentral.latest(MavenCentral.FRAMEWORK_GROUP, artifact, indicator) }
+            .getOrNull()
           VersionChoice(label, key, version, latest)
         }
       }
@@ -162,7 +165,7 @@ class UpgradeAction : FlxgdxAction() {
     if (!dialog.showAndGet()) return
     val dir = GameProject.baseDir(project) ?: return
     val chosen = dialog.chosen
-    val flixel = chosen[VersionCatalog.FLIXEL_VERSION]
+    val flixel = chosen[VersionCatalog.FRAMEWORK_VERSION]
     val changes = arrayListOf(
       FileChange.toml(dir.resolve(VersionCatalog.PATH)) { file ->
         val catalog = VersionCatalog(file)

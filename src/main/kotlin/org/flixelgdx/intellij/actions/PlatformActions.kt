@@ -58,7 +58,7 @@ import java.nio.file.Path
  * from a freshly rendered one ([CatalogMerge]). Finally the platform is added to `platforms` in `project.toml`, and
  * Gradle syncs.
  */
-class AddPlatformAction : FlxgdxAction() {
+class AddPlatformAction : GameAction() {
 
   override fun actionPerformed(e: AnActionEvent) {
     val project = e.project ?: return
@@ -70,7 +70,8 @@ class AddPlatformAction : FlxgdxAction() {
       return
     }
     val versions = DocumentEdits.readToml(project, dir.resolve(VersionCatalog.PATH)) { file ->
-      VersionCatalog(file).let { it.version(VersionCatalog.FLIXEL_VERSION) to it.version(VersionCatalog.KTX_VERSION) }
+      val catalog = VersionCatalog(file)
+      catalog.version(VersionCatalog.FRAMEWORK_VERSION) to catalog.version(VersionCatalog.KTX_VERSION)
     }
     val flixel = versions?.first
     if (flixel == null) {
@@ -159,7 +160,7 @@ class AddPlatformAction : FlxgdxAction() {
  * folder when the person asks for it. The catalog entries of the platform stay, since they do no harm and make adding
  * the platform back easy.
  */
-class RemovePlatformAction : FlxgdxAction() {
+class RemovePlatformAction : GameAction() {
 
   override fun actionPerformed(e: AnActionEvent) {
     val project = e.project ?: return

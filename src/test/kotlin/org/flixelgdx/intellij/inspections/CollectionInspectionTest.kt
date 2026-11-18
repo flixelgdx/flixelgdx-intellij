@@ -23,9 +23,9 @@
  */
 package org.flixelgdx.intellij.inspections
 
-class CollectionInspectionTest : FlixelFixtureTest() {
+class CollectionInspectionTest : FrameworkFixtureTest() {
 
-  private val tool = FlixelCollectionInspection()
+  private val tool = CollectionInspection()
   private val head = "import java.util.*; class Foo {\n"
 
   private fun found(body: String): List<String> {

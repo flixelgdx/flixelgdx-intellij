@@ -36,7 +36,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.flixelgdx.intellij.debugger.DebuggerLocator
 import org.flixelgdx.intellij.game.GameProject
-import org.flixelgdx.intellij.settings.FlxgdxProjectSettings
+import org.flixelgdx.intellij.settings.PluginProjectSettings
 import org.flixelgdx.intellij.toml.ProjectToml
 import org.jetbrains.plugins.gradle.service.execution.GradleExternalTaskConfigurationType
 import org.jetbrains.plugins.gradle.service.execution.GradleRunConfiguration
@@ -68,7 +68,7 @@ class RunConfigSync(private val project: Project, private val scope: CoroutineSc
    * Call it from any thread; it only schedules work.
    */
   fun sync() {
-    val settings = project.service<FlxgdxProjectSettings>()
+    val settings = project.service<PluginProjectSettings>()
     if (!settings.autoRunConfigs) return
     val base = project.basePath ?: return
     scope.launch {
@@ -80,14 +80,14 @@ class RunConfigSync(private val project: Project, private val scope: CoroutineSc
   }
 
   private fun readPlatforms(dir: Path): List<String>? {
-    if (!GameProject.isFlixelDir(dir)) return null
+    if (!GameProject.isGameDir(dir)) return null
     val text = runCatching { Files.readString(dir.resolve(GameProject.MARKER)) }.getOrNull() ?: return null
     return ProjectToml.platforms(text)
   }
 
   /** Applies the plan on the EDT. [debuggerInstalled] decides if debug-tools configurations get the debugger step. */
   private fun apply(base: String, platforms: List<String>, debuggerInstalled: Boolean) {
-    val settings = project.service<FlxgdxProjectSettings>()
+    val settings = project.service<PluginProjectSettings>()
     if (!settings.autoRunConfigs) return
     val manager = RunManager.getInstance(project)
     val type = GradleExternalTaskConfigurationType.getInstance()

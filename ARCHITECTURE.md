@@ -13,7 +13,7 @@ collection classes, and the WGSL shader contract) for its inspections and shader
 ## How the plugin creates a game
 
 ```
- wizard (FlxgdxWizardStep -> NewProjectSpec)
+ wizard (NewGameStep -> NewProjectSpec)
                   |
                   v
    MavenCentral (latest framework version, unless one was typed)
@@ -75,11 +75,11 @@ Everything lives in one Gradle module, under `src/main/kotlin/org/flixelgdx/inte
 - **`maven`**: `MavenCentral` reads `maven-metadata.xml` to find the latest release of an artifact.
 - **`game`**: `GameProject` (a project is a FlixelGDX game when its root has a `project.toml`), `FlixelNotifier`
   (the plugin's notifications) and `GradleRefresh`.
-- **`wizard`**: The FlixelGDX entry in File > New > Project. `FlxgdxWizardStep` collects the settings and validates
+- **`wizard`**: The FlixelGDX entry in File > New > Project. `NewGameStep` collects the settings and validates
   them with `ProjectValidation` (the same rules as the framework's settings plugin), `NewProjectSpec` holds the
   choices, and `NewProjectRunner` creates the files and imports the result. Git uses the platform's own wizard step.
   `AndroidSdk` finds an installed Android SDK.
-- **`actions`**: The Tools > FlixelGDX menu. `FlxgdxAction` is the base class that shows an action only in FlixelGDX
+- **`actions`**: The Tools > FlixelGDX menu. `GameAction` is the base class that shows an action only in FlixelGDX
   projects. The dialogs only collect values; the actions plan the edits with the `toml` package.
 - **`runconfig`**: `RunConfigPlanner` decides which Gradle run configurations should exist for the enabled platforms
   (a pure function, so it is unit tested), and `RunConfigSync` applies the plan. `DebuggerBeforeRunProvider` adds the
@@ -88,17 +88,17 @@ Everything lives in one Gradle module, under `src/main/kotlin/org/flixelgdx/inte
   installing it from its latest GitHub release (`DebuggerInstaller`, `DebuggerRelease`, `DebuggerUnpacker`,
   `DebuggerLaunchers`, `InstallProgress`), and starting it as its own process (`DebuggerLauncher`).
 - **`inspections`**: Four UAST inspections that check Java and Kotlin game code: allocation in per-frame methods,
-  standard Java collections, reflection, and APIs missing on Android or the web. `FlixelInspection` is the shared
-  base, and `FlixelScope` limits them to modules that have the framework on their classpath. The rule data lives in
+  standard Java collections, reflection, and APIs missing on Android or the web. `GameCodeInspection` is the shared
+  base, and `FrameworkScope` limits them to modules that have the framework on their classpath. The rule data lives in
   `CollectionMapping`, `ReflectionRules`, and `UnsupportedApis`, and the quick fixes are `MoveToFieldFix`,
   `ReplaceCollectionFix` (Java) and `KotlinReplaceCollectionFix` (Kotlin, which writes planned text through UAST so
   the plugin needs no Kotlin plugin dependency).
 - **`wgsl`**: WGSL shader editing. `WgslBundleProvider` hands the bundled TextMate grammar to the IDE,
   `NewWgslShaderAction` creates a starter shader from the file template, `WgslContext` scopes the live templates to
   `.wgsl` files, and `WgslContract` keeps the names of the framework's shader contract in one place.
-- **`settings`**: The application settings (`FlxgdxSettings`, the debugger path) and the project settings
-  (`FlxgdxProjectSettings`, run configuration choices), with their pages under Settings > Tools > FlixelGDX.
-- **`startup`**: `FlxgdxStartupActivity` syncs the run configurations when a FlixelGDX project opens.
+- **`settings`**: The application settings (`PluginSettings`, the debugger path) and the project settings
+  (`PluginProjectSettings`, run configuration choices), with their pages under Settings > Tools > FlixelGDX.
+- **`startup`**: `GameStartupActivity` syncs the run configurations when a FlixelGDX project opens.
 
 ## Resources
 

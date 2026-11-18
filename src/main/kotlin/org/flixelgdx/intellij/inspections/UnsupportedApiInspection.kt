@@ -43,7 +43,7 @@ import org.jetbrains.uast.visitor.AbstractUastNonRecursiveVisitor
  * works on a desktop JDK 25 can crash the game on a phone or in a browser. The inspection id is
  * `FlixelGdxUnsupportedApi`.
  */
-class FlixelUnsupportedApiInspection : FlixelInspection() {
+class UnsupportedApiInspection : GameCodeInspection() {
 
   override val hints: Array<Class<out UElement>> = arrayOf(
     UCallExpression::class.java,

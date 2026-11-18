@@ -36,12 +36,12 @@ import org.jetbrains.uast.visitor.AbstractUastNonRecursiveVisitor
  *
  * It is built on UAST, the IDE's language-neutral view of code, so one implementation checks Java and Kotlin files.
  * It also applies the shared rule that the inspections only run in modules that use the framework (see
- * [FlixelScope]).
+ * [FrameworkScope]).
  *
  * To add an inspection, extend this class, list the UAST element types you care about in [hints] (this keeps the
  * IDE from visiting every node) and build a visitor in [createVisitor].
  */
-abstract class FlixelInspection : AbstractBaseUastLocalInspectionTool() {
+abstract class GameCodeInspection : AbstractBaseUastLocalInspectionTool() {
 
   /** The UAST element types [createVisitor] wants to see. */
   protected abstract val hints: Array<Class<out UElement>>
@@ -49,10 +49,10 @@ abstract class FlixelInspection : AbstractBaseUastLocalInspectionTool() {
   /** Creates the visitor that reports problems to [holder]. */
   protected abstract fun createVisitor(holder: ProblemsHolder): AbstractUastNonRecursiveVisitor
 
-  override fun isAvailableForFile(file: PsiFile): Boolean = FlixelScope.isFlixelFile(file)
+  override fun isAvailableForFile(file: PsiFile): Boolean = FrameworkScope.isFrameworkFile(file)
 
   override fun buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean): PsiElementVisitor {
-    if (!FlixelScope.isFlixelFile(holder.file)) return PsiElementVisitor.EMPTY_VISITOR
+    if (!FrameworkScope.isFrameworkFile(holder.file)) return PsiElementVisitor.EMPTY_VISITOR
     return UastHintedVisitorAdapter.create(holder.file.language, createVisitor(holder), hints, true)
   }
 }

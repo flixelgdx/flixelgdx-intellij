@@ -59,7 +59,7 @@ import org.jetbrains.uast.visitor.AbstractUastVisitor
  * Kotlin standard library (`forEach`, `let`, ...) is skipped too, because most of those functions are inlined by the
  * compiler and create no object.
  */
-class FlixelAllocationInspection : FlixelInspection() {
+class AllocationInspection : GameCodeInspection() {
 
   override val hints: Array<Class<out UElement>> = arrayOf(UMethod::class.java)
 

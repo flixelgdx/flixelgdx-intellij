@@ -44,10 +44,10 @@ object MavenCentral {
   const val BASE_URL = "https://repo1.maven.org/maven2"
 
   /** The Maven group of the framework and its extensions. */
-  const val FLIXEL_GROUP = "org.flixelgdx"
+  const val FRAMEWORK_GROUP = "org.flixelgdx"
 
   /** The artifact whose releases define the version of the framework. */
-  const val FLIXEL_CORE = "flixelgdx-core"
+  const val FRAMEWORK_CORE = "flixelgdx-core"
 
   /** The artifact whose releases define the version of the Kotlin extension. */
   const val KTX_CORE = "flixelgdx-ktx-core"

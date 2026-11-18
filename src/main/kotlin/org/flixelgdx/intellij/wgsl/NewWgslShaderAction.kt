@@ -48,7 +48,7 @@ class NewWgslShaderAction :
 
   override fun isAvailable(dataContext: DataContext): Boolean {
     val project = CommonDataKeys.PROJECT.getData(dataContext) ?: return false
-    return super.isAvailable(dataContext) && GameProject.isFlixelProject(project)
+    return super.isAvailable(dataContext) && GameProject.isGame(project)
   }
 
   override fun buildDialog(project: Project, directory: PsiDirectory, builder: CreateFileFromTemplateDialog.Builder) {

@@ -39,7 +39,7 @@ import com.intellij.psi.codeStyle.JavaCodeStyleManager
 import com.intellij.psi.util.PsiTreeUtil
 
 /**
- * Quick fix for [FlixelAllocationInspection] that turns a local variable into a private field.
+ * Quick fix for [AllocationInspection] that turns a local variable into a private field.
  *
  * Before:
  * ```java

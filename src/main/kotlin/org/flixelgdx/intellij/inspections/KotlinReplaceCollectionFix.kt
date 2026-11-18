@@ -41,7 +41,7 @@ import org.jetbrains.uast.UastCallKind
 import org.jetbrains.uast.toUElement
 
 /**
- * Quick fix for [FlixelCollectionInspection] that swaps a standard collection for the FlixelGDX one in Kotlin code.
+ * Quick fix for [CollectionInspection] that swaps a standard collection for the FlixelGDX one in Kotlin code.
  *
  * Before:
  * ```kotlin

@@ -27,7 +27,7 @@ import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.util.SystemInfo
 import com.intellij.util.EnvironmentUtil
-import org.flixelgdx.intellij.settings.FlxgdxSettings
+import org.flixelgdx.intellij.settings.PluginSettings
 import java.nio.file.Path
 
 /**
@@ -50,7 +50,7 @@ class DebuggerLocator {
    * @param configured the path to try first. It defaults to the one saved in the settings; the settings page passes
    * what is typed in its field so the answer follows the field before it is applied.
    */
-  fun find(configured: String = service<FlxgdxSettings>().debuggerPath): DetectedDebugger? =
+  fun find(configured: String = service<PluginSettings>().debuggerPath): DetectedDebugger? =
     DebuggerDetector.detect(configured, environment())
 
   companion object {

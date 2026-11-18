@@ -39,13 +39,13 @@ import java.nio.file.Paths
  * `update()` runs on a background thread, so the single file check for `project.toml` is safe there. Subclasses
  * implement [actionPerformed] and must start any slow work as a background task.
  */
-abstract class FlxgdxAction : AnAction(), DumbAware {
+abstract class GameAction : AnAction(), DumbAware {
 
   override fun getActionUpdateThread(): ActionUpdateThread = ActionUpdateThread.BGT
 
   override fun update(e: AnActionEvent) {
     val project = e.project
-    e.presentation.isEnabledAndVisible = project != null && GameProject.isFlixelProject(project)
+    e.presentation.isEnabledAndVisible = project != null && GameProject.isGame(project)
   }
 }
 
@@ -53,13 +53,13 @@ abstract class FlxgdxAction : AnAction(), DumbAware {
  * The "FlixelGDX" menu that holds the project actions. It appears under Tools, and in the project view menu when the
  * project root is selected, and only in FlixelGDX projects.
  */
-class FlxgdxActionGroup : DefaultActionGroup(), DumbAware {
+class GameActionGroup : DefaultActionGroup(), DumbAware {
 
   override fun getActionUpdateThread(): ActionUpdateThread = ActionUpdateThread.BGT
 
   override fun update(e: AnActionEvent) {
     val project = e.project
-    var visible = project != null && GameProject.isFlixelProject(project)
+    var visible = project != null && GameProject.isGame(project)
     if (visible && e.place == ActionPlaces.PROJECT_VIEW_POPUP) {
       val files = e.getData(CommonDataKeys.VIRTUAL_FILE_ARRAY)
       val root = project?.basePath?.let { runCatching { Paths.get(it) }.getOrNull() }

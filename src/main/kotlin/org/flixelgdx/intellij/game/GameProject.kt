@@ -36,12 +36,12 @@ object GameProject {
   const val MARKER = "project.toml"
 
   /** Returns `true` when [dir] holds a `project.toml`. Touches the disk, so call it off the EDT. */
-  fun isFlixelDir(dir: Path): Boolean = Files.isRegularFile(dir.resolve(MARKER))
+  fun isGameDir(dir: Path): Boolean = Files.isRegularFile(dir.resolve(MARKER))
 
   /** Returns `true` when the base folder of [project] is a FlixelGDX game. */
-  fun isFlixelProject(project: Project): Boolean {
+  fun isGame(project: Project): Boolean {
     val base = baseDir(project) ?: return false
-    return runCatching { isFlixelDir(base) }.getOrDefault(false)
+    return runCatching { isGameDir(base) }.getOrDefault(false)
   }
 
   /** The Gradle root of [project], or `null` for a project without a base folder. */

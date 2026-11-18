@@ -55,7 +55,7 @@ import org.jetbrains.uast.visitor.AbstractUastNonRecursiveVisitor
  * a different order guarantee means the code needs a human decision. Parameters of overriding methods are skipped,
  * since their types come from the method being overridden.
  */
-class FlixelCollectionInspection : FlixelInspection() {
+class CollectionInspection : GameCodeInspection() {
 
   override val hints: Array<Class<out UElement>> = arrayOf(
     UField::class.java,

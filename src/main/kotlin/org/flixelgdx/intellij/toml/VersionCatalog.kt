@@ -115,7 +115,8 @@ class VersionCatalog(private val file: TomlFile) {
       TomlEdits.removeFromArray(array, alias)?.let(edits::add)
     }
     val ref = library(entry).versionRef
-    if (ref.isNotEmpty() && ref != FLIXEL_VERSION && libraries().none { it.alias != alias && it.versionRef == ref }) {
+    val shared = libraries().any { it.alias != alias && it.versionRef == ref }
+    if (ref.isNotEmpty() && ref != FRAMEWORK_VERSION && !shared) {
       TomlEdits.entry(file, VERSIONS, ref)?.let { edits += TomlEdits.removeEntry(it) }
     }
     return edits
@@ -151,7 +152,7 @@ class VersionCatalog(private val file: TomlFile) {
     const val PATH = "gradle/libs.versions.toml"
 
     /** The `[versions]` key of the framework. */
-    const val FLIXEL_VERSION = "flixelgdx"
+    const val FRAMEWORK_VERSION = "flixelgdx"
 
     /** The `[versions]` key of the Kotlin extension of the framework. */
     const val KTX_VERSION = "flixelgdx-ktx"

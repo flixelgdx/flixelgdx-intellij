@@ -38,7 +38,7 @@ import com.intellij.psi.PsiVariable
 import com.intellij.psi.codeStyle.JavaCodeStyleManager
 
 /**
- * Quick fix for [FlixelCollectionInspection] that swaps a standard collection for the FlixelGDX one.
+ * Quick fix for [CollectionInspection] that swaps a standard collection for the FlixelGDX one.
  *
  * Before:
  * ```java

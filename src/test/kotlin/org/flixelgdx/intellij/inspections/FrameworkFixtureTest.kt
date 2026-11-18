@@ -33,7 +33,7 @@ import com.intellij.testFramework.fixtures.LightJavaCodeInsightFixtureTestCase
  * It adds small stand-ins for the framework classes the inspections look for (`FlixelBasic`, the update and draw
  * interfaces, `FlixelMath` and the collections), so the tests do not need the real framework on the classpath.
  */
-abstract class FlixelFixtureTest : LightJavaCodeInsightFixtureTestCase() {
+abstract class FrameworkFixtureTest : LightJavaCodeInsightFixtureTestCase() {
 
   override fun getProjectDescriptor(): LightProjectDescriptor = JAVA_LATEST_WITH_LATEST_JDK
 

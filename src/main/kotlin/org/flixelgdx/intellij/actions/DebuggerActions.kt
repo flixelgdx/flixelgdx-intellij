@@ -65,7 +65,7 @@ class InstallDebuggerDialog(project: Project?) : DialogWrapper(project, true) {
 }
 
 /** Tools > FlixelGDX > Install Debugger: downloads and installs the latest debugger release with progress. */
-class InstallDebuggerAction : FlxgdxAction() {
+class InstallDebuggerAction : GameAction() {
 
   override fun actionPerformed(e: AnActionEvent) {
     val project = e.project ?: return
@@ -79,7 +79,7 @@ class InstallDebuggerAction : FlxgdxAction() {
  * Tools > FlixelGDX > Open Debugger: starts the FlixelGDX Debugger as its own program. When it is not installed, a
  * notification offers to install it.
  */
-class OpenDebuggerAction : FlxgdxAction() {
+class OpenDebuggerAction : GameAction() {
 
   override fun actionPerformed(e: AnActionEvent) {
     val project = e.project ?: return

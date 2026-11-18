@@ -36,7 +36,7 @@ import org.jetbrains.uast.visitor.AbstractUastNonRecursiveVisitor
  * Android with R8) cannot see those names, so the code breaks only on the device. The inspection id is
  * `FlixelGdxReflection`.
  */
-class FlixelReflectionInspection : FlixelInspection() {
+class ReflectionInspection : GameCodeInspection() {
 
   override val hints: Array<Class<out UElement>> = arrayOf(UCallExpression::class.java, UImportStatement::class.java)
 
