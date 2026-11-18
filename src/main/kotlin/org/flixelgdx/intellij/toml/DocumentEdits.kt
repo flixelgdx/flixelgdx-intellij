@@ -23,10 +23,11 @@
  */
 package org.flixelgdx.intellij.toml
 
-import com.intellij.openapi.application.ReadAction
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.util.Computable
 import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiDocumentManager
@@ -77,9 +78,9 @@ object DocumentEdits {
    */
   fun <T> readToml(project: Project, path: Path, read: (TomlFile) -> T): T? {
     val vf = virtualFile(path) ?: return null
-    return ReadAction.compute<T?, RuntimeException> {
-      (PsiManager.getInstance(project).findFile(vf) as? TomlFile)?.let(read)
-    }
+    return ApplicationManager.getApplication().runReadAction(
+      Computable { (PsiManager.getInstance(project).findFile(vf) as? TomlFile)?.let(read) },
+    )
   }
 
   /**
