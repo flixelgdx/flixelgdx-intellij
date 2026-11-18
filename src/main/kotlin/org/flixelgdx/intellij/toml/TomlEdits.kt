@@ -92,9 +92,10 @@ object TomlEdits {
   fun strings(array: TomlArray): List<String> = array.elements.mapNotNull(::string)
 
   /**
-   * Plans a new entry line [line] at the end of the `[table]` table.
+   * Plans a new entry line [line] at the end of the `[table]` table. [line] may hold several entries, one per line.
    *
-   * When the table does not exist yet, it is added at the end of the file.
+   * When the table does not exist yet, it is added at the end of the file. Plan all new entries of one table as a
+   * single edit, because two insertions at the same place would come out in reverse order.
    */
   fun addEntry(file: TomlFile, table: String, line: String): TextEdit {
     val owner = table(file, table)
@@ -131,14 +132,18 @@ object TomlEdits {
   }
 
   /** Plans adding the string [item] at the end of [array], keeping the items that are there. */
-  fun appendToArray(array: TomlArray, item: String): TextEdit {
+  fun appendToArray(array: TomlArray, item: String): TextEdit = appendToArray(array, listOf(item))
+
+  /** Plans adding the strings [items] at the end of [array], in order, keeping the items that are there. */
+  fun appendToArray(array: TomlArray, items: List<String>): TextEdit {
+    val quoted = items.joinToString(", ") { quote(it) }
     val last = array.elements.lastOrNull()
     if (last == null) {
       val range = array.textRange
-      return TextEdit(range.startOffset, range.endOffset, "[${quote(item)}]")
+      return TextEdit(range.startOffset, range.endOffset, "[$quoted]")
     }
     val offset = last.textRange.endOffset
-    return TextEdit(offset, offset, ", ${quote(item)}")
+    return TextEdit(offset, offset, ", $quoted")
   }
 
   /**
