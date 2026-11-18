@@ -27,8 +27,9 @@ Reports standard Java collections (<code>ArrayList</code>, <code>HashMap</code>,
   <li><code>IdentityHashMap</code>: <code>FlixelIdentityMap&lt;K, V&gt;</code></li>
 </ul>
 <p>
-  For a field or local variable that is created with a no-argument or a capacity constructor, the quick fix
-  <b>Replace with ...</b> rewrites the declaration. It does not rewrite the calls, because the method names differ
+  For a field or local variable that is created with a no-argument or a capacity constructor (in Kotlin also an
+  empty <code>arrayListOf()</code>, <code>mutableListOf()</code>, <code>hashSetOf()</code> or
+  <code>hashMapOf()</code>), the quick fix <b>Replace with ...</b> rewrites the declaration. It does not rewrite the calls, because the method names differ
   (for example <code>getSize()</code> instead of <code>size()</code>), so the IDE will show errors on those lines until
   you update them. Ordered and sorted collections (<code>LinkedHashMap</code>, <code>TreeMap</code>,
   <code>LinkedList</code> and so on) have no exact equivalent, so they are only reported.

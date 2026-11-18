@@ -45,9 +45,10 @@ and WGSL shader editing. It needs no extra command-line tools.
     the framework's `update(float)` or `draw(...)`. Java files get the quick fix **Move to a field** for a local
     variable whose initializer does not depend on the method.
   - **Standard Java collection** (`FlixelGdxCollection`, weak warning): `java.util` collections in fields, locals,
-    parameters and `new` expressions, plus Kotlin's `mutableListOf` and friends. For a Java field or local
-    created with a no-argument or capacity constructor the quick fix **Replace with FlixelArray** (or `FlixelSet`,
-    `FlixelMap`, `FlixelIntMap`, `FlixelIntArray` and so on) rewrites the declaration. The mapping is
+    parameters and `new` expressions, plus Kotlin's `mutableListOf` and friends. For a Java or Kotlin field or local
+    created with a no-argument or capacity constructor (in Kotlin also an empty `arrayListOf()`, `mutableListOf()`,
+    `hashSetOf()` or `hashMapOf()`) the quick fix **Replace with FlixelArray** (or `FlixelSet`, `FlixelMap`,
+    `FlixelIntMap`, `FlixelIntArray` and so on) rewrites the declaration and adds the import. The mapping is
     `List`/`ArrayList` to `FlixelArray` (or a primitive array for boxed numbers), `Set`/`HashSet` to `FlixelSet`
     (`FlixelIntSet` and `FlixelLongSet` for `Integer` and `Long`), `Map`/`HashMap` to `FlixelMap` (`FlixelIntMap` and
     `FlixelLongMap` for `Integer` and `Long` keys, `FlixelObjectIntMap` and `FlixelObjectFloatMap` for number values)

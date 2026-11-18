@@ -116,6 +116,65 @@ class KotlinInspectionTest : FlixelFixtureTest() {
     )
   }
 
+  private val replace = FlixelCollectionInspection()
+
+  fun testKotlinFixReplacesAnArrayListOfField() {
+    fix(
+      "PlayState.kt",
+      "import org.flixelgdx.FlixelBasic\n\nclass PlayState : FlixelBasic() {\n" +
+        "  private val list: <caret>ArrayList<Any> = arrayListOf()\n}\n",
+      replace,
+      "Replace with FlixelArray",
+      "import org.flixelgdx.FlixelBasic\nimport org.flixelgdx.collections.FlixelArray\n\n" +
+        "class PlayState : FlixelBasic() {\n" +
+        "  private val list: FlixelArray<Any> = FlixelArray()\n}\n",
+    )
+  }
+
+  fun testKotlinFixKeepsTheCapacityOfAConstructor() {
+    fix(
+      "Foo.kt",
+      "package game\n\nclass Foo {\n  val a: <caret>MutableList<String> = java.util.ArrayList(16)\n}\n",
+      replace,
+      "Replace with FlixelArray",
+      "package game\n\nimport org.flixelgdx.collections.FlixelArray\n\nclass Foo {\n" +
+        "  val a: FlixelArray<String> = FlixelArray(16)\n}\n",
+    )
+  }
+
+  fun testKotlinFixOnAnInferredHelper() {
+    fix(
+      "Foo.kt",
+      "class Foo {\n  fun f() {\n    val m = <caret>hashMapOf<Int, String>()\n  }\n}\n",
+      replace,
+      "Replace with FlixelIntMap",
+      "import org.flixelgdx.collections.FlixelIntMap\n\nclass Foo {\n  fun f() {\n" +
+        "    val m = FlixelIntMap<String>()\n  }\n}\n",
+    )
+  }
+
+  fun testKotlinFixUsesAPrimitiveArrayForBoxedNumbers() {
+    fix(
+      "Foo.kt",
+      "import org.flixelgdx.collections.*\n\nclass Foo {\n  val a: <caret>ArrayList<Int> = arrayListOf()\n}\n",
+      replace,
+      "Replace with FlixelIntArray",
+      "import org.flixelgdx.collections.*\n\nclass Foo {\n  val a: FlixelIntArray = FlixelIntArray()\n}\n",
+    )
+  }
+
+  fun testNoKotlinFixForOrderedOrFilledCollections() {
+    myFixture.enableInspections(replace)
+    myFixture.configureByText(
+      "Foo.kt",
+      "class Foo {\n  val s: MutableSet<String> = mutableSetOf()\n" +
+        "  val l: MutableList<String> = mutableListOf(\"a\")\n}\n",
+    )
+    myFixture.doHighlighting()
+    val names = myFixture.availableIntentions.map { it.text }
+    assertTrue(names.toString(), names.none { it.startsWith("Replace with Flixel") })
+  }
+
   fun testReflectionInKotlin() {
     val source = """
       import kotlin.reflect.full.memberProperties

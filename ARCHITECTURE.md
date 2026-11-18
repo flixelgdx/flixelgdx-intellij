@@ -89,8 +89,9 @@ Everything lives in one Gradle module, under `src/main/kotlin/org/flixelgdx/inte
 - **`inspections`**: Four UAST inspections that check Java and Kotlin game code: allocation in per-frame methods,
   standard Java collections, reflection, and APIs missing on Android or the web. `FlixelInspection` is the shared
   base, and `FlixelScope` limits them to modules that have the framework on their classpath. The rule data lives in
-  `CollectionMapping`, `ReflectionRules`, and `UnsupportedApis`, and the quick fixes are `MoveToFieldFix` and
-  `ReplaceCollectionFix`.
+  `CollectionMapping`, `ReflectionRules`, and `UnsupportedApis`, and the quick fixes are `MoveToFieldFix`,
+  `ReplaceCollectionFix` (Java) and `KotlinReplaceCollectionFix` (Kotlin, which writes planned text through UAST so
+  the plugin needs no Kotlin plugin dependency).
 - **`wgsl`**: WGSL shader editing. `WgslBundleProvider` hands the bundled TextMate grammar to the IDE,
   `NewWgslShaderAction` creates a starter shader from the file template, `WgslContext` scopes the live templates to
   `.wgsl` files, and `WgslContract` keeps the names of the framework's shader contract in one place.

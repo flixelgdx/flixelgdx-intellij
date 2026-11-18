@@ -50,9 +50,10 @@ import org.jetbrains.uast.visitor.AbstractUastNonRecursiveVisitor
  * `org.flixelgdx.collections`. The inspection id is `FlixelGdxCollection`.
  *
  * For a field or local variable that is initialized with a no-argument or capacity constructor the inspection offers
- * [ReplaceCollectionFix]; every other case is only reported, because a different method name or a different order
- * guarantee means the code needs a human decision. Parameters of overriding methods are skipped, since their types
- * come from the method being overridden.
+ * [ReplaceCollectionFix] in Java and [KotlinReplaceCollectionFix] in Kotlin (where `arrayListOf()` and the other
+ * empty helpers count as such a constructor); every other case is only reported, because a different method name or
+ * a different order guarantee means the code needs a human decision. Parameters of overriding methods are skipped,
+ * since their types come from the method being overridden.
  */
 class FlixelCollectionInspection : FlixelInspection() {
 
@@ -87,7 +88,10 @@ class FlixelCollectionInspection : FlixelInspection() {
       val name = flaggedName(node) ?: return true
       val variable = psi.parent as? PsiVariable
       val plan = variable?.let { ReplaceCollectionFix.plan(it) }
-      val fixes = if (plan != null) arrayOf<LocalQuickFix>(ReplaceCollectionFix(plan.target.name)) else emptyArray()
+      val fixes = when {
+        plan != null -> arrayOf<LocalQuickFix>(ReplaceCollectionFix(plan.target.name))
+        else -> kotlinFix(node)
+      }
       report(psi, name, *fixes)
       return true
     }
@@ -109,7 +113,14 @@ class FlixelCollectionInspection : FlixelInspection() {
       val owner = node.resolve()?.containingClass?.qualifiedName
       if (owner != null && !owner.startsWith("kotlin.collections.")) return
       val target = node.methodIdentifier?.sourcePsi ?: psi
-      reportWith(target, "Kotlin's $name()", replacement)
+      val fixes = (node.uastParent as? UVariable)?.let(::kotlinFix) ?: emptyArray()
+      reportWith(target, "Kotlin's $name()", replacement, *fixes)
+    }
+
+    /** The Kotlin quick fix for [node], or no fix when [KotlinCollectionPlan] cannot plan one. */
+    private fun kotlinFix(node: UVariable): Array<LocalQuickFix> {
+      val plan = KotlinCollectionPlan.plan(node) ?: return emptyArray()
+      return arrayOf(KotlinReplaceCollectionFix(plan))
     }
 
     private fun typeElementOf(node: UVariable): PsiElement? {
