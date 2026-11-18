@@ -38,7 +38,6 @@ dependencies {
       "org.jetbrains.plugins.gradle",
       "org.jetbrains.plugins.textmate",
       "org.toml.lang",
-      "com.intellij.modules.jcef",
     )
     testFramework(TestFrameworkType.Platform)
     testFramework(TestFrameworkType.Plugin.Java)

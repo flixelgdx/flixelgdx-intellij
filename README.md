@@ -134,8 +134,7 @@ The build needs JDK 21. The first build downloads an IntelliJ IDEA distribution,
 ./gradlew runIde           # a sandbox IDE with the plugin installed
 ```
 
-A live WGSL preview inside the IDE is not possible today: the IDE's embedded browser does not offer WebGPU. See
-[docs/wgsl-preview-spike.md](docs/wgsl-preview-spike.md) for what was tried.
+A live WGSL preview inside the IDE is not possible today: the IDE's embedded browser does not offer WebGPU.
 
 ## Contributing and building
 

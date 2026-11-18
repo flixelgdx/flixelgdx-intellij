@@ -127,12 +127,10 @@ The plugin is built with Gradle (Kotlin DSL) and the
 - **`gradle.properties`**: The plugin version, the oldest supported IDE build (`pluginSinceBuild`), the IDE the
   plugin is compiled against (`platformType` and `platformVersion`), and Gradle settings.
 - **`gradle/libs.versions.toml`**: The version catalog for Kotlin, the Gradle plugins, and JUnit.
-- **`docs/`**: Design notes, such as [docs/wgsl-preview-spike.md](docs/wgsl-preview-spike.md), which records why
-  there is no live WGSL preview.
 
 ### Dependency Management
 
-The plugin compiles against the IDE's bundled Java, Gradle, TextMate, TOML, and JCEF plugins, and its tests also use
+The plugin compiles against the IDE's bundled Java, Gradle, TextMate, and TOML plugins, and its tests also use
 the bundled Kotlin plugin. It does not bundle the Kotlin standard library, because the IDE already ships one.
 
 ## GitHub Integration
