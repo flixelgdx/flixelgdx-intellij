@@ -1,8 +1,8 @@
-package {{.Package}}.backend.android;
+package {{package}}.backend.android;
 
 import android.app.Activity;
 import android.os.Bundle;
-import {{.Package}}.{{.Class}};
+import {{package}}.{{className}};
 import org.flixelgdx.backend.android.FlixelAndroidLauncher;
 
 /** Starts the game on Android. */
@@ -11,6 +11,6 @@ public class AndroidLauncher extends Activity {
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    FlixelAndroidLauncher.launch(this, new {{.Class}}());
+    FlixelAndroidLauncher.launch(this, new {{className}}());
   }
 }

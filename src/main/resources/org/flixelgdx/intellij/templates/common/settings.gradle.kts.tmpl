@@ -10,7 +10,7 @@ plugins {
   // Downloads the Java version the build asks for when it is not installed yet.
   id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
   // Reads project.toml, includes the modules you chose and sets the group and version.
-  id("org.flixelgdx.project") version "{{.FlixelVersion}}"
+  id("org.flixelgdx.project") version "{{frameworkVersion}}"
 }
 
 dependencyResolutionManagement {
@@ -21,4 +21,4 @@ dependencyResolutionManagement {
   }
 }
 
-rootProject.name = "{{kts .Folder}}"
+rootProject.name = "{{folder | kotlin}}"

@@ -26,49 +26,51 @@ package org.flixelgdx.intellij.template
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
-class GoTemplateTest {
+class TextTemplateTest {
 
-  private val values = TemplateValues(
-    fields = mapOf("Title" to "My \"Game\"", "Kotlin" to false, "Width" to 640, "Empty" to ""),
-    methods = mapOf("HasPlatform" to { name: String -> name == "desktop" }),
-  )
+  private val values = mapOf("title" to "My \"Game\"", "kotlin" to false, "width" to 640, "empty" to "", "desktop" to true)
 
-  private fun render(text: String) = GoTemplate.render("test", text, values)
+  private fun render(text: String) = TextTemplate.render("test", text, values)
 
   @Test
-  fun printsFieldsAndMethods() {
-    assertEquals("My \"Game\" 640 true", render("{{.Title}} {{.Width}} {{.HasPlatform \"desktop\"}}"))
+  fun printsValues() {
+    assertEquals("My \"Game\" 640 true", render("{{title}} {{ width }} {{desktop}}"))
   }
 
   @Test
   fun ifElseAndNot() {
-    assertEquals("java", render("{{if .Kotlin}}kotlin{{else}}java{{end}}"))
-    assertEquals("yes", render("{{if not .Kotlin}}yes{{end}}"))
-    assertEquals("", render("{{if .Empty}}set{{end}}"))
-    assertEquals("web", render("{{if not .HasPlatform \"html5\"}}web{{end}}"))
+    assertEquals("java", render("{{if kotlin}}kotlin{{else}}java{{end}}"))
+    assertEquals("yes", render("{{if not kotlin}}yes{{end}}"))
+    assertEquals("", render("{{if empty}}set{{end}}"))
+    assertEquals("", render("{{if not desktop}}web{{end}}"))
   }
 
   @Test
-  fun trimMarkersRemoveWhiteSpaceLikeGo() {
-    assertEquals("a\nb", render("a\n{{- if .Kotlin}}\nk{{- end}}\nb"))
-    assertEquals("x\ny", render("{{if not .Kotlin -}}\n  x\n{{end -}}\ny"))
+  fun trimMarkersRemoveWhiteSpace() {
+    assertEquals("a\nb", render("a\n{{- if kotlin}}\nk{{- end}}\nb"))
+    assertEquals("x\ny", render("{{if not kotlin -}}\n  x\n{{end -}}\ny"))
   }
 
   @Test
-  fun escapeFunctions() {
-    assertEquals("My \\\"Game\\\"", render("{{kts .Title}}"))
-    assertEquals("My &quot;Game&quot;", render("{{xml .Title}}"))
-    assertEquals("My \\\"Game\\\"", render("{{toml .Title}}"))
+  fun filtersEscape() {
+    assertEquals("My \\\"Game\\\"", render("{{title | kotlin}}"))
+    assertEquals("My &quot;Game&quot;", render("{{title | xml}}"))
+    assertEquals("My \\\"Game\\\"", render("{{title|toml}}"))
   }
 
   @Test(expected = TemplateException::class)
-  fun unknownFieldFails() {
-    render("{{.Nope}}")
+  fun unknownValueFails() {
+    render("{{nope}}")
+  }
+
+  @Test(expected = TemplateException::class)
+  fun unknownFilterFails() {
+    render("{{title | json}}")
   }
 
   @Test(expected = TemplateException::class)
   fun unclosedIfFails() {
-    render("{{if .Kotlin}}x")
+    render("{{if kotlin}}x")
   }
 
   @Test(expected = TemplateException::class)
@@ -77,7 +79,7 @@ class GoTemplateTest {
   }
 
   @Test(expected = TemplateException::class)
-  fun rangeIsNotSupported() {
-    render("{{range .Title}}{{end}}")
+  fun unknownSyntaxFails() {
+    render("{{for title}}{{end}}")
   }
 }

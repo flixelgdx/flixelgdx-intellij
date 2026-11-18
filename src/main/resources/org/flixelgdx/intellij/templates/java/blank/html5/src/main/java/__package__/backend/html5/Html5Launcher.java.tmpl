@@ -1,6 +1,6 @@
-package {{.Package}}.backend.html5;
+package {{package}}.backend.html5;
 
-import {{.Package}}.{{.Class}};
+import {{package}}.{{className}};
 import org.flixelgdx.backend.html5.FlixelHtml5Launcher;
 
 /** Starts the game in a web browser. */
@@ -14,6 +14,6 @@ public final class Html5Launcher {
    * @param args The command line arguments, which the browser does not provide.
    */
   public static void main(String[] args) {
-    FlixelHtml5Launcher.launch(new {{.Class}}());
+    FlixelHtml5Launcher.launch(new {{className}}());
   }
 }

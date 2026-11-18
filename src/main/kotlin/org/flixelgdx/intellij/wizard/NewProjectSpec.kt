@@ -52,7 +52,7 @@ import java.nio.file.Path
  * @property desktop whether to build for desktop.
  * @property html5 whether to build for the web.
  * @property android whether to build for Android.
- * @property flixelVersion the framework version as typed; blank means the latest release on Maven Central.
+ * @property frameworkVersion the framework version as typed; blank means the latest release on Maven Central.
  * @property template the template to start from.
  */
 data class NewProjectSpec(
@@ -67,7 +67,7 @@ data class NewProjectSpec(
   val desktop: Boolean = true,
   val html5: Boolean = true,
   val android: Boolean = false,
-  val flixelVersion: String = "",
+  val frameworkVersion: String = "",
   val template: String = GameTemplates.DEFAULT,
 ) {
 
@@ -83,8 +83,8 @@ data class NewProjectSpec(
    * The framework version the person typed, without a leading `v` (release tags look like `v0.7.2`, but Maven
    * versions do not), or `null` when the field was left empty.
    */
-  val typedFlixelVersion: String?
-    get() = flixelVersion.trim().removePrefix("v").takeIf { it.isNotEmpty() }
+  val typedFrameworkVersion: String?
+    get() = frameworkVersion.trim().removePrefix("v").takeIf { it.isNotEmpty() }
 
   /**
    * Builds the data the templates read.
@@ -99,7 +99,7 @@ data class NewProjectSpec(
     pkg = pkg,
     language = language,
     platforms = platforms,
-    flixelVersion = flixel,
+    frameworkVersion = flixel,
     ktxVersion = ktx,
     folder = dir.fileName?.toString() ?: title,
     width = width,

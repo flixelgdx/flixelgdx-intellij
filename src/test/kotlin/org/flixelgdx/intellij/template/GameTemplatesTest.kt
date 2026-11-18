@@ -35,8 +35,7 @@ import java.security.MessageDigest
  * Renders every language and platform set and compares the result with the golden files in
  * `src/test/resources/golden`, which hold the whole project as text.
  *
- * The golden files started as the expected output of the old project generator. Run the tests with
- * `-Dgolden.update=true` to rewrite them after a deliberate change, then review the diff.
+ * Run `./gradlew test -Pgolden.update=true` to rewrite them after a deliberate change, then review the diff.
  */
 class GameTemplatesTest {
 
@@ -106,7 +105,7 @@ class GameTemplatesTest {
     pkg = "com.teststudio.javagame",
     language = language,
     platforms = platforms,
-    flixelVersion = "1.2.3",
+    frameworkVersion = "1.2.3",
     ktxVersion = "0.4.0",
     folder = "my-game",
     width = 640,

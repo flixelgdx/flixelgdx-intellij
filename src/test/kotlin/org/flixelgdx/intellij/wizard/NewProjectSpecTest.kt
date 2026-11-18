@@ -46,7 +46,7 @@ class NewProjectSpecTest {
     assertEquals("my-game", data.folder)
     assertEquals(listOf("desktop", "html5"), data.platforms)
     assertEquals(GameLanguage.JAVA, data.language)
-    assertEquals("0.7.2", data.flixelVersion)
+    assertEquals("0.7.2", data.frameworkVersion)
     assertEquals(640, data.width)
     assertEquals(360, data.height)
   }
@@ -62,11 +62,11 @@ class NewProjectSpecTest {
   }
 
   @Test
-  fun typedFlixelVersionDropsTheTagPrefix() {
-    assertNull(base().typedFlixelVersion)
-    assertNull(base().copy(flixelVersion = "  ").typedFlixelVersion)
-    assertEquals("0.8.0", base().copy(flixelVersion = " v0.8.0 ").typedFlixelVersion)
-    assertEquals("0.8.0", base().copy(flixelVersion = "0.8.0").typedFlixelVersion)
+  fun typedFrameworkVersionDropsTheTagPrefix() {
+    assertNull(base().typedFrameworkVersion)
+    assertNull(base().copy(frameworkVersion = "  ").typedFrameworkVersion)
+    assertEquals("0.8.0", base().copy(frameworkVersion = " v0.8.0 ").typedFrameworkVersion)
+    assertEquals("0.8.0", base().copy(frameworkVersion = "0.8.0").typedFrameworkVersion)
   }
 
   @Test

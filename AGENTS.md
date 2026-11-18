@@ -14,7 +14,7 @@ from it is installed into a game.
 
 The source lives in one Gradle module under `src/main/kotlin/org/flixelgdx/intellij/`, split into packages:
 
-- **`template`**: The layered game templates (`GameTemplates`), the small Go-template renderer (`GoTemplate`), the
+- **`template`**: The layered game templates (`GameTemplates`), the small template renderer (`TextTemplate`), the
   template data, and `ProjectWriter`, which writes a rendered game at once.
 - **`toml`**: Comment-preserving edits of the TOML files of a game (`TomlEdits`, `VersionCatalog`, `GameProjectToml`,
   `CatalogMerge`) and `DocumentEdits`, which applies them as one undoable command.

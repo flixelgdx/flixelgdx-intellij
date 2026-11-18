@@ -51,11 +51,13 @@ class GameFile(val path: String, val content: ByteArray, val executable: Boolean
  * A later layer replaces a file of an earlier one that ends up at the same path. Think of it as three sheets of
  * tracing paper laid on top of each other: what is drawn on a higher sheet hides what is under it.
  *
- * File names follow a few rules, so the folders can hold files that tools would otherwise treat as their own:
+ * File names follow a few rules, so the folders can hold files that the build or Git would otherwise treat as their
+ * own:
  *
- * - A name ending in `.tmpl` is rendered with [GoTemplate] and loses the suffix. Any other file is copied as it is,
+ * - A name ending in `.tmpl` is rendered with [TextTemplate] and loses the suffix. Any other file is copied as it is,
  *   byte for byte, which keeps `gradle-wrapper.jar` intact.
- * - `dot_` at the start of a name becomes a dot, so `dot_gitignore` becomes `.gitignore`.
+ * - `dot_` at the start of a name becomes a dot, so `dot_gitignore` becomes `.gitignore`. A real `.gitignore` here
+ *   would apply to this repository, and Gradle leaves such files out of the plugin's resources by default.
  * - A folder called `__package__` becomes the Java package as nested folders, and `__Class__` in a name becomes the
  *   class name of the game.
  * - A top-level `desktop`, `html5` or `android` folder is a module. Its files are only created when the game builds
@@ -129,7 +131,7 @@ object GameTemplates {
   }
 
   /** Turns one resource into a [GameFile], or `null` for a file of a module the game does not have. */
-  private fun build(resourcePath: String, rel: String, data: GameTemplateData, values: TemplateValues): GameFile? {
+  private fun build(resourcePath: String, rel: String, data: GameTemplateData, values: Map<String, Any>): GameFile? {
     val segments = rel.split('/').toMutableList()
     val module = segments[0]
     if (segments.size > 1 && module in PLATFORMS && !data.hasPlatform(module)) return null
@@ -147,7 +149,7 @@ object GameTemplates {
     segments[last] = segments[last].removeSuffix(TMPL)
     var content = resource(resourcePath)
     if (isTemplate) {
-      content = GoTemplate.render(rel, String(content, Charsets.UTF_8), values).toByteArray(Charsets.UTF_8)
+      content = TextTemplate.render(rel, String(content, Charsets.UTF_8), values).toByteArray(Charsets.UTF_8)
     }
     val fileName = segments[last]
     if (fileName == "gradlew.bat") content = toCrlf(content)

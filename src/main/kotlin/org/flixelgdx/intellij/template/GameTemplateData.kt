@@ -45,7 +45,7 @@ enum class GameLanguage(val id: String) {
  * @property className the name of the main game class, such as `MyGame`.
  * @property language the language of the game code.
  * @property platforms the platforms the game builds for besides `core`, in the order of [GameTemplates.PLATFORMS].
- * @property flixelVersion the version of FlixelGDX, such as `0.7.2`.
+ * @property frameworkVersion the version of the framework, such as `0.7.2`.
  * @property ktxVersion the version of the Kotlin extension of FlixelGDX; only used by Kotlin games.
  * @property folder the name of the project folder, used as the Gradle project name.
  * @property slug a lowercase file name made from the title, used for the web files and the desktop jar.
@@ -60,7 +60,7 @@ data class GameTemplateData(
   val className: String,
   val language: GameLanguage,
   val platforms: List<String>,
-  val flixelVersion: String,
+  val frameworkVersion: String,
   val ktxVersion: String,
   val folder: String,
   val slug: String,
@@ -74,33 +74,31 @@ data class GameTemplateData(
   /** Whether the game builds for [platform]. */
   fun hasPlatform(platform: String): Boolean = platform in platforms
 
-  /** The fields and methods the templates read, under the names the templates use. */
-  fun values(): TemplateValues = TemplateValues(
-    fields = mapOf(
-      "Title" to title,
-      "Company" to company,
-      "Version" to version,
-      "Package" to pkg,
-      "Class" to className,
-      "Language" to language.id,
-      "Kotlin" to kotlin,
-      "FlixelVersion" to flixelVersion,
-      "KtxVersion" to ktxVersion,
-      "Folder" to folder,
-      "Slug" to slug,
-      "Width" to width,
-      "Height" to height,
-      "PlatformList" to platforms.joinToString(", ") { "\"$it\"" },
-      "BuildsrcBundle" to buildsrcBundle().joinToString(", ") { "\"$it\"" },
-    ),
-    methods = mapOf("HasPlatform" to { name: String -> hasPlatform(name) }),
-  )
+  /** The values the templates read, under the names the templates use (see [TextTemplate]). */
+  fun values(): Map<String, Any> = buildMap {
+    put("title", title)
+    put("company", company)
+    put("version", version)
+    put("package", pkg)
+    put("className", className)
+    put("language", language.id)
+    put("kotlin", kotlin)
+    put("frameworkVersion", frameworkVersion)
+    put("ktxVersion", ktxVersion)
+    put("folder", folder)
+    put("slug", slug)
+    put("width", width)
+    put("height", height)
+    put("platformList", platforms.joinToString(", ") { "\"$it\"" })
+    put("buildSrcBundle", buildSrcBundle().joinToString(", ") { "\"$it\"" })
+    for (platform in GameTemplates.PLATFORMS) put(platform, hasPlatform(platform))
+  }
 
   /**
    * The Gradle plugins that `buildSrc` puts on the build classpath, in catalog order: Kotlin's plugin for Kotlin
    * games, R8 and the Android Gradle plugin for Android, and TeaVM with the FlixelGDX web plugin for the web.
    */
-  private fun buildsrcBundle(): List<String> = buildList {
+  private fun buildSrcBundle(): List<String> = buildList {
     if (kotlin) add("kotlin-gradle-plugin")
     if (hasPlatform(ANDROID)) add("r8")
     if (hasPlatform(HTML5)) {
@@ -127,7 +125,7 @@ data class GameTemplateData(
       pkg: String,
       language: GameLanguage,
       platforms: Collection<String>,
-      flixelVersion: String,
+      frameworkVersion: String,
       ktxVersion: String,
       folder: String,
       width: Int,
@@ -140,7 +138,7 @@ data class GameTemplateData(
       className = GameNames.className(title),
       language = language,
       platforms = GameTemplates.PLATFORMS.filter { it in platforms },
-      flixelVersion = flixelVersion,
+      frameworkVersion = frameworkVersion,
       ktxVersion = ktxVersion,
       folder = folder,
       slug = GameNames.slug(title),

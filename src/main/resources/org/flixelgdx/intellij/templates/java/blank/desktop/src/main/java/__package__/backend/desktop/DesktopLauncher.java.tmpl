@@ -1,6 +1,6 @@
-package {{.Package}}.backend.desktop;
+package {{package}}.backend.desktop;
 
-import {{.Package}}.{{.Class}};
+import {{package}}.{{className}};
 import org.flixelgdx.backend.desktop.FlixelDesktopLauncher;
 
 /** Starts the game in a desktop window. */
@@ -14,6 +14,6 @@ public final class DesktopLauncher {
    * @param args The command line arguments, which the game does not use.
    */
   public static void main(String[] args) {
-    FlixelDesktopLauncher.launch(new {{.Class}}());
+    FlixelDesktopLauncher.launch(new {{className}}());
   }
 }

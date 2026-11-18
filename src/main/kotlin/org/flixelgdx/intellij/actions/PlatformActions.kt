@@ -142,7 +142,7 @@ class AddPlatformAction : FlxgdxAction() {
     pkg = settings.pkg,
     language = settings.language,
     platforms = settings.platforms + platform,
-    flixelVersion = flixel,
+    frameworkVersion = flixel,
     ktxVersion = ktx,
     folder = dir.fileName?.toString().orEmpty(),
     width = settings.width,

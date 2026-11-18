@@ -1,27 +1,27 @@
 plugins {
-  id("flixelgdx.{{if .Kotlin}}kotlin-jvm{{else}}java{{end}}")
+  id("flixelgdx.{{if kotlin}}kotlin-jvm{{else}}java{{end}}")
   application
 }
 
-val gameFileName = "{{.Slug}}"
+val gameFileName = "{{slug}}"
 val isMacOs = System.getProperty("os.name", "").lowercase().contains("mac")
 val heapJvmArgs = listOf("-Xms8M", "-Xmx1G")
 // WebGPU and SDL call native code, which Java only allows quietly when native access is enabled.
 val nativeAccessJvmArgs = listOf("--enable-native-access=ALL-UNNAMED")
 
 application {
-  mainClass = "{{.Package}}.backend.desktop.DesktopLauncher{{if .Kotlin}}Kt{{end}}"
+  mainClass = "{{package}}.backend.desktop.DesktopLauncher{{if kotlin}}Kt{{end}}"
   applicationDefaultJvmArgs = heapJvmArgs + nativeAccessJvmArgs
 }
 
 dependencies {
   implementation(project(":core"))
   implementation(libs.bundles.desktop)
-{{- if not .Kotlin}}
+{{- if not kotlin}}
   annotationProcessor(libs.bundles.desktopProcessors)
 {{- end}}
 }
-{{- if .Kotlin}}
+{{- if kotlin}}
 
 // Kotlin runs annotation processors through kapt, which a package can apply to this module.
 plugins.withId("org.jetbrains.kotlin.kapt") {

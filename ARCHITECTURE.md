@@ -19,7 +19,7 @@ collection classes, and the WGSL shader contract) for its inspections and shader
    MavenCentral (latest framework version, unless one was typed)
                   |
                   v
-   GameTemplates (layers the template files and renders them with GoTemplate, in memory)
+   GameTemplates (layers the template files and renders them with TextTemplate, in memory)
                   |
                   v
    ProjectWriter (writes every file at once, and removes them again if one fails)
@@ -30,12 +30,13 @@ collection classes, and the WGSL shader contract) for its inspections and shader
 
 - **The template files** live under `src/main/resources/org/flixelgdx/intellij/templates/` in three layers:
   `common/`, then `<language>/base/`, then `<language>/<template>/`. A later layer replaces a file at the same path.
-  A name ending in `.tmpl` is rendered and loses the suffix, `dot_` becomes a leading dot, a `__package__` folder
+  A name ending in `.tmpl` is rendered and loses the suffix, `dot_` becomes a leading dot (so Git and Gradle leave those files alone here), a `__package__` folder
   becomes the package folders, `__Class__` becomes the game class name, and the `desktop`, `html5` and `android`
   folders are only created for the chosen platforms. `index.txt` lists every file, because resources inside a jar
   cannot be listed.
-- **`GoTemplate`** renders the small part of Go's `text/template` syntax the files use (fields, `if`/`else`/`end`,
-  `not`, a few escape functions and the `{{-`/`-}}` trim markers), and fails loudly on anything else.
+- **`TextTemplate`** renders the plugin's small template syntax: `{{name}}` prints a value, `{{name | toml}}` (or
+  `kotlin`, `xml`) escapes it, `{{if name}}`/`{{if not name}}`/`{{else}}`/`{{end}}` leave out blocks, and the
+  `{{-`/`-}}` markers trim white space. It fails loudly on anything else.
 - **`project.toml` and the version catalog** are templates too. The catalog gets the framework entries for the
   chosen platforms and language, in the bundles the build files use (`core`, `desktop`, `html5`, `android`, the
   `*Processors` bundles, `androidDesugar` and `buildsrc`).
@@ -66,7 +67,7 @@ the catalog entries (`CatalogMerge`).
 
 Everything lives in one Gradle module, under `src/main/kotlin/org/flixelgdx/intellij/`:
 
-- **`template`**: `GameTemplates`, `GoTemplate`, `GameTemplateData`, `GameNames` (class name and file name slug)
+- **`template`**: `GameTemplates`, `TextTemplate`, `Escapes`, `GameTemplateData`, `GameNames` (class name and file name slug)
   and `ProjectWriter`, described above. Nothing here touches the IDE, so it is tested with plain unit tests.
 - **`toml`**: `TomlEdits` (small planned edits of TOML files), `VersionCatalog`, `GameProjectToml`, `CatalogMerge`,
   `Coordinates`, `SettingsPluginVersion`, `DocumentEdits` (applies edits through the IDE's documents), and

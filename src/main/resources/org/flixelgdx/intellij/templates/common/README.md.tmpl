@@ -1,6 +1,6 @@
-# {{.Title}}
+# {{title}}
 
-A game made with [FlixelGDX](https://github.com/flixelgdx), written in {{if .Kotlin}}Kotlin{{else}}Java{{end}}.
+A game made with [FlixelGDX](https://github.com/flixelgdx), written in {{if kotlin}}Kotlin{{else}}Java{{end}}.
 
 ## Project layout
 
@@ -8,13 +8,13 @@ A game made with [FlixelGDX](https://github.com/flixelgdx), written in {{if .Kot
 |----------------------------|------------------------------------------------------------------------------------|
 | `project.toml`             | The title, version, window size and platforms. Edit it by hand.                    |
 | `core/`                    | Your game. Almost all of your code goes here.                                      |
-{{- if .HasPlatform "desktop"}}
+{{- if desktop}}
 | `desktop/`                 | The launcher that starts the game in a desktop window.                             |
 {{- end}}
-{{- if .HasPlatform "html5"}}
+{{- if html5}}
 | `html5/`                   | The launcher that starts the game in a web browser.                                |
 {{- end}}
-{{- if .HasPlatform "android"}}
+{{- if android}}
 | `android/`                 | The launcher that starts the game on an Android phone or tablet.                   |
 {{- end}}
 | `assets/`                  | Images, sounds and other files that every platform shares.                         |
@@ -28,16 +28,16 @@ downloads everything else the first time, so the first build is slow.
 
 | Platform | With Gradle                       |
 |----------|-----------------------------------|
-{{- if .HasPlatform "desktop"}}
+{{- if desktop}}
 | Desktop  | `./gradlew :desktop:run`          |
 {{- end}}
-{{- if .HasPlatform "html5"}}
+{{- if html5}}
 | Web      | `./gradlew :html5:run`            |
 {{- end}}
-{{- if .HasPlatform "android"}}
+{{- if android}}
 | Android  | `./gradlew :android:installDebug` |
 {{- end}}
-{{if .HasPlatform "desktop"}}
+{{if desktop}}
 Use `./gradlew :desktop:debug` to start the desktop game with the framework's debugging tools.
 {{end}}
 ## Add libraries

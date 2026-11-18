@@ -4,25 +4,25 @@
 
 # Where the game runs. Pick from "desktop", "html5" and "android".
 # This key has to stay above the first [table] heading.
-platforms = [{{.PlatformList}}]
+platforms = [{{platformList}}]
 
 [app]
 # The name of the game. It is used for the window title and for file and folder
 # names, so it can only use plain letters, numbers, spaces and simple punctuation.
-title    = "{{toml .Title}}"
+title    = "{{title | toml}}"
 # The Java package of your code, written in lowercase like com.example.mygame.
-package  = "{{.Package}}"
+package  = "{{package}}"
 # Your name or studio. The same file name rules as the title apply.
-company  = "{{toml .Company}}"
+company  = "{{company | toml}}"
 # The game version. It must start with a number, like 0.1.0.
-version  = "{{toml .Version}}"
+version  = "{{version | toml}}"
 # The language of your code, "java" or "kotlin".
-language = "{{.Language}}"
+language = "{{language}}"
 
 [window]
 # The size of the game window in pixels.
-width      = {{.Width}}
-height     = {{.Height}}
+width      = {{width}}
+height     = {{height}}
 # How many frames the game tries to draw each second.
 framerate  = 60
 # Wait for the screen to refresh before drawing the next frame. This avoids tearing.

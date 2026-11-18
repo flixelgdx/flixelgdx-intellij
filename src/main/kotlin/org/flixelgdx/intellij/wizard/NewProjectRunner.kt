@@ -76,7 +76,7 @@ class NewProjectRunner(private val project: Project, private val scope: Coroutin
           throw IOException("The folder ${spec.dir} is not empty. Pick an empty folder or another name.")
         }
         indicator.text = "Finding the FlixelGDX version"
-        val flixel = spec.typedFlixelVersion ?: latest(MavenCentral.FLIXEL_CORE, indicator)
+        val flixel = spec.typedFrameworkVersion ?: latest(MavenCentral.FLIXEL_CORE, indicator)
         val ktx = if (spec.language == GameLanguage.KOTLIN) {
           runCatching { MavenCentral.latest(MavenCentral.FLIXEL_GROUP, MavenCentral.KTX_CORE, indicator) }
             .getOrDefault(flixel)

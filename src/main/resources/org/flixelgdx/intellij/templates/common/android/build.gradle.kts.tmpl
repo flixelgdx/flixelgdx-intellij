@@ -1,21 +1,21 @@
-{{if .Kotlin -}}
+{{if kotlin -}}
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 {{end -}}
 plugins {
   // The Gradle plugins this module needs. Add a line here when a library asks for one.
   id("com.android.application")
-{{- if .Kotlin}}
+{{- if kotlin}}
   id("org.jetbrains.kotlin.android")
 {{- end}}
 }
 
 android {
-  namespace = "{{.Package}}.backend"
+  namespace = "{{package}}.backend"
   compileSdk = 36
 
   defaultConfig {
-    applicationId = "{{.Package}}"
+    applicationId = "{{package}}"
     minSdk = 26
     targetSdk = 35
     versionCode = 1
@@ -45,7 +45,7 @@ java {
     vendor.set(JvmVendorSpec.ADOPTIUM)
   }
 }
-{{- if .Kotlin}}
+{{- if kotlin}}
 
 kotlin {
   compilerOptions {
@@ -58,11 +58,11 @@ dependencies {
   coreLibraryDesugaring(libs.bundles.androidDesugar)
   implementation(project(":core"))
   implementation(libs.bundles.android)
-{{- if not .Kotlin}}
+{{- if not kotlin}}
   annotationProcessor(libs.bundles.androidProcessors)
 {{- end}}
 }
-{{- if .Kotlin}}
+{{- if kotlin}}
 
 // Kotlin runs annotation processors through kapt, which a package can apply to this module.
 plugins.withId("org.jetbrains.kotlin.kapt") {

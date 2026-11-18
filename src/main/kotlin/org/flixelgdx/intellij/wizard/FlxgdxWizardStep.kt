@@ -157,7 +157,7 @@ class FlxgdxWizardStep(private val parent: GitNewProjectWizardStep) : AbstractNe
         row("Framework version:") {
           textField().bindText(tagProp).columns(COLUMNS)
             .comment("A version such as 0.7.2. Leave empty for the latest release on Maven Central.")
-            .checked { flixelVersionProblem(it) }
+            .checked { frameworkVersionProblem(it) }
         }
         row("Template:") {
           comboBox(GameTemplates.names(GameLanguage.JAVA)).bindItem(templateProp)
@@ -181,7 +181,7 @@ class FlxgdxWizardStep(private val parent: GitNewProjectWizardStep) : AbstractNe
       desktop = desktopProp.get(),
       html5 = html5Prop.get(),
       android = androidProp.get(),
-      flixelVersion = tagProp.get(),
+      frameworkVersion = tagProp.get(),
       template = templateProp.get(),
     )
     project.service<NewProjectRunner>().create(spec)
@@ -194,7 +194,7 @@ class FlxgdxWizardStep(private val parent: GitNewProjectWizardStep) : AbstractNe
   private fun packageProblem(value: String): String? =
     if (value.isEmpty()) "Package must not be empty." else ProjectValidation.packageName(value)?.sentence("Package")
 
-  private fun flixelVersionProblem(value: String): String? {
+  private fun frameworkVersionProblem(value: String): String? {
     val version = value.removePrefix("v")
     if (version.isEmpty()) return null
     return ProjectValidation.version(version)?.sentence("Framework version")

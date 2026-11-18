@@ -1,4 +1,4 @@
-package {{.Package}};
+package {{package}};
 
 import org.flixelgdx.FlixelGame;
 
@@ -9,10 +9,10 @@ import org.flixelgdx.FlixelGame;
  * to start the game. The window settings, such as the title and the size, are read from
  * {@code project.toml} through the generated {@link Project} class, so change them there.
  */
-public class {{.Class}} extends FlixelGame {
+public class {{className}} extends FlixelGame {
 
   /** Creates the game and tells it to open {@link PlayState} first. */
-  public {{.Class}}() {
+  public {{className}}() {
     super(Project.config().build(), PlayState::new);
   }
 }

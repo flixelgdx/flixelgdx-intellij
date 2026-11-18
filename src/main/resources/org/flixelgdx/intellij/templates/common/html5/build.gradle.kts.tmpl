@@ -1,14 +1,14 @@
 plugins {
-  id("flixelgdx.{{if .Kotlin}}kotlin-jvm{{else}}java{{end}}")
+  id("flixelgdx.{{if kotlin}}kotlin-jvm{{else}}java{{end}}")
   id("org.teavm")
   id("org.flixelgdx.html5")
 }
 
-val gameFileName = "{{.Slug}}"
+val gameFileName = "{{slug}}"
 
 teavm {
   all {
-    mainClass = "{{.Package}}.backend.html5.Html5Launcher{{if .Kotlin}}Kt{{end}}"
+    mainClass = "{{package}}.backend.html5.Html5Launcher{{if kotlin}}Kt{{end}}"
   }
   js {
     addedToWebApp = true
@@ -27,11 +27,11 @@ html5 {
 dependencies {
   implementation(project(":core"))
   implementation(libs.bundles.html5)
-{{- if not .Kotlin}}
+{{- if not kotlin}}
   annotationProcessor(libs.bundles.html5Processors)
 {{- end}}
 }
-{{- if .Kotlin}}
+{{- if kotlin}}
 
 // Kotlin runs annotation processors through kapt, which a package can apply to this module.
 plugins.withId("org.jetbrains.kotlin.kapt") {
