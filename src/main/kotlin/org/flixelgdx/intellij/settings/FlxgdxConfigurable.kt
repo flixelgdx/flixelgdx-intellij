@@ -28,9 +28,6 @@ import com.intellij.openapi.application.ModalityState
 import com.intellij.openapi.components.service
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
 import com.intellij.openapi.options.BoundSearchableConfigurable
-import com.intellij.openapi.progress.ProgressIndicator
-import com.intellij.openapi.progress.ProgressManager
-import com.intellij.openapi.progress.Task
 import com.intellij.openapi.ui.DialogPanel
 import com.intellij.openapi.ui.TextFieldWithBrowseButton
 import com.intellij.ui.DocumentAdapter
@@ -39,20 +36,15 @@ import com.intellij.ui.components.JBLabel
 import com.intellij.ui.dsl.builder.AlignX
 import com.intellij.ui.dsl.builder.bindText
 import com.intellij.ui.dsl.builder.panel
-import org.flixelgdx.intellij.cli.FlxgdxCli
-import org.flixelgdx.intellij.cli.FlxgdxLocator
 import org.flixelgdx.intellij.debugger.DebuggerInstaller
 import org.flixelgdx.intellij.debugger.DebuggerLocator
 import org.flixelgdx.intellij.debugger.DebuggerSource
-import java.nio.file.Paths
 import javax.swing.event.DocumentEvent
 
 /** The settings page under Tools > FlixelGDX. */
 class FlxgdxConfigurable : BoundSearchableConfigurable("FlixelGDX", "org.flixelgdx.intellij.settings") {
 
-  private lateinit var pathField: TextFieldWithBrowseButton
   private lateinit var debuggerField: TextFieldWithBrowseButton
-  private val resultLabel = JBLabel()
   private val debuggerLabel = JBLabel()
   private val reinstall = JBCheckBox("Reinstall")
 
@@ -62,18 +54,6 @@ class FlxgdxConfigurable : BoundSearchableConfigurable("FlixelGDX", "org.flixelg
   override fun createPanel(): DialogPanel {
     val settings = service<FlxgdxSettings>()
     return panel {
-      row("Executable path:") {
-        pathField = textFieldWithBrowseButton(
-          FileChooserDescriptorFactory.createSingleFileOrExecutableAppDescriptor().withTitle("Select flxgdx"),
-        ).bindText(settings::executablePath)
-          .align(AlignX.FILL)
-          .comment("Leave empty to find flxgdx automatically on PATH and in the usual install folders.")
-          .component
-        button("Test") { test() }
-      }
-      row {
-        cell(resultLabel)
-      }
       group("FlixelGDX Debugger") {
         row("Debugger executable:") {
           debuggerField = textFieldWithBrowseButton(
@@ -126,30 +106,5 @@ class FlxgdxConfigurable : BoundSearchableConfigurable("FlixelGDX", "org.flixelg
 
   private fun installDebugger() {
     DebuggerInstaller.install(null, reinstall.isSelected) { detectDebugger() }
-  }
-
-  private fun test() {
-    val typed = pathField.text.trim()
-    resultLabel.text = "Testing..."
-    ProgressManager.getInstance().run(object : Task.Backgroundable(null, "Testing flxgdx", true) {
-      private var message = ""
-
-      override fun run(indicator: ProgressIndicator) {
-        val exe = if (typed.isEmpty()) {
-          service<FlxgdxLocator>().find()?.path
-        } else {
-          runCatching { Paths.get(typed) }.getOrNull()
-        }
-        message = if (exe == null) {
-          "flxgdx was not found."
-        } else {
-          service<FlxgdxCli>().probe(exe, indicator).describe()
-        }
-      }
-
-      override fun onFinished() {
-        ApplicationManager.getApplication().invokeLater({ resultLabel.text = message }, ModalityState.any())
-      }
-    })
   }
 }

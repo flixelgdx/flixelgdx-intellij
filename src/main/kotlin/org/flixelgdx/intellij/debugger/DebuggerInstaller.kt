@@ -32,7 +32,7 @@ import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
 import com.intellij.util.io.HttpRequests
-import org.flixelgdx.intellij.cli.FlxgdxNotifier
+import org.flixelgdx.intellij.game.FlixelNotifier
 import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Path
@@ -75,19 +75,19 @@ object DebuggerInstaller {
 
       override fun onSuccess() {
         val done = result ?: return
-        service<FlxgdxNotifier>().info(project, TITLE, done.summary())
+        service<FlixelNotifier>().info(project, TITLE, done.summary())
         onDone(done)
       }
 
       override fun onThrowable(error: Throwable) {
-        service<FlxgdxNotifier>().error(project, TITLE, error.message ?: error.toString())
+        service<FlixelNotifier>().error(project, TITLE, error.message ?: error.toString())
       }
     })
   }
 
   /** Shows a notification that says the debugger is missing, with an Install Debugger button. */
   fun offer(project: Project?) {
-    val group = NotificationGroupManager.getInstance().getNotificationGroup(FlxgdxNotifier.GROUP_ID)
+    val group = NotificationGroupManager.getInstance().getNotificationGroup(FlixelNotifier.GROUP_ID)
     val notification = group.createNotification(
       "FlixelGDX Debugger is not installed",
       "Install it from its latest release, or set its path under Settings > Tools > FlixelGDX.",

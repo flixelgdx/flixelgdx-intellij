@@ -25,11 +25,6 @@
     <stepsBeforeRunProvider implementation="org.flixelgdx.intellij.runconfig.DebuggerBeforeRunProvider"/>
     <newProjectWizard.generator implementation="org.flixelgdx.intellij.wizard.FlxgdxNewProjectWizard"/>
     <postStartupActivity implementation="org.flixelgdx.intellij.startup.FlxgdxStartupActivity"/>
-    <toolWindow
-        id="FlixelGDX"
-        anchor="bottom"
-        canCloseContents="false"
-        factoryClass="org.flixelgdx.intellij.doctor.DoctorToolWindowFactory"/>
     <localInspection
         language="UAST"
         shortName="FlixelGdxAllocation"
@@ -102,15 +97,6 @@
               text="Remove Platform..."
               description="Remove a platform from the project"/>
       <separator/>
-      <action id="org.flixelgdx.intellij.InstallHandbook"
-              class="org.flixelgdx.intellij.actions.InstallHandbookAction"
-              text="Install Handbook..."
-              description="Copy the documentation of a repository into the handbooks folder"/>
-      <action id="org.flixelgdx.intellij.UninstallHandbook"
-              class="org.flixelgdx.intellij.actions.UninstallHandbookAction"
-              text="Uninstall Handbook..."
-              description="Remove a handbook that was installed with flxgdx"/>
-      <separator/>
       <action id="org.flixelgdx.intellij.OpenDebugger"
               class="org.flixelgdx.intellij.actions.OpenDebuggerAction"
               text="Open Debugger"
@@ -124,10 +110,6 @@
               class="org.flixelgdx.intellij.actions.UpgradeAction"
               text="Upgrade..."
               description="Upgrade FlixelGDX to its latest release on Maven Central"/>
-      <action id="org.flixelgdx.intellij.RunDoctor"
-              class="org.flixelgdx.intellij.doctor.RunDoctorAction"
-              text="Run Doctor"
-              description="Check that this computer and the project are ready to build"/>
     </group>
   </actions>
 </idea-plugin>

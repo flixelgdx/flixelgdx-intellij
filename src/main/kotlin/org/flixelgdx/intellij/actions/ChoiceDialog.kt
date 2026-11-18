@@ -35,7 +35,7 @@ import javax.swing.JComponent
 /**
  * A small dialog that asks the person to pick one item from a list, with an optional checkbox below it.
  *
- * It serves Add Platform, Remove Platform (with the "delete the folder" checkbox) and Uninstall Handbook.
+ * It serves Add Platform and Remove Platform (with the "delete the folder" checkbox).
  *
  * @param T the type of the items.
  * @param title the title of the dialog.

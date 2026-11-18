@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.flixelgdx.intellij.model
+package org.flixelgdx.intellij.toml
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull

@@ -31,10 +31,10 @@ import com.intellij.openapi.actionSystem.DataContext
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.service
 import com.intellij.openapi.util.Key
-import org.flixelgdx.intellij.cli.FlxgdxNotifier
 import org.flixelgdx.intellij.debugger.DebuggerInstaller
 import org.flixelgdx.intellij.debugger.DebuggerLauncher
 import org.flixelgdx.intellij.debugger.LaunchOutcome
+import org.flixelgdx.intellij.game.FlixelNotifier
 import org.jetbrains.plugins.gradle.service.execution.GradleRunConfiguration
 
 /** The "Open FlixelGDX Debugger" step in the Before launch list of a run configuration. It keeps no data. */
@@ -87,7 +87,7 @@ class DebuggerBeforeRunProvider : BeforeRunTaskProvider<DebuggerBeforeRunTask>()
 
   private fun start(configuration: RunConfiguration) {
     val project = configuration.project
-    val notifier = service<FlxgdxNotifier>()
+    val notifier = service<FlixelNotifier>()
     when (val outcome = DebuggerLauncher.ensureRunning()) {
       is LaunchOutcome.NotInstalled -> DebuggerInstaller.offer(project)
       is LaunchOutcome.Failed ->

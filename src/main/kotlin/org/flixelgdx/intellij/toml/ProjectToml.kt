@@ -21,11 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.flixelgdx.intellij.model
+package org.flixelgdx.intellij.toml
 
 /**
- * A tiny reader for the one value of `project.toml` the plugin needs when `flxgdx` is not available: the enabled
- * platforms.
+ * A tiny reader for the one value of `project.toml` that the run configurations need: the enabled platforms.
+ *
+ * It works on plain text, so it can run on a background thread at startup before the IDE has parsed anything.
  *
  * It is deliberately not a TOML parser. It only understands a top-level `platforms = ["desktop", "html5"]` line (the
  * list may span several lines), and it gives up with `null` as soon as anything looks unusual, so the plugin never

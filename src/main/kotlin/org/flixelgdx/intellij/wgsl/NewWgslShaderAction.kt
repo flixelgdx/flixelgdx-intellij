@@ -32,7 +32,7 @@ import com.intellij.openapi.actionSystem.DataContext
 import com.intellij.openapi.project.DumbAware
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiDirectory
-import org.flixelgdx.intellij.cli.FlxgdxProject
+import org.flixelgdx.intellij.game.GameProject
 
 /**
  * File > New > WGSL Shader: creates a starter fragment shader from the `WGSL Shader` file template.
@@ -48,7 +48,7 @@ class NewWgslShaderAction :
 
   override fun isAvailable(dataContext: DataContext): Boolean {
     val project = CommonDataKeys.PROJECT.getData(dataContext) ?: return false
-    return super.isAvailable(dataContext) && FlxgdxProject.isFlixelProject(project)
+    return super.isAvailable(dataContext) && GameProject.isFlixelProject(project)
   }
 
   override fun buildDialog(project: Project, directory: PsiDirectory, builder: CreateFileFromTemplateDialog.Builder) {

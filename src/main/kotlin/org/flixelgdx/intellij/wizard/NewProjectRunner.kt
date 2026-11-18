@@ -35,7 +35,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.flixelgdx.intellij.cli.FlxgdxNotifier
+import org.flixelgdx.intellij.game.FlixelNotifier
 import org.flixelgdx.intellij.maven.MavenCentral
 import org.flixelgdx.intellij.runconfig.RunConfigSync
 import org.flixelgdx.intellij.template.GameLanguage
@@ -97,7 +97,7 @@ class NewProjectRunner(private val project: Project, private val scope: Coroutin
       }
 
       override fun onThrowable(error: Throwable) {
-        service<FlxgdxNotifier>().error(project, TITLE, error.message ?: error.toString())
+        service<FlixelNotifier>().error(project, TITLE, error.message ?: error.toString())
       }
     })
   }

@@ -32,10 +32,10 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.DialogWrapper
 import com.intellij.ui.components.JBCheckBox
 import com.intellij.ui.dsl.builder.panel
-import org.flixelgdx.intellij.cli.FlxgdxNotifier
 import org.flixelgdx.intellij.debugger.DebuggerInstaller
 import org.flixelgdx.intellij.debugger.DebuggerLauncher
 import org.flixelgdx.intellij.debugger.LaunchOutcome
+import org.flixelgdx.intellij.game.FlixelNotifier
 import javax.swing.JComponent
 
 /** Asks whether the debugger should be downloaded again even when it is already installed. */
@@ -97,7 +97,7 @@ class OpenDebuggerAction : FlxgdxAction() {
   }
 
   private fun report(project: Project, outcome: LaunchOutcome) {
-    val notifier = service<FlxgdxNotifier>()
+    val notifier = service<FlixelNotifier>()
     when (outcome) {
       is LaunchOutcome.NotInstalled -> DebuggerInstaller.offer(project)
       is LaunchOutcome.AlreadyRunning -> notifier.info(project, TITLE, "The debugger is already running.")

@@ -1,2 +1,0 @@
-{"protocol":1,"type":"progress","message":"Adding plug-jar","step":1,"total":1}
-{"protocol":1,"type":"result","message":"Added plug-jar 2.0 by hand.\n  core: plugin com.example.plug","data":{"dir":"/path/to/fx-game","action":"added","package":"plug-jar","kind":"plugin","tag":"2.0","version":"2.0","libraries":[],"plugins":[{"module":"core","id":"com.example.plug","alias":"plug-jar","version":"2.0"}],"repositories":[],"removed":[],"updated":[],"notes":[],"suggestions":[],"warnings":[],"files":["core/build.gradle.kts","gradle/libs.versions.toml","project.toml"]}}

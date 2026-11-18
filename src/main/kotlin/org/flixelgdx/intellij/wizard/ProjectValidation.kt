@@ -26,15 +26,15 @@ package org.flixelgdx.intellij.wizard
 /**
  * One rejected value of a project setting.
  *
- * The wording matches the `flxgdx` tool and the FlixelGDX Gradle plugin, so a person reads the same complaint in the
- * wizard, on the command line and in the build.
+ * The wording matches the FlixelGDX Gradle settings plugin, so a person reads the same complaint in the wizard and
+ * in the build.
  *
  * @property field the dotted name of the setting, such as `app.title`.
  * @property msg the problem as a full sentence. Most start with "it", as in "it must not be blank."
  */
 data class FieldError(val field: String, val msg: String) {
 
-  /** The message in the form `flxgdx` prints: "Invalid app.title in project.toml: it must not be blank." */
+  /** The message in the form the build prints: "Invalid app.title in project.toml: it must not be blank." */
   override fun toString() = "Invalid $field in project.toml: $msg"
 
   /**
@@ -47,11 +47,11 @@ data class FieldError(val field: String, val msg: String) {
 }
 
 /**
- * The same checks that `flxgdx new` and the Gradle plugin run on the settings of a project.
+ * The same checks that the FlixelGDX Gradle settings plugin runs on the settings of a project.
  *
- * Checking in the wizard means a typo is caught while typing instead of after a failed run. Each function returns
- * `null` when the value is fine. The rules and the texts are copies of `internal/project/validate.go` in the `flxgdx`
- * repository, so keep them in step; `ProjectValidationTest` holds the shared table of examples.
+ * Checking in the wizard means a typo is caught while typing instead of after a failed build. Each function returns
+ * `null` when the value is fine. The rules and the texts follow `ProjectValidator` in the framework's
+ * `flixelgdx-project-plugin`, so keep them in step; `ProjectValidationTest` holds the shared table of examples.
  *
  * Example:
  * ```
@@ -191,7 +191,7 @@ object ProjectValidation {
     if (cp < 0x20 || cp > 0x7E) "the character U+%04X".format(cp) else "the character '${cp.toChar()}'"
 }
 
-/** Derives names from what the person typed, the same way `flxgdx new` does. */
+/** Derives names from what the person typed. */
 object PackageNames {
 
   /**

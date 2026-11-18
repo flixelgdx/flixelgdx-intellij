@@ -28,27 +28,11 @@ import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.SimplePersistentStateComponent
 import com.intellij.openapi.components.State
 import com.intellij.openapi.components.Storage
-import com.intellij.openapi.components.service
-import org.flixelgdx.intellij.cli.FlxgdxLocator
 
-/**
- * The plugin's application-level settings, stored in `flixelgdx.xml` in the IDE config folder.
- *
- * Changing [executablePath] also clears the cached `flxgdx` location, so the next search sees the new value.
- */
+/** The plugin's application-level settings, stored in `flixelgdx.xml` in the IDE config folder. */
 @Service(Service.Level.APP)
 @State(name = "FlixelGdxSettings", storages = [Storage("flixelgdx.xml")])
 class FlxgdxSettings : SimplePersistentStateComponent<FlxgdxSettings.State>(State()) {
-
-  /** The path of the `flxgdx` executable. An empty value means "find it automatically". */
-  var executablePath: String
-    get() = state.executablePath.orEmpty()
-    set(value) {
-      if (state.executablePath.orEmpty() != value) {
-        state.executablePath = value
-        service<FlxgdxLocator>().invalidate()
-      }
-    }
 
   /** The path of the FlixelGDX Debugger executable. An empty value means "find it automatically". */
   var debuggerPath: String
@@ -57,27 +41,8 @@ class FlxgdxSettings : SimplePersistentStateComponent<FlxgdxSettings.State>(Stat
       state.debuggerPath = value
     }
 
-  /** The repositories that were used last, newest first. Dialogs offer them again so they need not be retyped. */
-  val recentRepos: List<String> get() = state.recentRepos.toList()
-
-  /** Puts [repo] at the top of [recentRepos] (a repeated entry moves up) and keeps the list short. Blank is ignored. */
-  fun rememberRepo(repo: String) {
-    val value = repo.trim()
-    if (value.isEmpty()) return
-    val list = state.recentRepos
-    list.remove(value)
-    list.add(0, value)
-    while (list.size > MAX_RECENT) list.removeAt(list.size - 1)
-  }
-
   /** The data that is written to disk. */
   class State : BaseState() {
-    var executablePath by string("")
     var debuggerPath by string("")
-    var recentRepos by list<String>()
-  }
-
-  companion object {
-    private const val MAX_RECENT = 10
   }
 }

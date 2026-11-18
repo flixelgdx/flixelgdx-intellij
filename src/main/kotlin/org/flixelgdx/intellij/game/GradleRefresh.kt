@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.flixelgdx.intellij.actions
+package org.flixelgdx.intellij.game
 
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.externalSystem.importing.ImportSpecBuilder
@@ -39,11 +39,11 @@ import org.jetbrains.plugins.gradle.util.GradleConstants
 import java.nio.file.Path
 
 /**
- * Makes the IDE notice that `flxgdx` changed the build files.
+ * Makes the IDE notice that the plugin changed the build files.
  *
- * Think of it as a messenger who runs after the builder: `flxgdx` edits `project.toml` and the Gradle files on disk,
- * and [refresh] tells the virtual file system about it and asks Gradle to sync again, so the new libraries show up in
- * the modules without a manual sync.
+ * Think of it as a messenger who runs after the builder: the plugin edits `project.toml`, the version catalog or a
+ * module folder, and [refresh] tells the virtual file system about it and asks Gradle to sync again, so the change
+ * shows up in the modules without a manual sync.
  */
 @Service(Service.Level.PROJECT)
 class GradleRefresh(private val project: Project, private val scope: CoroutineScope) {
@@ -67,14 +67,6 @@ class GradleRefresh(private val project: Project, private val scope: CoroutineSc
         linkAndSyncGradleProject(project, path)
       }
     }
-  }
-
-  /**
-   * Refreshes only the files under [dir], for changes that Gradle does not care about (for example the handbook
-   * folder). Call it from any thread; it only schedules work.
-   */
-  fun refreshFiles(dir: Path) {
-    scope.launch { refreshVfs(dir) }
   }
 
   private suspend fun refreshVfs(dir: Path) {

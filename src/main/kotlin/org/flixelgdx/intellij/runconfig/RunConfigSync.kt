@@ -34,15 +34,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.flixelgdx.intellij.cli.CliStatus
-import org.flixelgdx.intellij.cli.FlxgdxCli
-import org.flixelgdx.intellij.cli.FlxgdxProject
-import org.flixelgdx.intellij.cli.FlxgdxRunner
 import org.flixelgdx.intellij.debugger.DebuggerLocator
-import org.flixelgdx.intellij.model.CommandArgs
-import org.flixelgdx.intellij.model.ProjectInfo
-import org.flixelgdx.intellij.model.ProjectToml
+import org.flixelgdx.intellij.game.GameProject
 import org.flixelgdx.intellij.settings.FlxgdxProjectSettings
+import org.flixelgdx.intellij.toml.ProjectToml
 import org.jetbrains.plugins.gradle.service.execution.GradleExternalTaskConfigurationType
 import org.jetbrains.plugins.gradle.service.execution.GradleRunConfiguration
 import java.nio.file.Files
@@ -57,7 +52,7 @@ import java.nio.file.Paths
  * configuration for each, and clears away only the places it set itself when a platform leaves. The decisions come
  * from [RunConfigPlanner]; this class only reads the project and applies the plan.
  *
- * Everything that touches the disk or runs `flxgdx` happens on a background dispatcher. Changes to the run
+ * Everything that touches the disk happens on a background dispatcher. Changes to the run
  * configurations are made on the EDT.
  */
 @Service(Service.Level.PROJECT)
@@ -67,8 +62,8 @@ class RunConfigSync(private val project: Project, private val scope: CoroutineSc
    * Brings the run configurations in line with the platforms of the project.
    *
    * Nothing happens when the user turned off "Create run configurations automatically", when the project is not a
-   * FlixelGDX project, or when the platforms cannot be read with confidence. The platforms come from `flxgdx info`
-   * when the tool is usable, and otherwise from the `platforms` key of `project.toml`.
+   * FlixelGDX project, or when the platforms cannot be read with confidence. The platforms come from the `platforms`
+   * key of `project.toml`.
    *
    * Call it from any thread; it only schedules work.
    */
@@ -85,17 +80,8 @@ class RunConfigSync(private val project: Project, private val scope: CoroutineSc
   }
 
   private fun readPlatforms(dir: Path): List<String>? {
-    if (!FlxgdxProject.isFlixelDir(dir)) return null
-    val ok = service<FlxgdxCli>().status() as? CliStatus.Ok
-    if (ok != null) {
-      val result = service<FlxgdxRunner>()
-        .run(CommandArgs.info(), dir, executable = ok.path, timeoutMs = INFO_TIMEOUT_MS)
-      if (result.isSuccess) {
-        val info = ProjectInfo.parse(result.data)
-        return if (info.inProject) info.platforms else null
-      }
-    }
-    val text = runCatching { Files.readString(dir.resolve(FlxgdxProject.MARKER)) }.getOrNull() ?: return null
+    if (!GameProject.isFlixelDir(dir)) return null
+    val text = runCatching { Files.readString(dir.resolve(GameProject.MARKER)) }.getOrNull() ?: return null
     return ProjectToml.platforms(text)
   }
 
@@ -135,9 +121,5 @@ class RunConfigSync(private val project: Project, private val scope: CoroutineSc
         ?.let { manager.selectedConfiguration = it }
     }
     settings.tracked = plan.tracked
-  }
-
-  private companion object {
-    const val INFO_TIMEOUT_MS = 30_000L
   }
 }

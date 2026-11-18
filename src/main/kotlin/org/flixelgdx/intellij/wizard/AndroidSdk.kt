@@ -59,8 +59,9 @@ class SdkEnvironment(
 /**
  * Looks for an Android SDK, so the wizard can warn before someone picks Android without one.
  *
- * The Android build needs an SDK, and `flxgdx` skips the Android module while it cannot find one. The search checks
- * `ANDROID_HOME`, then `ANDROID_SDK_ROOT`, then the folder where Android Studio installs the SDK by default.
+ * The Android build needs an SDK, and the FlixelGDX settings plugin leaves the Android module out while it cannot find
+ * one. The search checks `ANDROID_HOME`, then `ANDROID_SDK_ROOT`, then the folder where Android Studio installs the SDK
+ * by default.
  */
 object AndroidSdk {
 

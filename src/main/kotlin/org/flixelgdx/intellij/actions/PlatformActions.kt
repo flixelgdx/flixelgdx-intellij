@@ -33,7 +33,8 @@ import com.intellij.openapi.util.io.NioFiles
 import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.psi.PsiFileFactory
-import org.flixelgdx.intellij.cli.FlxgdxNotifier
+import org.flixelgdx.intellij.game.FlixelNotifier
+import org.flixelgdx.intellij.game.GameProject
 import org.flixelgdx.intellij.runconfig.RunConfigSync
 import org.flixelgdx.intellij.template.GameTemplateData
 import org.flixelgdx.intellij.template.GameTemplates
@@ -61,8 +62,8 @@ class AddPlatformAction : FlxgdxAction() {
 
   override fun actionPerformed(e: AnActionEvent) {
     val project = e.project ?: return
-    val dir = ProjectActions.baseDir(project) ?: return
-    val notifier = service<FlxgdxNotifier>()
+    val dir = GameProject.baseDir(project) ?: return
+    val notifier = service<FlixelNotifier>()
     val settings = DocumentEdits.readToml(project, dir.resolve(GameProjectToml.PATH)) { GameProjectToml(it).settings() }
     if (settings == null) {
       notifier.error(project, TITLE, "${GameProjectToml.PATH} was not found.")
@@ -124,7 +125,7 @@ class AddPlatformAction : FlxgdxAction() {
       FileChange.toml(dir.resolve(GameProjectToml.PATH)) { GameProjectToml(it).addPlatform(platform) },
     )
     DocumentEdits.edit(project, TITLE, changes)
-    ProjectActions.refresh(project)
+    GameProject.refresh(project)
     project.service<RunConfigSync>().sync()
   }
 
@@ -162,8 +163,8 @@ class RemovePlatformAction : FlxgdxAction() {
 
   override fun actionPerformed(e: AnActionEvent) {
     val project = e.project ?: return
-    val dir = ProjectActions.baseDir(project) ?: return
-    val notifier = service<FlxgdxNotifier>()
+    val dir = GameProject.baseDir(project) ?: return
+    val notifier = service<FlixelNotifier>()
     val path = dir.resolve(GameProjectToml.PATH)
     val platforms = DocumentEdits.readToml(project, path) { GameProjectToml(it).platforms() }
     if (platforms == null) {
@@ -188,7 +189,7 @@ class RemovePlatformAction : FlxgdxAction() {
     DocumentEdits.edit(project, TITLE, listOf(FileChange.toml(path) { GameProjectToml(it).removePlatform(platform) }))
     if (dialog.checked) deleteFolder(project, dir.resolve(platform))
     notifier.info(project, TITLE, "Removed $platform.")
-    ProjectActions.refresh(project)
+    GameProject.refresh(project)
     project.service<RunConfigSync>().sync()
   }
 
@@ -201,7 +202,7 @@ class RemovePlatformAction : FlxgdxAction() {
       }
 
       override fun onThrowable(error: Throwable) {
-        service<FlxgdxNotifier>().error(project, TITLE, error.message ?: error.toString())
+        service<FlixelNotifier>().error(project, TITLE, error.message ?: error.toString())
       }
     })
   }

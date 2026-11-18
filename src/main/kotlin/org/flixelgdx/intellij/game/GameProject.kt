@@ -21,25 +21,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.flixelgdx.intellij.cli
+package org.flixelgdx.intellij.game
 
+import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 
-/** Helpers that recognize a FlixelGDX project. */
-object FlxgdxProject {
+/** Recognizes a FlixelGDX game and finds its folder. */
+object GameProject {
 
-  /** The file that marks the root of a FlixelGDX project. */
+  /** The file that marks the root of a FlixelGDX game. */
   const val MARKER = "project.toml"
 
   /** Returns `true` when [dir] holds a `project.toml`. Touches the disk, so call it off the EDT. */
   fun isFlixelDir(dir: Path): Boolean = Files.isRegularFile(dir.resolve(MARKER))
 
-  /** Returns `true` when the base folder of [project] is a FlixelGDX project. */
+  /** Returns `true` when the base folder of [project] is a FlixelGDX game. */
   fun isFlixelProject(project: Project): Boolean {
-    val base = project.basePath ?: return false
-    return runCatching { isFlixelDir(Paths.get(base)) }.getOrDefault(false)
+    val base = baseDir(project) ?: return false
+    return runCatching { isFlixelDir(base) }.getOrDefault(false)
+  }
+
+  /** The Gradle root of [project], or `null` for a project without a base folder. */
+  fun baseDir(project: Project): Path? = project.basePath?.let { runCatching { Paths.get(it) }.getOrNull() }
+
+  /** Refreshes the files of [project] and syncs Gradle. See [GradleRefresh]. Call it from any thread. */
+  fun refresh(project: Project) {
+    baseDir(project)?.let { project.service<GradleRefresh>().refresh(it) }
   }
 }

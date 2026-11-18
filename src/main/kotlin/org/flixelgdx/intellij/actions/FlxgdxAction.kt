@@ -30,7 +30,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.actionSystem.DefaultActionGroup
 import com.intellij.openapi.project.DumbAware
-import org.flixelgdx.intellij.cli.FlxgdxProject
+import org.flixelgdx.intellij.game.GameProject
 import java.nio.file.Paths
 
 /**
@@ -45,7 +45,7 @@ abstract class FlxgdxAction : AnAction(), DumbAware {
 
   override fun update(e: AnActionEvent) {
     val project = e.project
-    e.presentation.isEnabledAndVisible = project != null && FlxgdxProject.isFlixelProject(project)
+    e.presentation.isEnabledAndVisible = project != null && GameProject.isFlixelProject(project)
   }
 }
 
@@ -59,7 +59,7 @@ class FlxgdxActionGroup : DefaultActionGroup(), DumbAware {
 
   override fun update(e: AnActionEvent) {
     val project = e.project
-    var visible = project != null && FlxgdxProject.isFlixelProject(project)
+    var visible = project != null && GameProject.isFlixelProject(project)
     if (visible && e.place == ActionPlaces.PROJECT_VIEW_POPUP) {
       val files = e.getData(CommonDataKeys.VIRTUAL_FILE_ARRAY)
       val root = project?.basePath?.let { runCatching { Paths.get(it) }.getOrNull() }

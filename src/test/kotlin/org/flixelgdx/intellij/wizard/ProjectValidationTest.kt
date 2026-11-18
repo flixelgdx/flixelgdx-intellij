@@ -29,9 +29,8 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
- * Checks [ProjectValidation] and [PackageNames] against the same table of examples that
- * `internal/project/project_test.go` (TestValidators) and `internal/templates/templates_test.go` (TestPackageName)
- * use in the flxgdx repository. When a row changes there, change it here too.
+ * Checks [ProjectValidation] and [PackageNames] against a table of examples that follows `ProjectValidatorTest` in
+ * the framework's `flixelgdx-project-plugin`. When a rule changes there, change it here too.
  */
 class ProjectValidationTest {
 
@@ -90,7 +89,7 @@ class ProjectValidationTest {
   }
 
   @Test
-  fun messagesUseTheFlxgdxWording() {
+  fun messagesUseTheBuildWording() {
     assertEquals(
       "Invalid app.title in project.toml: it must not be blank.",
       ProjectValidation.title("")?.toString(),
