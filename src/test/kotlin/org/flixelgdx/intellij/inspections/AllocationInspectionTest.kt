@@ -41,6 +41,21 @@ class AllocationInspectionTest : FlixelFixtureTest() {
     assertEquals(listOf("new Object()", "new int[4]", "{1, 2}", "new Runnable() { public void run() {} }"), found)
   }
 
+  fun testFlagsAllocationsInAStateSubclass() {
+    addFramework()
+    myFixture.addClass(
+      "package org.flixelgdx.group; public abstract class FlixelBasicGroup<T> extends org.flixelgdx.FlixelBasic {" +
+        " public void update(float e) {} }",
+    )
+    myFixture.addClass(
+      "package org.flixelgdx; public abstract class FlixelState" +
+        " extends org.flixelgdx.group.FlixelBasicGroup<FlixelBasic> { public void update(float e) {} }",
+    )
+    val source = "import org.flixelgdx.FlixelState;" +
+      " class PlayState extends FlixelState { @Override public void update(float e) { Object o = new Object(); } }"
+    assertEquals(listOf("new Object()"), problems("PlayState.java", source, tool))
+  }
+
   fun testFlagsAllocationsInNestedBlocksAndLoops() {
     val found = check("for (int i = 0; i < 3; i++) { if (i > 1) { while (true) { Object o = new Object(); break; } } }")
     assertEquals(listOf("new Object()"), found)

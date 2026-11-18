@@ -172,11 +172,22 @@ class FlixelAllocationInspection : FlixelInspection() {
      * Returns true when [method] overrides the framework's `update(float)` or `draw(...)`.
      *
      * It follows the real super methods instead of trusting the name, so an unrelated method called `update` is not
-     * treated as per-frame code.
+     * treated as per-frame code. The whole chain is followed, because a game's `update` usually overrides one in
+     * `FlixelState`, which overrides the one in a group class, which finally overrides the framework's own.
      */
     fun isPerFrame(method: PsiMethod): Boolean {
       if (method.name != "update" && method.name != "draw") return false
-      return method.findSuperMethods(true).any { it.containingClass?.qualifiedName in perFrameOwners }
+      return overridesPerFrame(method, HashSet())
+    }
+
+    /** Walks up the super methods of [method] until one belongs to a per-frame owner. [seen] stops loops. */
+    private fun overridesPerFrame(method: PsiMethod, seen: MutableSet<PsiMethod>): Boolean {
+      for (parent in method.findSuperMethods(true)) {
+        if (!seen.add(parent)) continue
+        if (parent.containingClass?.qualifiedName in perFrameOwners) return true
+        if (overridesPerFrame(parent, seen)) return true
+      }
+      return false
     }
 
     private fun isStdlibCall(lambda: ULambdaExpression): Boolean {

@@ -76,6 +76,30 @@ class KotlinInspectionTest : FlixelFixtureTest() {
     )
   }
 
+  fun testAllocationInAStateSubclass() {
+    myFixture.addClass(
+      "package org.flixelgdx.group; public abstract class FlixelBasicGroup<T> extends org.flixelgdx.FlixelBasic {" +
+        " public void update(float e) {} }",
+    )
+    myFixture.addClass(
+      "package org.flixelgdx; public abstract class FlixelState" +
+        " extends org.flixelgdx.group.FlixelBasicGroup<FlixelBasic> { public void update(float e) {} }",
+    )
+    myFixture.addClass("package org.flixelgdx.math; public class FlixelVector { public FlixelVector() {} }")
+    val source = """
+      import org.flixelgdx.FlixelState
+      import org.flixelgdx.math.FlixelVector
+
+      class PlayState : FlixelState() {
+          override fun update(elapsed: Float) {
+              super.update(elapsed)
+              val vector = FlixelVector()
+          }
+      }
+    """.trimIndent()
+    assertEquals(listOf("FlixelVector()"), problems("PlayState.kt", source, FlixelAllocationInspection()))
+  }
+
   fun testCollectionsInKotlin() {
     val source = """
       import java.util.ArrayList
