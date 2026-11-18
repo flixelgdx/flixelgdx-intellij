@@ -23,8 +23,6 @@
  */
 package org.flixelgdx.intellij.debugger
 
-import com.google.gson.JsonParser
-import org.flixelgdx.intellij.model.CommandArgs
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -32,68 +30,36 @@ import org.junit.Test
 
 class InstallProgressTest {
 
-  private fun data(json: String) = JsonParser.parseString(json).asJsonObject
-
-  private fun fraction(step: Int, total: Int?, json: String?) =
-    InstallProgress.fraction(step, total, json?.let { data(it) })
-
   @Test
   fun downloadHalfwayIsOneAndAHalfStepsOfFive() {
-    val f = fraction(2, 5, """{"stage":"download","bytes":500,"total":1000}""")
-    assertEquals(0.3, f!!, 1e-9)
+    assertEquals(0.3, InstallProgress.fraction(2, 5, 500, 1000)!!, 1e-9)
   }
 
   @Test
   fun downloadStartAndEndStayInsideTheDownloadStep() {
-    assertEquals(0.2, fraction(2, 5, """{"stage":"download","bytes":0,"total":1000}""")!!, 1e-9)
-    assertEquals(0.4, fraction(2, 5, """{"stage":"download","bytes":1000,"total":1000}""")!!, 1e-9)
+    assertEquals(0.2, InstallProgress.fraction(2, 5, 0, 1000)!!, 1e-9)
+    assertEquals(0.4, InstallProgress.fraction(2, 5, 1000, 1000)!!, 1e-9)
   }
 
   @Test
-  fun moreBytesThanTheTotalIsClamped() {
-    assertEquals(0.4, fraction(2, 5, """{"stage":"download","bytes":2000,"total":1000}""")!!, 1e-9)
+  fun moreBytesThanTheSizeIsClamped() {
+    assertEquals(0.4, InstallProgress.fraction(2, 5, 2000, 1000)!!, 1e-9)
   }
 
   @Test
-  fun unknownTotalGivesNoFraction() {
-    assertNull(fraction(2, 5, """{"stage":"download","bytes":10,"total":0}"""))
+  fun unknownSizeOrStepGivesNoFraction() {
+    assertNull(InstallProgress.fraction(2, 5, 10, 0))
+    assertNull(InstallProgress.fraction(2, 5, 10, -1))
+    assertNull(InstallProgress.fraction(0, 5, 1, 2))
+    assertNull(InstallProgress.fraction(2, 0, 1, 2))
   }
 
   @Test
-  fun otherLogEventsAreIgnored() {
-    assertNull(fraction(2, 5, """{"stage":"unpack","bytes":10,"total":100}"""))
-    assertNull(fraction(2, 5, """{"level":"info"}"""))
-    assertNull(fraction(2, 5, null))
-    assertNull(fraction(2, 5, """{"stage":"download","bytes":"x","total":100}"""))
-  }
-
-  @Test
-  fun noStepInformationGivesNoFraction() {
-    assertNull(fraction(0, 5, """{"stage":"download","bytes":1,"total":2}"""))
-    assertNull(fraction(2, null, """{"stage":"download","bytes":1,"total":2}"""))
-  }
-
-  @Test
-  fun parsesTheInstallResultAndIgnoresUnknownKeys() {
-    val json = """
-      {"tool":"debugger","action":"installed","version":"v1.0.1","previous_version":"","dir":"/d",
-       "executable":"/d/FlixelDebugger.App","asset":"a.zip","sha256":"x","shortcuts":[],"hints":[],"future":1}
-    """.trimIndent()
-    val result = InstallResult.parse(data(json))
-    assertEquals(InstallResult("installed", "v1.0.1", "/d/FlixelDebugger.App"), result)
-    assertEquals("The debugger v1.0.1 was installed.", result.summary())
-  }
-
-  @Test
-  fun summaryFollowsTheAction() {
-    assertTrue(InstallResult("unchanged", "v1", "/x").summary().contains("already installed"))
-    assertTrue(InstallResult("upgraded", "v1", "/x").summary().contains("upgraded"))
-    assertTrue(InstallResult("reinstalled", "", "/x").summary().startsWith("The debugger was"))
-  }
-
-  @Test
-  fun installArgumentsAddForceOnlyWhenAsked() {
-    assertEquals(listOf("install", "debugger"), CommandArgs.installDebugger(false))
-    assertEquals(listOf("install", "debugger", "--force"), CommandArgs.installDebugger(true))
+  fun summaries() {
+    assertEquals("The debugger v1.0.1 was installed.", InstallResult("installed", "v1.0.1", "/d/x").summary())
+    assertEquals("The debugger v1.0.1 is already installed.", InstallResult("unchanged", "v1.0.1", "/d/x").summary())
+    assertEquals("The debugger was upgraded.", InstallResult("upgraded", "", "/d/x").summary())
+    val withNotes = InstallResult("reinstalled", "v2", "/d/x", listOf("A note.")).summary()
+    assertTrue(withNotes.endsWith("\nA note."))
   }
 }

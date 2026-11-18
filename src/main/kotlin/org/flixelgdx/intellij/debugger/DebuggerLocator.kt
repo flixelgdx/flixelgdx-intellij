@@ -31,8 +31,8 @@ import org.flixelgdx.intellij.settings.FlxgdxSettings
 import java.nio.file.Path
 
 /**
- * Finds the FlixelGDX Debugger on this computer, using the path in the settings, then the install that `flxgdx`
- * recorded, then `PATH`. See [DebuggerDetector] for the order.
+ * Finds the FlixelGDX Debugger on this computer, using the path in the settings, then the default install folder,
+ * then `PATH`. See [DebuggerDetector] for the order.
  *
  * Detection reads files, so call [find] off the EDT.
  *
@@ -53,11 +53,14 @@ class DebuggerLocator {
   fun find(configured: String = service<FlxgdxSettings>().debuggerPath): DetectedDebugger? =
     DebuggerDetector.detect(configured, environment())
 
-  private fun environment() = DebuggerEnvironment(
-    pathVariable = EnvironmentUtil.getValue("PATH"),
-    home = Path.of(System.getProperty("user.home")),
-    windows = SystemInfo.isWindows,
-    mac = SystemInfo.isMac,
-    getenv = { EnvironmentUtil.getValue(it) },
-  )
+  companion object {
+    /** Describes this computer for the debugger search and install. */
+    fun environment(): DebuggerEnvironment = DebuggerEnvironment(
+      pathVariable = EnvironmentUtil.getValue("PATH"),
+      home = Path.of(System.getProperty("user.home")),
+      windows = SystemInfo.isWindows,
+      mac = SystemInfo.isMac,
+      getenv = { EnvironmentUtil.getValue(it) },
+    )
+  }
 }

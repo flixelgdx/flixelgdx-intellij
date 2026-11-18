@@ -118,7 +118,7 @@
       <action id="org.flixelgdx.intellij.InstallDebugger"
               class="org.flixelgdx.intellij.actions.InstallDebuggerAction"
               text="Install Debugger..."
-              description="Download the FlixelGDX Debugger with flxgdx"/>
+              description="Download the latest FlixelGDX Debugger release"/>
       <separator/>
       <action id="org.flixelgdx.intellij.Upgrade"
               class="org.flixelgdx.intellij.actions.UpgradeAction"

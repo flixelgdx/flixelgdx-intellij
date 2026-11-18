@@ -23,64 +23,62 @@
  */
 package org.flixelgdx.intellij.debugger
 
-import com.google.gson.JsonObject
-import org.flixelgdx.intellij.cli.stringAt
-
-/** Turns the events of `flxgdx install` into progress for the IDE. */
+/** Turns the steps of a debugger install into one smooth progress fraction. */
 object InstallProgress {
 
+  /** How many steps an install has: look up, download, check, unpack and create launchers. */
+  const val STEPS = 5
+
   /**
-   * Works out how far the whole install is, from a `log` event of the download.
+   * Works out how far the whole install is while the download step runs.
    *
-   * The install has [total] steps, and the download is one of them. While it runs, `flxgdx` sends `log` events with
-   * `data` such as `{"stage":"download","bytes":12345,"total":54945240}`. The finished steps count fully and the
-   * download counts by the share of bytes that arrived, so the bar moves smoothly instead of jumping.
+   * The finished steps count fully and the download counts by the share of bytes that arrived, so the bar moves
+   * smoothly instead of jumping.
    *
-   * @param step the number of the latest `progress` step (the first step is 1).
-   * @param total the number of steps, or `null` when it is not known.
-   * @param data the `data` of the log event.
-   * @return a fraction between 0 and 1, or `null` when the event is not a download update or has no usable sizes.
+   * @param step the number of the current step (the first step is 1).
+   * @param total the number of steps.
+   * @param bytes how many bytes arrived so far.
+   * @param size the size of the download, or a value of 0 or less when it is not known.
+   * @return a fraction between 0 and 1, or `null` when the numbers do not allow one.
    */
-  fun fraction(step: Int, total: Int?, data: JsonObject?): Double? {
-    if (total == null || total <= 0 || step <= 0) return null
-    if (data.stringAt("stage") != "download") return null
-    val bytes = number(data, "bytes") ?: return null
-    val size = number(data, "total") ?: return null
-    if (size <= 0 || bytes < 0) return null
+  fun fraction(step: Int, total: Int, bytes: Long, size: Long): Double? {
+    if (total <= 0 || step <= 0 || size <= 0 || bytes < 0) return null
     val share = (bytes.toDouble() / size).coerceIn(0.0, 1.0)
     return ((step - 1) + share) / total
   }
-
-  private fun number(data: JsonObject?, key: String): Long? =
-    data?.get(key)?.takeIf { it.isJsonPrimitive && it.asJsonPrimitive.isNumber }?.asLong
 }
 
 /**
- * The result of `flxgdx install debugger`.
+ * What an install of the debugger did.
  *
  * @property action `installed`, `upgraded`, `reinstalled` or `unchanged`.
- * @property version the release tag that is installed.
+ * @property version the release tag that is installed, or an empty string when it is not known.
  * @property executable the path to start the program with.
+ * @property notes things the person should know, such as a launcher that could not be created.
  */
-data class InstallResult(val action: String, val version: String, val executable: String) {
+data class InstallResult(
+  val action: String,
+  val version: String,
+  val executable: String,
+  val notes: List<String> = emptyList(),
+) {
 
-  /** A short sentence for a notification. */
+  /** A short text for a notification, with the notes on their own lines. */
   fun summary(): String {
     val what = if (version.isEmpty()) "The debugger" else "The debugger $version"
-    return when (action) {
-      "unchanged" -> "$what is already installed."
-      "upgraded" -> "$what was upgraded."
-      "reinstalled" -> "$what was reinstalled."
+    val first = when (action) {
+      UNCHANGED -> "$what is already installed."
+      UPGRADED -> "$what was upgraded."
+      REINSTALLED -> "$what was reinstalled."
       else -> "$what was installed."
     }
+    return (listOf(first) + notes).joinToString("\n")
   }
 
   companion object {
-    /** Reads the `data` of the result event. Missing keys become empty text. */
-    fun parse(data: JsonObject?): InstallResult = InstallResult(
-      data.stringAt("action").orEmpty(),
-      data.stringAt("version").orEmpty(),
-      data.stringAt("executable").orEmpty(),
-    )
+    const val INSTALLED = "installed"
+    const val UPGRADED = "upgraded"
+    const val REINSTALLED = "reinstalled"
+    const val UNCHANGED = "unchanged"
   }
 }

@@ -24,7 +24,6 @@
 package org.flixelgdx.intellij.debugger
 
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Rule
 import org.junit.Test
@@ -45,21 +44,21 @@ class DebuggerDetectorTest {
     return f.toPath()
   }
 
-  private fun state(home: File, executable: Path, version: String = "v1.2.0") {
-    val dir = File(home, ".config/flxgdx")
-    dir.mkdirs()
-    File(dir, "state.toml").writeText(
-      "[tools]\n[tools.debugger]\nversion = '$version'\ndir = '${executable.parent}'\nexecutable = '$executable'\n",
-    )
+  /** Installs a fake debugger into the default Linux folder below [home], with [version] remembered. */
+  private fun install(home: File, version: String? = "v1.2.0"): Path {
+    val dir = File(home, ".local/share/flixelgdx/debugger")
+    val path = exe(dir)
+    if (version != null) File(dir, DebuggerPaths.VERSION_FILE).writeText("$version\n")
+    return path
   }
 
   private fun env(path: String?, home: File, windows: Boolean = false) =
     DebuggerEnvironment(path, home.toPath(), windows, mac = false, getenv = { null })
 
   @Test
-  fun settingsWinsOverTheRecordedInstallAndPath() {
+  fun settingsWinsOverTheInstallAndPath() {
     val home = tmp.newFolder("home")
-    state(home, exe(tmp.newFolder("installed")))
+    install(home)
     val inPath = tmp.newFolder("bin")
     exe(inPath, "flixelgdx-debugger")
     val custom = exe(tmp.newFolder("custom"))
@@ -80,21 +79,26 @@ class DebuggerDetectorTest {
   }
 
   @Test
-  fun theRecordedInstallComesBeforePath() {
+  fun theInstallComesBeforePathAndKnowsItsVersion() {
     val home = tmp.newFolder("home")
-    val installed = exe(tmp.newFolder("installed"))
-    state(home, installed, "v1.3.0")
+    val installed = install(home, "v1.3.0")
     val inPath = tmp.newFolder("bin")
     exe(inPath, "flixelgdx-debugger")
 
     val found = DebuggerDetector.detect("", env(inPath.toString(), home))
-    assertEquals(DetectedDebugger(installed, "v1.3.0", DebuggerSource.CLI_STATE), found)
+    assertEquals(DetectedDebugger(installed, "v1.3.0", DebuggerSource.INSTALLED), found)
   }
 
   @Test
-  fun aRecordedInstallThatIsGoneFallsThroughToPath() {
+  fun anInstallWithoutAVersionFileHasNoVersion() {
     val home = tmp.newFolder("home")
-    state(home, File(tmp.root, "gone/FlixelDebugger.App").toPath())
+    install(home, version = null)
+    assertNull(DebuggerDetector.detect("", env(null, home))?.version)
+  }
+
+  @Test
+  fun noInstallFallsThroughToPath() {
+    val home = tmp.newFolder("home")
     val inPath = tmp.newFolder("bin")
     val launcher = exe(inPath, "flixelgdx-debugger")
 
@@ -105,31 +109,13 @@ class DebuggerDetectorTest {
   @Test
   fun aWrongSettingsPathFallsThrough() {
     val home = tmp.newFolder("home")
-    val installed = exe(tmp.newFolder("installed"))
-    state(home, installed)
+    install(home)
     val found = DebuggerDetector.detect("/definitely/not/here", env(null, home))
-    assertEquals(DebuggerSource.CLI_STATE, found?.source)
+    assertEquals(DebuggerSource.INSTALLED, found?.source)
   }
 
   @Test
   fun nothingFoundGivesNull() {
     assertNull(DebuggerDetector.detect("", env("", tmp.newFolder("home"))))
-  }
-
-  @Test
-  fun anUnreadableStateFileIsIgnored() {
-    val home = tmp.newFolder("home")
-    val dir = File(home, ".config/flxgdx")
-    dir.mkdirs()
-    File(dir, "state.toml").writeText("this is [not toml")
-    assertNull(DebuggerDetector.detect("", env(null, home)))
-  }
-
-  @Test
-  fun recordedReadsTheVersionAndExecutable() {
-    val home = tmp.newFolder("home")
-    val installed = exe(tmp.newFolder("installed"))
-    state(home, installed)
-    assertNotNull(DebuggerDetector.recorded(env(null, home)))
   }
 }

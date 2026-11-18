@@ -82,7 +82,7 @@ class FlxgdxConfigurable : BoundSearchableConfigurable("FlixelGDX", "org.flixelg
           ).bindText(settings::debuggerPath)
             .align(AlignX.FILL)
             .comment(
-              "Leave empty to use the install that flxgdx recorded, then flixelgdx-debugger on PATH.",
+              "Leave empty to use the installed debugger, then flixelgdx-debugger on PATH.",
             )
             .component
           debuggerField.textField.document.addDocumentListener(object : DocumentAdapter() {
@@ -112,7 +112,7 @@ class FlxgdxConfigurable : BoundSearchableConfigurable("FlixelGDX", "org.flixelg
       } else {
         val origin = when (found.source) {
           DebuggerSource.SETTINGS -> "from the path above"
-          DebuggerSource.CLI_STATE -> "installed by flxgdx"
+          DebuggerSource.INSTALLED -> "installed"
           DebuggerSource.PATH -> "from PATH"
         }
         val version = found.version?.let { " $it" }.orEmpty()

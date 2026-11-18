@@ -54,7 +54,7 @@ class InstallDebuggerDialog(project: Project?) : DialogWrapper(project, true) {
   }
 
   override fun createCenterPanel(): JComponent = panel {
-    row { label("Downloads the FlixelGDX Debugger with flxgdx and records where it is.") }
+    row { label("Downloads the latest FlixelGDX Debugger release from GitHub.") }
     row { cell(force) }
   }
 
@@ -64,7 +64,7 @@ class InstallDebuggerDialog(project: Project?) : DialogWrapper(project, true) {
   }
 }
 
-/** Tools > FlixelGDX > Install Debugger: runs `flxgdx install debugger` with progress. */
+/** Tools > FlixelGDX > Install Debugger: downloads and installs the latest debugger release with progress. */
 class InstallDebuggerAction : FlxgdxAction() {
 
   override fun actionPerformed(e: AnActionEvent) {

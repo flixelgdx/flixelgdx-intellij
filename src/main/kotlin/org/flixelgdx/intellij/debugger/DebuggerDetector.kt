@@ -28,13 +28,13 @@ import java.nio.file.Files
 import java.nio.file.Path
 
 /** The place a debugger executable was found. */
-enum class DebuggerSource { SETTINGS, CLI_STATE, PATH }
+enum class DebuggerSource { SETTINGS, INSTALLED, PATH }
 
 /**
  * A FlixelGDX Debugger executable that was found.
  *
  * @property path the executable to start.
- * @property version the release tag the CLI recorded, or `null` when it is not known (for example from `PATH`).
+ * @property version the installed release tag, or `null` when it is not known (for example from `PATH`).
  * @property source where it was found.
  */
 data class DetectedDebugger(val path: Path, val version: String?, val source: DebuggerSource)
@@ -59,13 +59,13 @@ data class DebuggerEnvironment(
 /**
  * Finds the FlixelGDX Debugger.
  *
- * Think of it as asking three people in a fixed order: first the path the user typed in the settings, then the record
- * that `flxgdx install debugger` left in `state.toml`, then every folder on `PATH` for `flixelgdx-debugger`. The
- * first one that points at a real executable wins. It touches the disk, so call it off the EDT.
+ * Think of it as looking in three places in a fixed order: first the path the user typed in the settings, then the
+ * default install folder ([DebuggerPaths.installDir]), then every folder on `PATH` for `flixelgdx-debugger`. The first
+ * one that points at a real executable wins. It touches the disk, so call it off the EDT.
  */
 object DebuggerDetector {
 
-  /** The name of the launcher that `flxgdx` puts on `PATH`. */
+  /** The name of the launcher link that the install puts in `~/.local/bin`. */
   const val COMMAND = "flixelgdx-debugger"
 
   /** The name of the program inside the release (without `.exe`). */
@@ -83,10 +83,9 @@ object DebuggerDetector {
 
     resolveSetting(configured.trim(), exeName)?.let { return DetectedDebugger(it, null, DebuggerSource.SETTINGS) }
 
-    recorded(env)?.let { entry ->
-      val path = runCatching { Path.of(entry.executable) }.getOrNull()
-      if (path != null && isExecutable(path)) return DetectedDebugger(path, entry.version, DebuggerSource.CLI_STATE)
-    }
+    val dir = DebuggerPaths.installDir(env)
+    val installed = DebuggerPaths.executable(dir, env)
+    if (isExecutable(installed)) return DetectedDebugger(installed, installedVersion(dir), DebuggerSource.INSTALLED)
 
     val command = if (env.windows) "$COMMAND.exe" else COMMAND
     env.pathVariable?.split(File.pathSeparatorChar)?.forEach { dir ->
@@ -98,12 +97,10 @@ object DebuggerDetector {
     return null
   }
 
-  /** The entry for the debugger in the `state.toml` of the CLI, or `null` when there is none or it is unreadable. */
-  fun recorded(env: DebuggerEnvironment): InstalledTool? {
-    val config = ConfigDir.resolve(env.windows, env.mac, env.getenv, env.home) ?: return null
-    val text = runCatching { Files.readString(ConfigDir.statePath(config)) }.getOrNull() ?: return null
-    return StateToml.tool(text, "debugger")
-  }
+  /** The release tag remembered in [dir], or `null` when it is not known. */
+  private fun installedVersion(dir: Path): String? =
+    runCatching { Files.readString(dir.resolve(DebuggerPaths.VERSION_FILE)).trim() }.getOrNull()
+      ?.takeIf { it.isNotEmpty() }
 
   private fun resolveSetting(setting: String, exeName: String): Path? {
     if (setting.isEmpty()) return null
