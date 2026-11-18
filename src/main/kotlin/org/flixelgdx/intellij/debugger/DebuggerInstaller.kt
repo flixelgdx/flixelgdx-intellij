@@ -112,7 +112,7 @@ object DebuggerInstaller {
 
     step(indicator, 1, "Looking up the latest release")
     val tag = latestTag(indicator)
-    if (!force && previous != null && previous.isNotEmpty() && previous == tag) {
+    if (!force && !previous.isNullOrEmpty() && previous == tag) {
       return InstallResult(InstallResult.UNCHANGED, previous, exe.toString())
     }
 
