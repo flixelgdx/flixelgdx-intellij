@@ -36,75 +36,86 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.flixelgdx.intellij.cli.FlxgdxNotifier
-import org.flixelgdx.intellij.cli.FlxgdxTasks
+import org.flixelgdx.intellij.maven.MavenCentral
 import org.flixelgdx.intellij.runconfig.RunConfigSync
+import org.flixelgdx.intellij.template.GameLanguage
+import org.flixelgdx.intellij.template.GameTemplates
+import org.flixelgdx.intellij.template.ProjectWriter
 import org.jetbrains.plugins.gradle.service.project.open.linkAndSyncGradleProject
+import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Path
 
 /**
- * Creates a FlixelGDX project with `flxgdx new` inside the project the wizard just opened, then imports it as a
- * Gradle project.
+ * Creates the files of a FlixelGDX game inside the project the wizard just opened, then imports it as a Gradle
+ * project.
  *
- * Think of it as a builder who arrives at an empty plot: [create] asks `flxgdx` to put up the house, and once that is
- * done the Gradle import is started so the IDE learns about the modules.
+ * Think of it as a builder who arrives at an empty plot with a prefabricated house: [create] first finds out which
+ * framework version to use, assembles every file in memory from the templates, and only then puts them all on the
+ * plot at once. If anything goes wrong while writing, the files are taken away again. Once the house stands, the
+ * Gradle import starts so the IDE learns about the modules.
  */
 @Service(Service.Level.PROJECT)
 class NewProjectRunner(private val project: Project, private val scope: CoroutineScope) {
 
   /**
-   * Runs `flxgdx new` for [spec] under a cancelable background task of this project, and imports the result.
+   * Creates the game described by [spec] in a cancelable background task, then imports it.
    *
-   * The task title is "Creating FlixelGDX project". When `flxgdx` is missing or too old, the usual "flxgdx is not
-   * ready" notification is shown instead. Once the run succeeds, the notes of the installed packages are shown in
-   * one notification and the Gradle import starts. Warnings and failures are reported by [FlxgdxTasks.run].
+   * The framework version is the one typed in the wizard, or else the latest release on Maven Central. A Kotlin game
+   * also gets the latest release of the Kotlin extension; when that lookup fails, it uses the framework version, since
+   * the two are released together. Failures are shown as an error notification and leave the folder as it was.
    *
    * Call it from any thread; it only schedules work.
    */
   fun create(spec: NewProjectSpec) {
-    val dir = spec.dir
-    FlxgdxTasks.run(
-      project = project,
-      title = TITLE,
-      args = spec.toArgs(),
-      workDir = dir.parent,
-      onFinished = { result ->
-        if (result.isSuccess) {
-          val parsed = NewProjectResult.parse(result.data)
-          if (parsed.notes.isNotEmpty()) {
-            service<FlxgdxNotifier>().info(project, TITLE, parsed.notes.joinToString("\n"))
-          }
-          importGradle(dir)
-          project.service<RunConfigSync>().sync()
-        }
-      },
-    )
-  }
-
-  /**
-   * Prepares the arguments for a run into [dir]: it lists the folder on a background thread and sets
-   * [NewProjectSpec.force] only when the folder holds nothing but the wizard's own files.
-   *
-   * This is the entry point the wizard uses. It blocks on disk access, so it hops to a pooled thread first.
-   */
-  fun createIn(spec: NewProjectSpec) {
-    ProgressManager.getInstance().run(object : Task.Backgroundable(project, "Preparing FlixelGDX project", false) {
-      private var prepared = spec
-
+    ProgressManager.getInstance().run(object : Task.Backgroundable(project, TITLE, true) {
       override fun run(indicator: ProgressIndicator) {
-        prepared = spec.copy(force = TargetFolder.needsForce(listEntries(spec.dir)))
+        indicator.isIndeterminate = false
+        indicator.fraction = 0.0
+        if (TargetFolder.hasForeignFiles(listEntries(spec.dir))) {
+          throw IOException("The folder ${spec.dir} is not empty. Pick an empty folder or another name.")
+        }
+        indicator.text = "Finding the FlixelGDX version"
+        val flixel = spec.typedFlixelVersion ?: latest(MavenCentral.FLIXEL_CORE, indicator)
+        val ktx = if (spec.language == GameLanguage.KOTLIN) {
+          runCatching { MavenCentral.latest(MavenCentral.FLIXEL_GROUP, MavenCentral.KTX_CORE, indicator) }
+            .getOrDefault(flixel)
+        } else {
+          flixel
+        }
+        indicator.checkCanceled()
+        indicator.fraction = 0.5
+        indicator.text = "Writing the project files"
+        val files = GameTemplates.render(spec.templateData(flixel, ktx), spec.template)
+        ProjectWriter.write(spec.dir, files)
+        indicator.fraction = 1.0
       }
 
       override fun onSuccess() {
-        create(prepared)
+        importGradle(spec.dir)
+        project.service<RunConfigSync>().sync()
+      }
+
+      override fun onThrowable(error: Throwable) {
+        service<FlxgdxNotifier>().error(project, TITLE, error.message ?: error.toString())
       }
     })
   }
 
+  private fun latest(artifact: String, indicator: ProgressIndicator): String =
+    try {
+      MavenCentral.latest(MavenCentral.FLIXEL_GROUP, artifact, indicator)
+    } catch (e: IOException) {
+      throw IOException(
+        "Could not find the latest FlixelGDX version on Maven Central (${e.message}). " +
+          "Check your connection, or type a version under Advanced in the wizard.",
+        e,
+      )
+    }
+
   private fun listEntries(dir: Path): List<String> {
     if (!Files.isDirectory(dir)) return emptyList()
-    return runCatching { Files.list(dir).use { s -> s.map { it.fileName.toString() }.toList() } }
-      .getOrDefault(emptyList())
+    return Files.list(dir).use { s -> s.map { it.fileName.toString() }.toList() }
   }
 
   private fun importGradle(dir: Path) {

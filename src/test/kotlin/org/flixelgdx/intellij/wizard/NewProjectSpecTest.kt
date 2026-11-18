@@ -23,6 +23,7 @@
  */
 package org.flixelgdx.intellij.wizard
 
+import org.flixelgdx.intellij.template.GameLanguage
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -37,112 +38,47 @@ class NewProjectSpecTest {
   private fun base() = NewProjectSpec(dir, "My Game", "My Studio", "0.1.0", "com.mystudio.mygame")
 
   @Test
-  fun defaultJavaProject() {
-    assertEquals(
-      listOf(
-        "new", "/work/my-game",
-        "--title", "My Game",
-        "--company", "My Studio",
-        "--app-version", "0.1.0",
-        "--package", "com.mystudio.mygame",
-        "--width", "640",
-        "--height", "360",
-        "--platforms", "desktop,html5",
-        "--language", "java",
-        "--template", "blank",
-        "--handbook",
-      ),
-      base().toArgs().map { it.replace('\\', '/') },
-    )
+  fun defaultJavaProjectData() {
+    val data = base().templateData("0.7.2", "0.7.0")
+    assertEquals("My Game", data.title)
+    assertEquals("MyGame", data.className)
+    assertEquals("my-game", data.slug)
+    assertEquals("my-game", data.folder)
+    assertEquals(listOf("desktop", "html5"), data.platforms)
+    assertEquals(GameLanguage.JAVA, data.language)
+    assertEquals("0.7.2", data.flixelVersion)
+    assertEquals(640, data.width)
+    assertEquals(360, data.height)
   }
 
   @Test
-  fun kotlinProjectWithAndroidAndEverythingElse() {
-    val spec = base().copy(
-      width = 1280,
-      height = 720,
-      language = GameLanguage.KOTLIN,
-      android = true,
-      libraries = " flixelgdx/flixelgdx-ui , a/b:c ,, ",
-      plugins = "x/y",
-      suggested = false,
-      git = true,
-      flixelVersion = " v0.8.0 ",
-      force = true,
-    )
-    assertEquals(
-      listOf(
-        "new", "/work/my-game",
-        "--title", "My Game",
-        "--company", "My Studio",
-        "--app-version", "0.1.0",
-        "--package", "com.mystudio.mygame",
-        "--width", "1280",
-        "--height", "720",
-        "--platforms", "desktop,html5,android",
-        "--language", "kotlin",
-        "--template", "blank",
-        "--libraries", "flixelgdx/flixelgdx-ui,a/b:c",
-        "--plugins", "x/y",
-        "--flixel-version", "v0.8.0",
-        "--no-suggested",
-        "--handbook",
-        "--git",
-        "--force",
-      ),
-      spec.toArgs().map { it.replace('\\', '/') },
-    )
+  fun kotlinAndroidProjectData() {
+    val spec = base().copy(language = GameLanguage.KOTLIN, desktop = false, android = true, width = 1280, height = 720)
+    val data = spec.templateData("0.7.2", "0.7.0")
+    assertEquals(listOf("html5", "android"), data.platforms)
+    assertTrue(data.kotlin)
+    assertEquals("0.7.0", data.ktxVersion)
+    assertEquals(1280, data.width)
   }
 
   @Test
-  fun everyOptionalFlagFollowsItsSwitch() {
-    val off = base().copy(handbook = false, suggested = true, git = false, force = false).toArgs()
-    val flags = listOf(
-      "--handbook", "--git", "--force", "--no-suggested", "--libraries", "--plugins", "--flixel-version",
-    )
-    for (flag in flags) {
-      assertFalse("$flag should be absent", flag in off)
-    }
-    val on = base().copy(handbook = true, suggested = false, git = true, force = true).toArgs()
-    for (flag in listOf("--handbook", "--git", "--force", "--no-suggested")) {
-      assertTrue("$flag should be present", flag in on)
-    }
+  fun typedFlixelVersionDropsTheTagPrefix() {
+    assertNull(base().typedFlixelVersion)
+    assertNull(base().copy(flixelVersion = "  ").typedFlixelVersion)
+    assertEquals("0.8.0", base().copy(flixelVersion = " v0.8.0 ").typedFlixelVersion)
+    assertEquals("0.8.0", base().copy(flixelVersion = "0.8.0").typedFlixelVersion)
   }
 
   @Test
   fun platformsKeepTheirOrder() {
-    assertEquals("android", base().copy(desktop = false, html5 = false, android = true).platforms.joinToString(","))
-    assertEquals("html5,android", base().copy(desktop = false, android = true).platforms.joinToString(","))
-    assertEquals("desktop", base().copy(html5 = false).platforms.joinToString(","))
+    assertEquals(listOf("desktop", "html5", "android"), base().copy(android = true).platforms)
+    assertEquals(emptyList<String>(), base().copy(desktop = false, html5 = false).platforms)
   }
 
   @Test
-  fun blankRepoListsAreLeftOut() {
-    val args = base().copy(libraries = " , ", plugins = "").toArgs()
-    assertFalse("--libraries" in args)
-    assertFalse("--plugins" in args)
-  }
-
-  @Test
-  fun repoSpecProblems() {
-    assertNull(RepoSpecs.problem(""))
-    assertNull(RepoSpecs.problem("flixelgdx/flixelgdx-ui, a/b:pkg"))
-    assertTrue(RepoSpecs.problem("a/b:")!!.contains("no package name"))
-    assertTrue(RepoSpecs.problem("a/b c/d")!!.contains("spaces"))
-  }
-
-  @Test
-  fun forceOnlyForAFolderWithWizardFiles() {
-    assertFalse(TargetFolder.needsForce(emptyList()))
-    assertTrue(TargetFolder.needsForce(listOf(".idea")))
-    assertTrue(TargetFolder.needsForce(listOf(".idea", "my-game.iml")))
-    assertFalse(TargetFolder.needsForce(listOf(".idea", "notes.txt")))
+  fun wizardFilesDoNotCountAsContent() {
+    assertFalse(TargetFolder.hasForeignFiles(emptyList()))
+    assertFalse(TargetFolder.hasForeignFiles(listOf(".idea", "my-game.iml")))
     assertTrue(TargetFolder.hasForeignFiles(listOf(".idea", "notes.txt")))
-    assertFalse(TargetFolder.hasForeignFiles(listOf(".idea")))
-  }
-
-  @Test
-  fun templatesListStartsWithBlank() {
-    assertEquals("blank", NewProjectSpec.TEMPLATES.first())
   }
 }

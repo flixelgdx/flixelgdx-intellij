@@ -25,11 +25,10 @@ package org.flixelgdx.intellij.wizard
 
 import com.intellij.icons.AllIcons
 import com.intellij.ide.wizard.AbstractNewProjectWizardStep
-import com.intellij.ide.wizard.NewProjectWizardBaseStep
+import com.intellij.ide.wizard.GitNewProjectWizardStep
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.ModalityState
 import com.intellij.openapi.components.service
-import com.intellij.openapi.options.ShowSettingsUtil
 import com.intellij.openapi.project.Project
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBTextField
@@ -41,25 +40,24 @@ import com.intellij.ui.dsl.builder.bindItem
 import com.intellij.ui.dsl.builder.bindSelected
 import com.intellij.ui.dsl.builder.bindText
 import com.intellij.ui.dsl.builder.columns
-import org.flixelgdx.intellij.cli.CliStatus
-import org.flixelgdx.intellij.cli.FlxgdxCli
-import org.flixelgdx.intellij.settings.FlxgdxConfigurable
+import org.flixelgdx.intellij.template.GameLanguage
+import org.flixelgdx.intellij.template.GameTemplates
 import java.nio.file.Files
 import java.nio.file.Path
 
 /**
- * The second step of the New Project wizard: the game settings, one field per `flxgdx new` flag.
+ * The last step of the New Project wizard: the game settings.
  *
- * Fields check themselves while the person types, using the same rules as `flxgdx` ([ProjectValidation]). The
- * package follows the company and the title until the person edits it. When Create is chosen, [setupProject] hands a
- * [NewProjectSpec] to [NewProjectRunner].
+ * Fields check themselves while the person types, using the same rules as the FlixelGDX build
+ * ([ProjectValidation]). The package follows the company and the title until the person edits it. When Create is
+ * chosen, [setupProject] hands a [NewProjectSpec] to [NewProjectRunner].
  *
- * Anything that touches the disk or runs `flxgdx` (the Android SDK search, the version check and the folder check)
- * runs on a pooled thread and reports back on the EDT.
+ * Anything that touches the disk (the Android SDK search and the folder check) runs on a pooled thread and reports
+ * back on the EDT.
  *
- * @param parent the step that owns the project name and location.
+ * @param parent the step before this one, which owns the project name, the location and the Git checkbox.
  */
-class FlxgdxWizardStep(private val parent: NewProjectWizardBaseStep) : AbstractNewProjectWizardStep(parent) {
+class FlxgdxWizardStep(private val parent: GitNewProjectWizardStep) : AbstractNewProjectWizardStep(parent) {
 
   private val titleProp = propertyGraph.property(parent.name)
   private val companyProp = propertyGraph.property("")
@@ -71,23 +69,14 @@ class FlxgdxWizardStep(private val parent: NewProjectWizardBaseStep) : AbstractN
   private val desktopProp = propertyGraph.property(true)
   private val html5Prop = propertyGraph.property(true)
   private val androidProp = propertyGraph.property(false)
-  private val librariesProp = propertyGraph.property("")
-  private val pluginsProp = propertyGraph.property("")
-  private val suggestedProp = propertyGraph.property(true)
-  private val handbookProp = propertyGraph.property(true)
-  private val gitProp = propertyGraph.property(false)
   private val tagProp = propertyGraph.property("")
-  private val templateProp = propertyGraph.property(NewProjectSpec.DEFAULT_TEMPLATE)
+  private val templateProp = propertyGraph.property(GameTemplates.DEFAULT)
   private val androidWarnProp = propertyGraph.property(false)
-  private val cliShownProp = propertyGraph.property(false)
   private val folderShownProp = propertyGraph.property(false)
 
-  private val cliLabel = JBLabel(AllIcons.General.Error)
   private val folderLabel = JBLabel(AllIcons.General.Error)
 
   @Volatile private var sdkMissing = false
-
-  @Volatile private var cliProblem: String? = null
 
   @Volatile private var folderProblem: String? = null
 
@@ -117,14 +106,6 @@ class FlxgdxWizardStep(private val parent: NewProjectWizardBaseStep) : AbstractN
 
   override fun setupUI(builder: Panel) {
     builder.apply {
-      row {
-        cell(cliLabel)
-        link("Open Settings") {
-          ShowSettingsUtil.getInstance().showSettingsDialog(null, FlxgdxConfigurable::class.java)
-          checkCli()
-        }
-        link("Check again") { checkCli() }
-      }.visibleIf(cliShownProp)
       row {
         cell(folderLabel)
       }.visibleIf(folderShownProp)
@@ -163,6 +144,7 @@ class FlxgdxWizardStep(private val parent: NewProjectWizardBaseStep) : AbstractN
       row("Platforms:") {
         checkBox("Desktop").bindSelected(desktopProp)
           .validationOnApply { if (anyPlatform()) null else error("Pick at least one platform.") }
+          .validationOnApply { folderProblem?.let { error(it) } }
         checkBox("Web").bindSelected(html5Prop)
         checkBox("Android").bindSelected(androidProp)
       }
@@ -171,39 +153,18 @@ class FlxgdxWizardStep(private val parent: NewProjectWizardBaseStep) : AbstractN
         label(ANDROID_WARNING)
       }.visibleIf(androidWarnProp)
 
-      row("Libraries:") {
-        textField().bindText(librariesProp).align(AlignX.FILL)
-          .contextHelp(REPO_HELP, "Libraries")
-          .checked { RepoSpecs.problem(it) }
-      }
-      row("Plugins:") {
-        textField().bindText(pluginsProp).align(AlignX.FILL)
-          .contextHelp(REPO_HELP, "Plugins")
-          .checked { RepoSpecs.problem(it) }
-      }
-      row {
-        checkBox("Install suggested packages").bindSelected(suggestedProp)
-      }
-      row {
-        checkBox("Include the FlixelGDX handbook").bindSelected(handbookProp)
-      }
-      row {
-        checkBox("Create Git repository").bindSelected(gitProp)
-          .validationOnApply { cliProblem?.let { error(it) } ?: folderProblem?.let { error(it) } }
-      }
-
       collapsibleGroup("Advanced") {
         row("Framework version:") {
           textField().bindText(tagProp).columns(COLUMNS)
-            .comment("A release tag such as v0.8.0. Leave empty for the latest release.")
+            .comment("A version such as 0.7.2. Leave empty for the latest release on Maven Central.")
+            .checked { flixelVersionProblem(it) }
         }
         row("Template:") {
-          comboBox(NewProjectSpec.TEMPLATES).bindItem(templateProp)
+          comboBox(GameTemplates.names(GameLanguage.JAVA)).bindItem(templateProp)
         }
       }
     }
     detectSdk()
-    checkCli()
     checkFolder()
   }
 
@@ -220,15 +181,10 @@ class FlxgdxWizardStep(private val parent: NewProjectWizardBaseStep) : AbstractN
       desktop = desktopProp.get(),
       html5 = html5Prop.get(),
       android = androidProp.get(),
-      libraries = librariesProp.get(),
-      plugins = pluginsProp.get(),
-      suggested = suggestedProp.get(),
-      handbook = handbookProp.get(),
-      git = gitProp.get(),
       flixelVersion = tagProp.get(),
       template = templateProp.get(),
     )
-    project.service<NewProjectRunner>().createIn(spec)
+    project.service<NewProjectRunner>().create(spec)
   }
 
   private fun Cell<JBTextField>.checked(rule: (String) -> String?): Cell<JBTextField> =
@@ -237,6 +193,12 @@ class FlxgdxWizardStep(private val parent: NewProjectWizardBaseStep) : AbstractN
 
   private fun packageProblem(value: String): String? =
     if (value.isEmpty()) "Package must not be empty." else ProjectValidation.packageName(value)?.sentence("Package")
+
+  private fun flixelVersionProblem(value: String): String? {
+    val version = value.removePrefix("v")
+    if (version.isEmpty()) return null
+    return ProjectValidation.version(version)?.sentence("Framework version")
+  }
 
   private fun sizeProblem(text: String, label: String, rule: (Long) -> FieldError?): String? {
     val value = text.toLongOrNull() ?: return "$label must be a whole number."
@@ -262,21 +224,6 @@ class FlxgdxWizardStep(private val parent: NewProjectWizardBaseStep) : AbstractN
       onEdt {
         sdkMissing = missing
         updateAndroidWarning()
-      }
-    }
-  }
-
-  private fun checkCli() {
-    ApplicationManager.getApplication().executeOnPooledThread {
-      val status = service<FlxgdxCli>().status()
-      val text = when (status) {
-        is CliStatus.Ok -> null
-        else -> status.describe() + " Set its location in the settings, then check again."
-      }
-      onEdt {
-        cliProblem = text
-        cliLabel.text = text.orEmpty()
-        cliShownProp.set(text != null)
       }
     }
   }
@@ -314,8 +261,5 @@ class FlxgdxWizardStep(private val parent: NewProjectWizardBaseStep) : AbstractN
     private const val SIZE_COLUMNS = 6
     private const val ANDROID_WARNING =
       "No Android SDK was found, so Android is skipped until one is set up (ANDROID_HOME or Android Studio)."
-    private const val REPO_HELP =
-      "Comma-separated repositories to install. Write owner/repo to install a repository, or owner/repo:package " +
-        "to pick one package of it. Example: flixelgdx/flixelgdx-ui, someone/tools:tools-core"
   }
 }

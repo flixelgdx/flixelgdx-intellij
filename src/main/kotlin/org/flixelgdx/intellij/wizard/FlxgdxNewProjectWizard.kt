@@ -26,6 +26,7 @@ package org.flixelgdx.intellij.wizard
 import com.intellij.icons.AllIcons
 import com.intellij.ide.util.projectWizard.WizardContext
 import com.intellij.ide.wizard.GeneratorNewProjectWizard
+import com.intellij.ide.wizard.GitNewProjectWizardStep
 import com.intellij.ide.wizard.NewProjectWizardBaseStep
 import com.intellij.ide.wizard.NewProjectWizardChainStep.Companion.nextStep
 import com.intellij.ide.wizard.NewProjectWizardStep
@@ -35,9 +36,9 @@ import javax.swing.Icon
 /**
  * Adds "FlixelGDX" to the list on the left of File > New > Project.
  *
- * The wizard has two steps in a chain: the standard step with the project name and location, then
- * [FlxgdxWizardStep] with the game settings. Choosing Create runs `flxgdx new` and imports the result as a Gradle
- * project.
+ * The wizard is a chain of steps: the standard step with the project name and location, the standard "Create Git
+ * repository" checkbox, then [FlxgdxWizardStep] with the game settings. Choosing Create writes the game files from the
+ * templates and imports the result as a Gradle project.
  */
 class FlxgdxNewProjectWizard : GeneratorNewProjectWizard {
 
@@ -53,5 +54,6 @@ class FlxgdxNewProjectWizard : GeneratorNewProjectWizard {
   override fun createStep(context: WizardContext): NewProjectWizardStep =
     RootNewProjectWizardStep(context)
       .nextStep(::NewProjectWizardBaseStep)
+      .nextStep(::GitNewProjectWizardStep)
       .nextStep(::FlxgdxWizardStep)
 }
