@@ -15,10 +15,9 @@ duplicate them here (and risk the two drifting out of sync), please read the can
 - **Language and toolchain.** The plugin is written in **Kotlin** and built with **JDK 21**, the version the
   IntelliJ Platform runs on, instead of Java 25. The Kotlin conventions (file header, KDoc, threading rules, and the
   declaration order) are in [AGENTS.md](AGENTS.md), which applies to people as much as to AI assistants.
-- **Talk to `flxgdx`, do not replace it.** The plugin is a front end for the `flxgdx` command-line tool. Anything
-  that changes a game project belongs in `flxgdx`, and the plugin only runs it through `FlxgdxRunner` with `--json`
-  and `--no-input`. If a feature needs a new command or a new field in the JSON output, propose it for `flxgdx`
-  first.
+- **Edit game files gently.** The plugin creates games from its bundled templates and changes them by editing
+  `project.toml` and the version catalog. Plan changes with the `toml` package so people keep their comments, and
+  leave rules that the build must enforce to the framework's Gradle settings plugin.
 - **Checks.** Before you open a pull request, run `./gradlew test`, `./gradlew verifyPlugin -PverifyLocal=true`, and
   `./gradlew buildPlugin`. CI runs the verifier against every recommended IDE version.
 - **Changelog.** Add a line for every user-visible change under `[Unreleased]` in [CHANGELOG.md](CHANGELOG.md). The
@@ -27,4 +26,4 @@ duplicate them here (and risk the two drifting out of sync), please read the can
 How to set up the build, run the tests, and try the plugin in a sandbox IDE is documented in
 **[COMPILING.md](COMPILING.md)**.
 
-For the package layout and how the plugin talks to `flxgdx`, see **[ARCHITECTURE.md](ARCHITECTURE.md)**.
+For the package layout and how the plugin creates and edits game projects, see **[ARCHITECTURE.md](ARCHITECTURE.md)**.

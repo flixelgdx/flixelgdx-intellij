@@ -4,35 +4,36 @@
 
 ## Project context
 
-This is the IntelliJ IDEA plugin for the [FlixelGDX](https://github.com/flixelgdx/flixelgdx) game framework. It is a
-**thin front end**: it finds and runs the `flxgdx` command-line tool and shows the results in the IDE. The plugin
-never edits a game's build files itself; `flxgdx` does the work, and the plugin collects input, shows progress, and
-presents the result.
+This is the IntelliJ IDEA plugin for the [FlixelGDX](https://github.com/flixelgdx/flixelgdx) game framework. It
+creates new games from templates bundled with the plugin, and changes existing games by editing their project files
+(`project.toml`, `gradle/libs.versions.toml` and `settings.gradle.kts`) directly. The framework's Gradle settings
+plugin (`org.flixelgdx.project`) reads those files at every sync. It needs no other tools.
 
 It is a **standalone tool**, not a framework extension. It does not depend on the framework at runtime, and nothing
-from it is installed into a game, so it has no `flxgdx.yml` manifest.
+from it is installed into a game.
 
 The source lives in one Gradle module under `src/main/kotlin/org/flixelgdx/intellij/`, split into packages:
 
-- **`cli`**: Finding `flxgdx` (`FlxgdxLocator`), checking its version (`FlxgdxCli`, `CliVersion`), running it and
-  decoding its `--json` events (`FlxgdxRunner`, `CliEvent`, `CliResult`), and showing runs as background tasks and
-  notifications (`FlxgdxTasks`, `FlxgdxNotifier`).
-- **`model`**: Plain data classes for the `data` trees `flxgdx` returns, and `CommandArgs`, which builds every
-  command's argument list.
-- **`wizard`**: The FlixelGDX entry in File > New > Project, which runs `flxgdx new` and imports the result.
-- **`actions`**: The Tools > FlixelGDX menu and its dialogs (libraries, plugins, platforms, handbooks, upgrade).
-- **`doctor`**: The FlixelGDX tool window that shows `flxgdx doctor` results.
+- **`template`**: The layered game templates (`GameTemplates`), the small Go-template renderer (`GoTemplate`), the
+  template data, and `ProjectWriter`, which writes a rendered game at once.
+- **`toml`**: Comment-preserving edits of the TOML files of a game (`TomlEdits`, `VersionCatalog`, `GameProjectToml`,
+  `CatalogMerge`) and `DocumentEdits`, which applies them as one undoable command.
+- **`maven`**: The latest release of an artifact from Maven Central's `maven-metadata.xml`.
+- **`game`**: Recognizing a FlixelGDX game (`GameProject`), the notifications (`FlixelNotifier`), and the Gradle sync
+  after a change (`GradleRefresh`).
+- **`wizard`**: The FlixelGDX entry in File > New > Project, which renders the templates and imports the result.
+- **`actions`**: The Tools > FlixelGDX menu and its dialogs (libraries, platforms, debugger, upgrade).
 - **`runconfig`**: The Gradle run configurations for each enabled platform, and the Open FlixelGDX Debugger
   before-launch step.
-- **`debugger`**: Finding, installing (through `flxgdx install debugger`), and starting the FlixelGDX Debugger.
+- **`debugger`**: Finding, installing (from its latest GitHub release), and starting the FlixelGDX Debugger.
 - **`inspections`**: The four FlixelGDX inspections for Java and Kotlin game code, built on UAST.
 - **`wgsl`**: WGSL shader support (TextMate grammar bundle, file template, live templates).
 - **`settings`** and **`startup`**: The settings pages and the check that runs when a FlixelGDX project opens.
 
 See [ARCHITECTURE.md](ARCHITECTURE.md) for how these fit together.
 
-Runtime verification happens in a **sandbox IDE** (`./gradlew runIde`) opened on a game project created with
-`flxgdx`, never in this repository.
+Runtime verification happens in a **sandbox IDE** (`./gradlew runIde`) opened on a game project created with the
+plugin's wizard, never in this repository.
 
 ---
 
@@ -44,15 +45,15 @@ is ambiguous.
 - Before implementing anything (planning or coding):
 
   1. Ask yourself whether the requested design or refactor is actually good for the plugin. A change belongs here if
-     it is about how the IDE finds, runs, or presents `flxgdx`, or about IDE-only help for game code (inspections,
-     WGSL editing, run configurations). Logic that changes a game project belongs in `flxgdx` instead, so every
-     front end gets it.
+     it is about creating or changing a game project, or about IDE-only help for game code (inspections, WGSL
+     editing, run configurations). Rules that the build itself must enforce belong in the framework's Gradle settings
+     plugin instead, so they also apply to people who edit the files by hand.
   2. If it hurts the plugin, breaks invariants, or there is clearly a better path, **stop before editing files or running commands**.
   3. Explain why (pros and cons), suggest better alternatives, and ask whether the user still wants to proceed.
   4. If they confirm after that discussion, proceed as requested.
 
 - If you are unsure about something, whether that would be for a library, a specific aspect of the plugin's codebase,
-  the IntelliJ Platform API, or the `flxgdx` protocol, do **not** assume anything.
+  the IntelliJ Platform API, or the framework's file formats, do **not** assume anything.
   Always verify first before making an assumption. If you are still unsure about something, ignore it and bring it up to the user when you're done completing a task.
 
 ---
@@ -78,16 +79,20 @@ When explaining code or introducing patterns:
 - **Never block the EDT.** Disk access, process runs and network calls belong on a background thread
   (`Task.Backgroundable`, a coroutine on `Dispatchers.IO`, or a pooled thread).
 - Use read actions for reading PSI or VFS data and write actions for changing it.
-- Touch Swing components only on the EDT. Listener callbacks from the runner arrive on a background thread.
+- Touch Swing components only on the EDT. Background task callbacks such as `onSuccess()` arrive on the EDT, but
+  `run()` does not.
 
-### The flxgdx runner
+### Editing game files
 
-- Everything that talks to `flxgdx` goes through `FlxgdxRunner` (or `FlxgdxTasks` on top of it). Do not build a
-  `GeneralCommandLine` for `flxgdx` anywhere else.
-- Drive the tool only with flags, `--json` and `--no-input`. Never parse human-readable output, and never match on a
-  `message` field. Use the event type, the `code`, the exit code, and the `data` tree.
-- Ignore JSON keys you do not know, so newer versions of `flxgdx` keep working.
-- Locate the executable with `FlxgdxLocator` and check its version with `FlxgdxCli`.
+- Plan every change to an existing game file as `TextEdit`s with the `toml` package, and apply them through
+  `DocumentEdits`, so the change is one undoable command and open editors see it. Never rewrite a whole file a person
+  may have edited; keep their comments and layout.
+- Use the TOML PSI to find where things are. Do not parse TOML by hand, except for the plain-text `ProjectToml`
+  reader that runs before the IDE has parsed anything.
+- New games come from the template files under `src/main/resources/org/flixelgdx/intellij/templates/`. Keep
+  `index.txt` in step with the folder, and rewrite the golden files with `./gradlew test -Pgolden.update=true` after
+  a deliberate template change, then review the diff.
+- Find versions on Maven Central (`MavenCentral`), never through the GitHub API.
 
 ### Performance and allocations
 
@@ -118,10 +123,10 @@ When explaining code or introducing patterns:
 - Every Kotlin source file starts with the MIT header block comment (copy it from an existing file).
 - **Import** every type you use. No star imports and no inline fully qualified names.
 - Keep names short. When a short name hides the meaning, add KDoc instead of a long identifier.
-- Prefer immutable `val` properties and `data class` models. Model classes read `data` trees with the forgiving
-  readers in `JsonRead.kt`, so a missing or reshaped key gives an empty answer instead of an exception.
-- Keep logic that can be tested without the IDE (argument building, JSON decoding, validation, planning) in plain
-  objects and classes, and keep the IDE glue thin around them.
+- Prefer immutable `val` properties and `data class` models. Readers of game files are forgiving, so a missing or
+  reshaped key gives an empty answer instead of an exception.
+- Keep logic that can be tested without the IDE (template rendering, edit planning, validation, version parsing) in
+  plain objects and classes, and keep the IDE glue thin around them.
 
 ### Declaration order
 
@@ -172,21 +177,23 @@ Documentation should read like a **beginner-friendly handbook**, not an expert-o
 
 ### Heavily used or critical APIs
 
-For widely used classes, properties, functions, or anything central to correctness (such as `FlxgdxRunner` and
-`FlxgdxTasks`), include a **small usage example** with an analogy in KDoc showing correct typical use.
+For widely used classes, properties, functions, or anything central to correctness (such as `GameTemplates`,
+`TomlEdits` and `DocumentEdits`), include a **small usage example** with an analogy in KDoc showing correct typical
+use.
 
 ---
 
 ## Architecture and scope
 
-- The plugin is a front end. Changes to a game project (its `project.toml`, Gradle files, dependencies, platforms)
-  are made by `flxgdx`, not by plugin code.
+- Changes to a game project are limited to `project.toml`, `gradle/libs.versions.toml`, the version of the settings
+  plugin in `settings.gradle.kts`, and new module folders from the templates. Rarer Gradle lines (such as a module's
+  `plugins {}` block) are left to the person.
 - Keep changes minimal: avoid unrelated files unless needed for the stated task.
 - Register every extension and action in `src/main/resources/META-INF/plugin.xml`, and keep inspection descriptions in
   `src/main/resources/inspectionDescriptions/` in sync with what the inspections report.
 - The unsupported API list lives in one file, `UnsupportedApis.kt`. Keep it in line with the framework's Android and
   web rules.
-- This repository must never mention other projects or games. Talk only about the plugin, the framework and `flxgdx`.
+- This repository must never mention other projects or games. Talk only about the plugin and the framework.
 
 ---
 
@@ -216,8 +223,8 @@ This repository does not use feature branches or pull requests. Every change is 
 - Your commit titles should be **short and descriptive**, not exceeding **72 characters**, and should not contain
   **keywords in front (e.g. `fix`, `feat`, `refactor`, etc.)**. They should also be **present** tense. Examples:
     - "Update README with more descriptive content"
-    - "Fix the doctor tool window not refreshing after a fix"
-    - "Add missing KDoc to FlxgdxRunner"
+    - "Fix the run configurations not refreshing after a platform change"
+    - "Add missing KDoc to GameTemplates"
 - Do **not** add a `Co-Authored-By` trailer (or any other co-author tag) to commits.
 - If the user has uncommitted changes present, **do not undo, modify or touch them**. Leave them as-is, and do not
   include them in your commits.

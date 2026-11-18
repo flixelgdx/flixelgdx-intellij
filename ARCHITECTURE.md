@@ -1,75 +1,91 @@
 # Project Structure
 
 FlixelGDX for IntelliJ IDEA is the IDE plugin for the [FlixelGDX](https://github.com/flixelgdx/flixelgdx) game
-framework. It is a thin front end for the `flxgdx` command-line tool: `flxgdx` does the real work (creating projects,
-adding libraries and platforms, checking the setup, installing tools), and the plugin collects input, runs the tool in
-the background, and shows the results inside the IDE.
+framework. It creates new games from templates bundled with the plugin, changes existing games by editing their
+project files (`project.toml`, `gradle/libs.versions.toml` and `settings.gradle.kts`), installs and starts the
+FlixelGDX Debugger, and helps with game code through inspections and WGSL shader support. It needs no other tools.
 
-The plugin does not depend on the framework, and the framework does not depend on the plugin. The only link between
-them is `flxgdx`, plus a few framework rules the plugin knows by name (the per-frame methods, the collection classes,
-and the WGSL shader contract) for its inspections and shader templates.
+The plugin does not depend on the framework at runtime, and the framework does not depend on the plugin. The links
+between them are the file formats the framework's Gradle settings plugin (`org.flixelgdx.project`) reads, the Maven
+coordinates of the framework, and a few framework rules the plugin knows by name (the per-frame methods, the
+collection classes, and the WGSL shader contract) for its inspections and shader templates.
 
-## How the plugin talks to flxgdx
+## How the plugin creates a game
 
 ```
- dialogs, wizard, tool window, startup check
+ wizard (FlxgdxWizardStep -> NewProjectSpec)
                   |
                   v
-   CommandArgs (builds the argument list)
+   MavenCentral (latest framework version, unless one was typed)
                   |
                   v
-   FlxgdxTasks (background task, progress, notifications)
+   GameTemplates (layers the template files and renders them with GoTemplate, in memory)
                   |
                   v
-   FlxgdxRunner (starts flxgdx --json --no-input, decodes events)
+   ProjectWriter (writes every file at once, and removes them again if one fails)
                   |
                   v
-   model/* (typed results read from the "data" tree)
+   Gradle import, then RunConfigSync
 ```
 
-- **`FlxgdxLocator`** finds the executable: the path in the settings first, then `PATH`, then common install folders
-  (such as `~/go/bin` and `~/.local/bin`).
-- **`FlxgdxCli`** runs `flxgdx version --json` and compares the result with `CliVersion.MINIMUM`. When the tool is
-  missing or too old, `FlxgdxNotifier` explains the fix once per IDE session.
-- **`FlxgdxRunner`** is the only place that starts the `flxgdx` process. It adds `--json --no-input` to every call,
-  reads stdout one line at a time, and turns each line into a `CliEvent` (`progress`, `log`, `warning`, `result`,
-  `error`). Listeners receive the events on a background thread, and the call returns a `CliResult` with the exit
-  code, the result `data`, and the error `code`.
-- **`FlxgdxTasks`** wraps the runner in a cancelable background task whose progress bar follows the `progress`
-  events, and reports warnings and failures as notifications. Its `onFinished` callback arrives on the EDT.
+- **The template files** live under `src/main/resources/org/flixelgdx/intellij/templates/` in three layers:
+  `common/`, then `<language>/base/`, then `<language>/<template>/`. A later layer replaces a file at the same path.
+  A name ending in `.tmpl` is rendered and loses the suffix, `dot_` becomes a leading dot, a `__package__` folder
+  becomes the package folders, `__Class__` becomes the game class name, and the `desktop`, `html5` and `android`
+  folders are only created for the chosen platforms. `index.txt` lists every file, because resources inside a jar
+  cannot be listed.
+- **`GoTemplate`** renders the small part of Go's `text/template` syntax the files use (fields, `if`/`else`/`end`,
+  `not`, a few escape functions and the `{{-`/`-}}` trim markers), and fails loudly on anything else.
+- **`project.toml` and the version catalog** are templates too. The catalog gets the framework entries for the
+  chosen platforms and language, in the bundles the build files use (`core`, `desktop`, `html5`, `android`, the
+  `*Processors` bundles, `androidDesugar` and `buildsrc`).
+- **Golden files** in `src/test/resources/golden/` hold every generated project as text, one per language and
+  platform set, and `GameTemplatesTest` compares the output with them.
 
-The plugin never reads human-readable output and never matches on a `message` field. It uses the event type, the
-`code`, the exit code, and the `data` tree, and ignores keys it does not know so newer versions of `flxgdx` keep
-working. The protocol itself is described in `flxgdx`'s
-[PROTOCOL.md](https://github.com/flixelgdx/flixelgdx-cli/blob/master/PROTOCOL.md).
+## How the plugin edits a game
+
+```
+ menu actions (AddLibraryAction, AddPlatformAction, UpgradeAction, ...)
+                  |
+                  v
+   VersionCatalog / GameProjectToml / CatalogMerge (plan TextEdits from the TOML PSI)
+                  |
+                  v
+   DocumentEdits (applies them as one undoable command and saves the files)
+                  |
+                  v
+   GradleRefresh (refreshes the files and syncs Gradle)
+```
+
+The TOML PSI of the bundled TOML plugin is only used to find where things are. Each change touches the fewest
+characters it can (one entry line, one array item, one value), so people keep their comments and layout. Adding a
+platform renders the templates for the new platform set and copies over only what is missing: the module folder and
+the catalog entries (`CatalogMerge`).
 
 ## Packages
 
 Everything lives in one Gradle module, under `src/main/kotlin/org/flixelgdx/intellij/`:
 
-- **`cli`**: The runner stack described above, plus `FlxgdxProject` (a project is a FlixelGDX project when its root
-  has a `project.toml`), `CliNotes` (the notes installed packages ask to show), and `JsonRead.kt` (forgiving readers
-  for `data` trees).
-- **`model`**: Plain data classes for command results (`ProjectInfo`, `ChangeResult`, `DoctorResult`,
-  `UpgradeResult`, `ManifestInfo`, `Handbook`) and `CommandArgs`, which builds the argument list of every command.
-  `ProjectToml` reads the enabled platforms straight from `project.toml` for the one case where `flxgdx` is not
-  available. Nothing in this package touches the IDE, so it is tested with plain unit tests.
-- **`wizard`**: The FlixelGDX entry in File > New > Project. `FlxgdxWizardStep` collects one field per
-  `flxgdx new` flag and validates them with `ProjectValidation` (the same rules as `flxgdx`), `NewProjectSpec` holds
-  the choices, and `NewProjectRunner` runs `flxgdx new` and imports the result as a Gradle project. `AndroidSdk`
-  finds an installed Android SDK.
+- **`template`**: `GameTemplates`, `GoTemplate`, `GameTemplateData`, `GameNames` (class name and file name slug)
+  and `ProjectWriter`, described above. Nothing here touches the IDE, so it is tested with plain unit tests.
+- **`toml`**: `TomlEdits` (small planned edits of TOML files), `VersionCatalog`, `GameProjectToml`, `CatalogMerge`,
+  `Coordinates`, `SettingsPluginVersion`, `DocumentEdits` (applies edits through the IDE's documents), and
+  `ProjectToml` (a plain-text reader of the platforms for the startup check).
+- **`maven`**: `MavenCentral` reads `maven-metadata.xml` to find the latest release of an artifact.
+- **`game`**: `GameProject` (a project is a FlixelGDX game when its root has a `project.toml`), `FlixelNotifier`
+  (the plugin's notifications) and `GradleRefresh`.
+- **`wizard`**: The FlixelGDX entry in File > New > Project. `FlxgdxWizardStep` collects the settings and validates
+  them with `ProjectValidation` (the same rules as the framework's settings plugin), `NewProjectSpec` holds the
+  choices, and `NewProjectRunner` creates the files and imports the result. Git uses the platform's own wizard step.
+  `AndroidSdk` finds an installed Android SDK.
 - **`actions`**: The Tools > FlixelGDX menu. `FlxgdxAction` is the base class that shows an action only in FlixelGDX
-  projects. `ProjectActions` holds the shared steps (read the project, run a command, report the outcome), and
-  `GradleRefresh` refreshes the files and syncs Gradle after `flxgdx` changes the build. The dialogs only collect
-  values and hand them to `CommandArgs`.
-- **`doctor`**: The FlixelGDX tool window. `DoctorController` runs `flxgdx doctor` and keeps the latest result, and
-  `DoctorPanel` draws it as a tree grouped by category.
+  projects. The dialogs only collect values; the actions plan the edits with the `toml` package.
 - **`runconfig`**: `RunConfigPlanner` decides which Gradle run configurations should exist for the enabled platforms
   (a pure function, so it is unit tested), and `RunConfigSync` applies the plan. `DebuggerBeforeRunProvider` adds the
   Open FlixelGDX Debugger step to the Before launch list.
-- **`debugger`**: Finding the FlixelGDX Debugger (`DebuggerDetector`, `DebuggerLocator`, and `StateToml` for the
-  install `flxgdx` recorded), installing it with `flxgdx install debugger` (`DebuggerInstaller`, `InstallProgress`),
-  and starting it as its own process (`DebuggerLauncher`).
+- **`debugger`**: Finding the FlixelGDX Debugger (`DebuggerDetector`, `DebuggerLocator`, `DebuggerPaths`),
+  installing it from its latest GitHub release (`DebuggerInstaller`, `DebuggerRelease`, `DebuggerUnpacker`,
+  `DebuggerLaunchers`, `InstallProgress`), and starting it as its own process (`DebuggerLauncher`).
 - **`inspections`**: Four UAST inspections that check Java and Kotlin game code: allocation in per-frame methods,
   standard Java collections, reflection, and APIs missing on Android or the web. `FlixelInspection` is the shared
   base, and `FlixelScope` limits them to modules that have the framework on their classpath. The rule data lives in
@@ -78,10 +94,9 @@ Everything lives in one Gradle module, under `src/main/kotlin/org/flixelgdx/inte
 - **`wgsl`**: WGSL shader editing. `WgslBundleProvider` hands the bundled TextMate grammar to the IDE,
   `NewWgslShaderAction` creates a starter shader from the file template, `WgslContext` scopes the live templates to
   `.wgsl` files, and `WgslContract` keeps the names of the framework's shader contract in one place.
-- **`settings`**: The application settings (`FlxgdxSettings`, the `flxgdx` and debugger paths) and the project
-  settings (`FlxgdxProjectSettings`, run configuration choices), with their pages under Settings > Tools > FlixelGDX.
-- **`startup`**: `FlxgdxStartupActivity` checks the installed `flxgdx` and syncs the run configurations when a
-  FlixelGDX project opens.
+- **`settings`**: The application settings (`FlxgdxSettings`, the debugger path) and the project settings
+  (`FlxgdxProjectSettings`, run configuration choices), with their pages under Settings > Tools > FlixelGDX.
+- **`startup`**: `FlxgdxStartupActivity` syncs the run configurations when a FlixelGDX project opens.
 
 ## Resources
 
@@ -91,9 +106,11 @@ Under `src/main/resources/`:
 - **`inspectionDescriptions/`**: The HTML description of each inspection, shown in the settings.
 - **`fileTemplates/` and `liveTemplates/`**: The WGSL file template and the FlixelGDX WGSL live templates.
 - **`textmate/wgsl/`**: The bundled WGSL TextMate grammar, with its own `LICENSE` and `NOTICE.md`.
+- **`org/flixelgdx/intellij/templates/`**: The files of a new game, in layers, with `index.txt` listing them.
 
-Tests live under `src/test/kotlin/`, mirroring the main packages. `src/test/resources/flxgdx/` holds recorded
-`flxgdx --json` output that the model tests decode, so the tests never need `flxgdx` installed.
+Tests live under `src/test/kotlin/`, mirroring the main packages. `src/test/resources/golden/` holds the expected
+output of the templates. Rewrite it after a deliberate template change with `./gradlew test -Pgolden.update=true`, then
+review the diff.
 
 ## Build System
 
@@ -113,8 +130,8 @@ The plugin is built with Gradle (Kotlin DSL) and the
 
 ### Dependency Management
 
-The plugin compiles against the IDE's bundled Java, Gradle, TextMate, and JCEF plugins, and its tests also use the
-bundled Kotlin plugin. It does not bundle the Kotlin standard library, because the IDE already ships one.
+The plugin compiles against the IDE's bundled Java, Gradle, TextMate, TOML, and JCEF plugins, and its tests also use
+the bundled Kotlin plugin. It does not bundle the Kotlin standard library, because the IDE already ships one.
 
 ## GitHub Integration
 

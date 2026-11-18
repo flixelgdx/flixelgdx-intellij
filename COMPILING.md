@@ -1,8 +1,8 @@
 # Compiling & Testing
 
 FlixelGDX for IntelliJ IDEA is an IDE plugin, so it is built and tested with the IntelliJ Platform Gradle Plugin
-instead of being run on its own. It does not depend on the FlixelGDX framework at all: it only needs the `flxgdx`
-command-line tool when you try it in an IDE.
+instead of being run on its own. It does not depend on the FlixelGDX framework at all, and it needs no other tools:
+the game templates are bundled with it.
 
 This guide focuses on what is specific to this repository. For general setup (installing Git, Eclipse Temurin, and
 IntelliJ IDEA), follow the framework's guide:
@@ -36,8 +36,8 @@ The one difference is the JDK version: this repository needs **JDK 21**, not JDK
 - **Disk space and patience for the first build.** The IntelliJ Platform Gradle Plugin downloads the IntelliJ IDEA
   distribution the plugin is compiled against (`platformType` and `platformVersion` in `gradle.properties`), which is
   over a gigabyte. Later builds reuse it.
-- **(Trying the plugin only)** The `flxgdx` command-line tool, version 1.0.0 or newer. It is not needed to build or
-  test the plugin. See [Trying the plugin locally](#trying-the-plugin-locally).
+- **(Trying the plugin only)** An internet connection, so the wizard can find the latest framework release on Maven
+  Central and the debugger can be downloaded. It is not needed to build or test the plugin.
 
 You do not need to install Gradle or Kotlin. The Gradle wrapper (`gradlew`) downloads the right Gradle version, and
 the Kotlin compiler comes with the Kotlin Gradle plugin (its version is in `gradle/libs.versions.toml`).
@@ -90,17 +90,17 @@ On Windows, use `gradlew.bat` instead of `./gradlew` in every command of this gu
 ./gradlew test
 ```
 
-The tests use JUnit 4 and the IntelliJ Platform test framework. Plain model tests (argument building, JSON decoding,
-validation) run without an IDE. The inspection tests start a light, headless IDE fixture with Java and Kotlin support,
-so the first run takes longer.
+The tests use JUnit 4 and the IntelliJ Platform test framework. Plain tests (template rendering, validation, version
+parsing) run without an IDE. The inspection and TOML editing tests start a light, headless IDE fixture, so the first
+run takes longer.
 
-Tests that read `flxgdx` output use recorded `--json` output in `src/test/resources/flxgdx/`, so they never need
-`flxgdx` installed.
+The template tests compare every generated project with the golden files in `src/test/resources/golden/`. After a
+deliberate change to the templates, rewrite them with `./gradlew test -Pgolden.update=true` and review the diff.
 
 To run one test class:
 
 ```bash
-./gradlew test --tests "org.flixelgdx.intellij.cli.CliVersionTest"
+./gradlew test --tests "org.flixelgdx.intellij.template.GameTemplatesTest"
 ```
 
 ---
@@ -137,21 +137,6 @@ one with File > New > Project > FlixelGDX.
 Build the zip with `./gradlew buildPlugin`, then in IntelliJ IDEA open **Settings > Plugins**, click the gear icon,
 choose **Install Plugin from Disk...**, and pick the zip from `build/distributions/`.
 
-### Getting `flxgdx`
-
-Most features run `flxgdx`, so install it before you try them. To build it from source you need
-[Go](https://go.dev/dl/):
-
-```bash
-git clone https://github.com/flixelgdx/flixelgdx-cli.git
-cd flixelgdx-cli
-go build ./cmd/flxgdx
-```
-
-Put the resulting `flxgdx` executable on your `PATH`, or set its full path under
-**Settings > Tools > FlixelGDX** in the sandbox IDE and click **Test**. The plugin also looks in common install
-folders such as `~/go/bin` and `~/.local/bin`.
-
 ---
 
 ## Troubleshooting
@@ -177,10 +162,10 @@ task at a time and limit the workers, for example `./gradlew test --max-workers=
 The build reads the plugin description from [README.md](README.md). Keep the `<!-- Plugin description -->` and
 `<!-- Plugin description end -->` lines when you edit it.
 
-### The plugin says flxgdx is missing or too old
+### Creating a project fails to find the latest FlixelGDX version
 
-Check the path under **Settings > Tools > FlixelGDX** and click **Test**. The plugin needs `flxgdx` 1.0.0 or newer;
-`flxgdx version` prints the installed version.
+The wizard reads the latest release from Maven Central. Without a connection, type a version (such as `0.7.2`) under
+**Advanced > Framework version** in the wizard.
 
 ### Gradle daemon or configuration cache issues
 

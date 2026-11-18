@@ -1,32 +1,35 @@
 # FlixelGDX for IntelliJ IDEA
 
 <!-- Plugin description -->
-Tools for building games with the FlixelGDX framework. The plugin is a thin front end for the
-<code>flxgdx</code> command-line tool: it finds the tool on your computer, checks that its version is new enough,
-and runs its commands with progress shown inside the IDE.
+Tools for building games with the FlixelGDX framework: a New Project wizard, menu actions that add libraries and
+platforms by editing the project files, Gradle run configurations, the FlixelGDX Debugger, inspections for game code
+and WGSL shader editing. It needs no extra command-line tools.
 <!-- Plugin description end -->
 
 ## What it does
 
-- Adds a settings page under **Settings > Tools > FlixelGDX** where you can point the IDE at the `flxgdx`
-  executable and test it.
-- Finds `flxgdx` for you: the path in the settings first, then your `PATH`, then common install folders such as
-  `~/go/bin` and `~/.local/bin`.
-- Checks that the installed `flxgdx` is new enough and shows a notification with next steps when it is missing or too
-  old (only once per IDE session, and only for FlixelGDX projects, which have a `project.toml` in the project root).
 - Adds **FlixelGDX** to File > New > Project. The wizard asks for the game title, company, version, package, window
-  size, language (Java or Kotlin), platforms (Desktop, Web, Android), extra libraries and plugins, and a few options
-  (suggested packages, the handbook, a Git repository, and under Advanced the framework version and the template).
-  Fields are checked while you type with the same rules as `flxgdx`, and the package follows the company and title.
-  Creating the project runs `flxgdx new` with progress and a Cancel button, then imports it as a Gradle project and
-  shows the notes of the installed packages. The wizard cannot finish while `flxgdx` is missing or too old.
+  size, language (Java or Kotlin), platforms (Desktop, Web, Android), whether to create a Git repository, and under
+  Advanced the framework version and the template. Fields are checked while you type with the same rules as the
+  FlixelGDX build, and the package follows the company and title. Creating the project finds the latest framework
+  release on Maven Central (unless you typed a version), renders every file from the templates bundled with the
+  plugin, writes them at once, and imports the result as a Gradle project. Kotlin games also get the Kotlin extension
+  of the framework.
 - Adds a **FlixelGDX** menu under Tools (and in the project view menu when you select the project root) in FlixelGDX
-  projects. It has Add Library, Add Plugin, Remove Library or Plugin, Add Platform, Remove Platform, Install Handbook,
-  Uninstall Handbook, Upgrade and Run Doctor. Adding a library or plugin works from a repository (`owner/repo`, a
-  GitHub URL or a local folder) or by hand with Maven coordinates. Upgrade shows the planned changes before it applies
-  them. After a change the project files are refreshed and Gradle is synced, and the notes of the packages are shown.
-- Adds a **FlixelGDX** tool window (bottom) with the results of `flxgdx doctor` grouped by category. Its toolbar can
-  run the checks again, fix what is safe to fix automatically, and switch the offline mode.
+  projects, which have a `project.toml` in the project root. Every action edits the project files directly, keeps
+  your comments and layout, can be undone with Edit > Undo, and syncs Gradle afterwards:
+  - **Add Library** takes Maven coordinates (`group:artifact:version`), an alias and a bundle, adds a `[libraries]`
+    entry to `gradle/libs.versions.toml` and appends the alias to the bundle (`core` for game code, a platform name,
+    a name ending in `Processors` for annotation processors, or `buildsrc` for Gradle plugins). A Gradle plugin also
+    needs its `id("...")` line in the `plugins {}` block of the module that uses it; add that line by hand.
+  - **Remove Library** lists the catalog entries (the framework's own are greyed out) and removes the entry, its name
+    in every bundle, and its version when nothing else uses it.
+  - **Add Platform** creates the module folder from the platform's templates (existing files are kept), copies the
+    catalog entries the platform needs, and adds it to `platforms` in `project.toml`. **Remove Platform** takes it
+    out of `platforms` and can delete the module folder.
+  - **Upgrade** looks up the latest framework release (and Kotlin extension release) on Maven Central, shows it next
+    to the version the game uses, and after you confirm changes `[versions]` in the catalog and the settings plugin
+    version in `settings.gradle.kts`.
 - Creates Gradle run configurations in a **FlixelGDX** folder for each enabled platform, so the green Run and Debug
   buttons work right away: **Desktop** (`:desktop:run`), **Desktop (Debug Tools)** (`:desktop:debug`, the framework's
   debug mode with its debugging tools), **Web** (`:html5:run`), **Web (Debug Tools)** (`:html5:debug`) and
@@ -68,8 +71,6 @@ and runs its commands with progress shown inside the IDE.
   priority over the bundle.
 - Works with the [FlixelGDX Debugger](https://github.com/flixelgdx/flixelgdx-debugger), the desktop app that inspects
   a running game. See [The debugger](#the-debugger) below.
-- Provides the runner that later features use to run `flxgdx` in the background. It only talks to the tool through
-  flags, `--json` and `--no-input`, never by reading human output.
 
 ## The debugger
 
@@ -78,12 +79,17 @@ the **Desktop (Debug Tools)** and **Web (Debug Tools)** run configurations do) c
 `127.0.0.1:6510`, and retries every two seconds until the debugger is listening.
 
 - **Settings > Tools > FlixelGDX > FlixelGDX Debugger** has a **Debugger executable** field and an **Install
-  Debugger** button (with a **Reinstall** box for `--force`). Install runs `flxgdx install debugger` with a progress
-  bar that follows the download. Below the field the page shows what was found.
+  Debugger** button (with a **Reinstall** box). Install downloads the file for your computer from the latest release
+  (`https://github.com/flixelgdx/flixelgdx-debugger/releases/latest/download/<file>`) with a progress bar that follows
+  the download, checks its SHA-256 when the release lists one in `checksums.txt`, unpacks it next to the install
+  folder and swaps it in, so a failed install leaves the old one working. On Linux and macOS it also puts a
+  `flixelgdx-debugger` link in `~/.local/bin`, and on Linux a menu entry. Below the field the page shows what was
+  found.
+- The install folder is `$XDG_DATA_HOME/flixelgdx/debugger` (or `~/.local/share/flixelgdx/debugger`) on Linux,
+  `~/Library/Application Support/FlixelGDX/Debugger` on macOS and `%LOCALAPPDATA%\FlixelGDX\Debugger` on Windows.
+  Builds exist for Linux and Windows on x64 and ARM64, and for macOS on ARM64.
 - The debugger is found in this order: the path in the settings (the executable, or the folder that holds it), then
-  the install that `flxgdx` recorded in `state.toml` in its config folder (`$XDG_CONFIG_HOME/flxgdx` or
-  `~/.config/flxgdx` on Linux, `~/Library/Application Support/flxgdx` on macOS, `%AppData%\flxgdx` on Windows), then
-  `flixelgdx-debugger` on `PATH`.
+  the install folder above, then `flixelgdx-debugger` on `PATH`.
 - **Tools > FlixelGDX > Install Debugger...** does the same install from the menu, and **Tools > FlixelGDX > Open
   Debugger** starts the app as its own program (nothing waits for it). When it is not installed, a notification offers
   to install it. Starting it twice is harmless: if a `FlixelDebugger.App` process is already running, nothing new is
@@ -112,9 +118,9 @@ plugin has no code for this on purpose: it only needs the debugger to send the r
 
 ## Requirements
 
-- IntelliJ IDEA 2025.3 or newer.
-- The [`flxgdx` command-line tool](https://github.com/flixelgdx/flixelgdx-cli), version 1.0.0 or newer. Either
-  install it so it is on your `PATH`, or set its full path under **Settings > Tools > FlixelGDX**.
+- IntelliJ IDEA 2025.3 or newer, with the bundled Gradle and TOML plugins enabled.
+- An internet connection when creating a project (to find the latest framework release, unless you type a version)
+  and when installing the debugger.
 
 ## Building
 
@@ -135,7 +141,7 @@ A live WGSL preview inside the IDE is not possible today: the IDE's embedded bro
 - **[COMPILING.md](COMPILING.md)** - how to build the plugin, run the tests and the plugin verifier, and try it in a
   sandbox IDE.
 - **[CONTRIBUTING.md](CONTRIBUTING.md)** - contribution guidelines (shared with the main framework).
-- **[ARCHITECTURE.md](ARCHITECTURE.md)** - the package layout and how the plugin talks to `flxgdx`.
+- **[ARCHITECTURE.md](ARCHITECTURE.md)** - the package layout and how the plugin creates and edits game projects.
 
 ## License
 
