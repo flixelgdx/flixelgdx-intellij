@@ -1,0 +1,399 @@
+=== .editorconfig (mode 644)
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.{java,kt,kts,gradle}]
+indent_style = space
+indent_size = 2
+max_line_length = 120
+
+[*.md]
+trim_trailing_whitespace = false
+=== .gitignore (mode 644)
+# Gradle
+.gradle/
+gradle-app.setting
+**/build/
+**/dist/
+.kotlin/
+
+# Java
+*.class
+*.war
+*.ear
+hs_err_pid*
+
+# Android
+/android/libs/
+/android/gen/
+/android/out/
+local.properties
+
+# IDEs
+.idea/
+*.ipr
+*.iws
+*.iml
+out/
+.classpath
+.project
+.settings/
+.vscode/
+nbproject/private/
+
+# Operating systems
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+*~
+*.log
+=== README.md (mode 644)
+# Java Game
+
+A game made with [FlixelGDX](https://github.com/flixelgdx), written in Kotlin.
+
+## Project layout
+
+| Path                       | What it is                                                                         |
+|----------------------------|------------------------------------------------------------------------------------|
+| `project.toml`             | The title, version, window size and platforms. Edit it by hand.                    |
+| `core/`                    | Your game. Almost all of your code goes here.                                      |
+| `html5/`                   | The launcher that starts the game in a web browser.                                |
+| `assets/`                  | Images, sounds and other files that every platform shares.                         |
+| `gradle/libs.versions.toml`| Every library and Gradle plugin of the game, in one version catalog.               |
+| `buildSrc/`                | Build settings that every module shares, such as the Java version.                 |
+
+## Run the game
+
+You need no tools besides a JDK to start Gradle. The wrapper (`gradlew`, or `gradlew.bat` on Windows)
+downloads everything else the first time, so the first build is slow.
+
+| Platform | With Gradle                       |
+|----------|-----------------------------------|
+| Web      | `./gradlew :html5:run`            |
+
+## Add libraries
+
+Add the library to `[libraries]` in `gradle/libs.versions.toml`, then add its name to the bundle of the module that
+uses it, such as `core`:
+
+```toml
+[libraries]
+my-library = { module = "com.example:my-library", version = "1.0.0" }
+
+[bundles]
+core = ["flixelgdx-core", "my-library"]
+```
+
+A Gradle plugin goes into the `buildsrc` bundle, and its `id("...")` line into the `plugins {}` block of the module
+that uses it.
+=== assets/.gitkeep (mode 644)
+=== buildSrc/build.gradle.kts (mode 644)
+plugins {
+  `kotlin-dsl`
+}
+
+repositories {
+  gradlePluginPortal()
+  google()
+  mavenCentral()
+}
+
+dependencies {
+  // The Gradle plugins your modules use, such as the web and Android plugins. Add more to the buildsrc bundle.
+  implementation(libs.bundles.buildsrc)
+}
+=== buildSrc/settings.gradle.kts (mode 644)
+dependencyResolutionManagement {
+  repositories {
+    gradlePluginPortal()
+    google()
+    mavenCentral()
+  }
+  versionCatalogs {
+    create("libs") {
+      // Reads the same version catalog the rest of the project uses.
+      from(files("../gradle/libs.versions.toml"))
+    }
+  }
+}
+
+rootProject.name = "buildSrc"
+=== buildSrc/src/main/kotlin/flixelgdx.kotlin-jvm.gradle.kts (mode 644)
+// The Kotlin settings every module of the game shares. Modules apply it with id("flixelgdx.kotlin-jvm").
+plugins {
+  kotlin("jvm")
+}
+
+java {
+  toolchain {
+    languageVersion.set(JavaLanguageVersion.of(25))
+    vendor.set(JvmVendorSpec.ADOPTIUM)
+  }
+}
+
+kotlin {
+  jvmToolchain {
+    languageVersion.set(JavaLanguageVersion.of(25))
+    vendor.set(JvmVendorSpec.ADOPTIUM)
+  }
+}
+
+tasks.withType<JavaCompile>().configureEach {
+  options.encoding = "UTF-8"
+}
+=== core/build.gradle.kts (mode 644)
+plugins {
+  id("flixelgdx.kotlin-jvm")
+  `java-library`
+}
+
+dependencies {
+  // Everything your game code needs. Add libraries to the core bundle in gradle/libs.versions.toml.
+  api(libs.bundles.core)
+}
+
+// Kotlin runs annotation processors through kapt, which a package can apply to this module.
+plugins.withId("org.jetbrains.kotlin.kapt") {
+  dependencies {
+    "kapt"(libs.bundles.coreProcessors)
+  }
+}
+=== core/src/main/kotlin/com/teststudio/javagame/JavaGame.kt (mode 644)
+package com.teststudio.javagame
+
+import org.flixelgdx.FlixelGame
+
+/**
+ * The main class of your game.
+ *
+ * Think of it as the front door: every platform (desktop, web and Android) creates this one class to
+ * start the game. The window settings, such as the title and the size, are read from `project.toml`
+ * through the generated [Project] class, so change them there. The game opens [PlayState] first.
+ */
+class JavaGame : FlixelGame(Project.config().build(), ::PlayState)
+=== core/src/main/kotlin/com/teststudio/javagame/PlayState.kt (mode 644)
+package com.teststudio.javagame
+
+import org.flixelgdx.FlixelState
+
+/**
+ * The first screen of your game.
+ *
+ * A state is one screen of the game, such as a menu or a level. Put everything that belongs to the
+ * screen in here and switch to another state when it is time to move on.
+ */
+class PlayState : FlixelState() {
+
+  /** Called once, when the state starts. */
+  override fun create() {
+    super.create()
+    // Create your sprites and text here, then add them to the state.
+  }
+
+  /**
+   * Called every frame.
+   *
+   * @param elapsed The seconds that passed since the last frame.
+   */
+  override fun update(elapsed: Float) {
+    super.update(elapsed)
+    // Put the logic of your game here. It runs many times a second.
+  }
+}
+=== gradle/gradle-daemon-jvm.properties (mode 644)
+#This file is generated by updateDaemonJvm
+toolchainUrl.FREE_BSD.AARCH64=https\://api.foojay.io/disco/v3.0/ids/50d5fe9033e125599b2aa94dc590a27d/redirect
+toolchainUrl.FREE_BSD.X86_64=https\://api.foojay.io/disco/v3.0/ids/b15e5055c5b0ea5fda57f6fdafe96572/redirect
+toolchainUrl.LINUX.AARCH64=https\://api.foojay.io/disco/v3.0/ids/50d5fe9033e125599b2aa94dc590a27d/redirect
+toolchainUrl.LINUX.X86_64=https\://api.foojay.io/disco/v3.0/ids/b15e5055c5b0ea5fda57f6fdafe96572/redirect
+toolchainUrl.MAC_OS.AARCH64=https\://api.foojay.io/disco/v3.0/ids/9064f22734b42ac03e85df04b632e167/redirect
+toolchainUrl.MAC_OS.X86_64=https\://api.foojay.io/disco/v3.0/ids/4d0277c49991306ac78048580fe34bcf/redirect
+toolchainUrl.UNIX.AARCH64=https\://api.foojay.io/disco/v3.0/ids/50d5fe9033e125599b2aa94dc590a27d/redirect
+toolchainUrl.UNIX.X86_64=https\://api.foojay.io/disco/v3.0/ids/b15e5055c5b0ea5fda57f6fdafe96572/redirect
+toolchainUrl.WINDOWS.AARCH64=https\://api.foojay.io/disco/v3.0/ids/e2fccfcc46d573aadfa3c21ecf330564/redirect
+toolchainUrl.WINDOWS.X86_64=https\://api.foojay.io/disco/v3.0/ids/aa99913fa6d767d899ffc96082da01ca/redirect
+toolchainVersion=25
+=== gradle/libs.versions.toml (mode 644)
+# The version catalog lists every dependency of the project in one place.
+# Gradle turns each entry into an accessor you can use in build files, such as
+# libs.flixelgdx.core. You can edit this file by hand or from the FlixelGDX menu of your IDE.
+# Your comments are kept.
+
+# One entry per library family. Change a number here to upgrade the whole family.
+# Example: flixelgdx = "0.7.2"
+[versions]
+flixelgdx = "1.2.3"
+kotlin-gradle-plugin = "2.3.21"
+teavm-gradle-plugin = "0.13.0"
+flixelgdx-ktx = "0.4.0"
+
+# One entry per library, pointing at a version above.
+# Example: flixelgdx-core = { module = "org.flixelgdx:flixelgdx-core", version.ref = "flixelgdx" }
+[libraries]
+flixelgdx-core = { module = "org.flixelgdx:flixelgdx-core", version.ref = "flixelgdx" }
+kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin-gradle-plugin" }
+flixelgdx-html5 = { module = "org.flixelgdx:flixelgdx-html5", version.ref = "flixelgdx" }
+teavm-gradle-plugin = { module = "org.teavm:teavm-gradle-plugin", version.ref = "teavm-gradle-plugin" }
+flixelgdx-html5-plugin = { module = "org.flixelgdx:flixelgdx-html5-plugin", version.ref = "flixelgdx" }
+flixelgdx-ktx-core = { module = "org.flixelgdx:flixelgdx-ktx-core", version.ref = "flixelgdx-ktx" }
+
+# Groups of libraries that a module uses together. The names are core, desktop,
+# html5 and android, plus the same names ending in Processors (annotation
+# processors), androidDesugar and buildsrc (Gradle plugins).
+# Example: core = ["flixelgdx-core"]
+[bundles]
+core = ["flixelgdx-core", "flixelgdx-ktx-core"]
+desktop = []
+html5 = ["flixelgdx-html5"]
+android = []
+coreProcessors = []
+desktopProcessors = []
+html5Processors = []
+androidProcessors = []
+androidDesugar = []
+buildsrc = ["kotlin-gradle-plugin", "teavm-gradle-plugin", "flixelgdx-html5-plugin"]
+=== gradle/wrapper/gradle-wrapper.jar (mode 644, sha256 497c8c2a7e5031f6aa847f88104aa80a93532ec32ee17bdb8d1d2f67a194a9c7)
+=== gradle/wrapper/gradle-wrapper.properties (mode 644)
+distributionBase=GRADLE_USER_HOME
+distributionPath=wrapper/dists
+distributionUrl=https\://services.gradle.org/distributions/gradle-9.5.1-bin.zip
+networkTimeout=10000
+retries=0
+retryBackOffMs=500
+zipStoreBase=GRADLE_USER_HOME
+zipStorePath=wrapper/dists
+=== gradle.properties (mode 644)
+org.gradle.jvmargs=-Xms32m -Xmx2g -Dfile.encoding=UTF-8
+org.gradle.daemon=true
+org.gradle.parallel=true
+org.gradle.caching=true
+
+kotlin.code.style=official
+
+# The FlixelGDX Android backend uses AndroidX libraries.
+android.useAndroidX=true
+=== gradlew (mode 755, sha256 ab5c0cad16305af2e619c159c1f58dd68d07fab9c11e36701e109c0277407f7a)
+=== gradlew.bat (mode 644, sha256 475c4f08cd57cf2faa819e7f36d72aa93f0ad646ea23a8f7fa3ef54dee1cbc52)
+=== html5/build.gradle.kts (mode 644)
+plugins {
+  id("flixelgdx.kotlin-jvm")
+  id("org.teavm")
+  id("org.flixelgdx.html5")
+}
+
+val gameFileName = "java-game"
+
+teavm {
+  all {
+    mainClass = "com.teststudio.javagame.backend.html5.Html5LauncherKt"
+  }
+  js {
+    addedToWebApp = true
+    targetFileName = "$gameFileName.js"
+  }
+  wasmGC {
+    addedToWebApp = true
+    targetFileName = "$gameFileName.wasm"
+  }
+}
+
+html5 {
+  // The page title comes from project.toml. Set more web options here, for example devServerPort = 8090.
+}
+
+dependencies {
+  implementation(project(":core"))
+  implementation(libs.bundles.html5)
+}
+
+// Kotlin runs annotation processors through kapt, which a package can apply to this module.
+plugins.withId("org.jetbrains.kotlin.kapt") {
+  dependencies {
+    "kapt"(libs.bundles.html5Processors)
+  }
+}
+=== html5/src/main/kotlin/com/teststudio/javagame/backend/html5/Html5Launcher.kt (mode 644)
+package com.teststudio.javagame.backend.html5
+
+import com.teststudio.javagame.JavaGame
+import org.flixelgdx.backend.html5.FlixelHtml5Launcher
+
+/** Runs the game on the web page. */
+fun main() {
+  FlixelHtml5Launcher.launch(JavaGame())
+}
+=== project.toml (mode 644)
+# This file describes your game. The FlixelGDX build reads it, so this is the one
+# place to change the title, version, window size and platforms.
+# You can edit it by hand or from the FlixelGDX menu of your IDE. Your comments are kept.
+
+# Where the game runs. Pick from "desktop", "html5" and "android".
+# This key has to stay above the first [table] heading.
+platforms = ["html5"]
+
+[app]
+# The name of the game. It is used for the window title and for file and folder
+# names, so it can only use plain letters, numbers, spaces and simple punctuation.
+title    = "Java Game"
+# The Java package of your code, written in lowercase like com.example.mygame.
+package  = "com.teststudio.javagame"
+# Your name or studio. The same file name rules as the title apply.
+company  = "Test Studio"
+# The game version. It must start with a number, like 0.1.0.
+version  = "0.1.0"
+# The language of your code, "java" or "kotlin".
+language = "kotlin"
+
+[window]
+# The size of the game window in pixels.
+width      = 640
+height     = 360
+# How many frames the game tries to draw each second.
+framerate  = 60
+# Wait for the screen to refresh before drawing the next frame. This avoids tearing.
+vsync      = true
+# Start the game in fullscreen.
+fullscreen = false
+
+# Optional: draw the game at a fixed size and stretch it to the window.
+# Remove the # in front of the lines below to use it.
+# [render]
+# resolution  = [0, 0]   # width and height, 0 means the window size, false turns it off
+# scale       = 1.0     # quality of the picture, higher is sharper but slower
+# smooth      = true    # false keeps pixels crisp, which is best for pixel art
+# transparent = false   # true lets the window show what is behind it
+=== settings.gradle.kts (mode 644)
+pluginManagement {
+  repositories {
+    gradlePluginPortal()
+    google()
+    mavenCentral()
+  }
+}
+
+plugins {
+  // Downloads the Java version the build asks for when it is not installed yet.
+  id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
+  // Reads project.toml, includes the modules you chose and sets the group and version.
+  id("org.flixelgdx.project") version "1.2.3"
+}
+
+dependencyResolutionManagement {
+  repositoriesMode = RepositoriesMode.FAIL_ON_PROJECT_REPOS
+  repositories {
+    mavenCentral()
+    google()
+  }
+}
+
+rootProject.name = "my-game"

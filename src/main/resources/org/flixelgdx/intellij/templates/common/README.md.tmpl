@@ -1,0 +1,57 @@
+# {{.Title}}
+
+A game made with [FlixelGDX](https://github.com/flixelgdx), written in {{if .Kotlin}}Kotlin{{else}}Java{{end}}.
+
+## Project layout
+
+| Path                       | What it is                                                                         |
+|----------------------------|------------------------------------------------------------------------------------|
+| `project.toml`             | The title, version, window size and platforms. Edit it by hand.                    |
+| `core/`                    | Your game. Almost all of your code goes here.                                      |
+{{- if .HasPlatform "desktop"}}
+| `desktop/`                 | The launcher that starts the game in a desktop window.                             |
+{{- end}}
+{{- if .HasPlatform "html5"}}
+| `html5/`                   | The launcher that starts the game in a web browser.                                |
+{{- end}}
+{{- if .HasPlatform "android"}}
+| `android/`                 | The launcher that starts the game on an Android phone or tablet.                   |
+{{- end}}
+| `assets/`                  | Images, sounds and other files that every platform shares.                         |
+| `gradle/libs.versions.toml`| Every library and Gradle plugin of the game, in one version catalog.               |
+| `buildSrc/`                | Build settings that every module shares, such as the Java version.                 |
+
+## Run the game
+
+You need no tools besides a JDK to start Gradle. The wrapper (`gradlew`, or `gradlew.bat` on Windows)
+downloads everything else the first time, so the first build is slow.
+
+| Platform | With Gradle                       |
+|----------|-----------------------------------|
+{{- if .HasPlatform "desktop"}}
+| Desktop  | `./gradlew :desktop:run`          |
+{{- end}}
+{{- if .HasPlatform "html5"}}
+| Web      | `./gradlew :html5:run`            |
+{{- end}}
+{{- if .HasPlatform "android"}}
+| Android  | `./gradlew :android:installDebug` |
+{{- end}}
+{{if .HasPlatform "desktop"}}
+Use `./gradlew :desktop:debug` to start the desktop game with the framework's debugging tools.
+{{end}}
+## Add libraries
+
+Add the library to `[libraries]` in `gradle/libs.versions.toml`, then add its name to the bundle of the module that
+uses it, such as `core`:
+
+```toml
+[libraries]
+my-library = { module = "com.example:my-library", version = "1.0.0" }
+
+[bundles]
+core = ["flixelgdx-core", "my-library"]
+```
+
+A Gradle plugin goes into the `buildsrc` bundle, and its `id("...")` line into the `plugins {}` block of the module
+that uses it.

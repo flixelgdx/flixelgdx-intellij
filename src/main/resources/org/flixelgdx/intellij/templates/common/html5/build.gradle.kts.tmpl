@@ -1,0 +1,42 @@
+plugins {
+  id("flixelgdx.{{if .Kotlin}}kotlin-jvm{{else}}java{{end}}")
+  id("org.teavm")
+  id("org.flixelgdx.html5")
+}
+
+val gameFileName = "{{.Slug}}"
+
+teavm {
+  all {
+    mainClass = "{{.Package}}.backend.html5.Html5Launcher{{if .Kotlin}}Kt{{end}}"
+  }
+  js {
+    addedToWebApp = true
+    targetFileName = "$gameFileName.js"
+  }
+  wasmGC {
+    addedToWebApp = true
+    targetFileName = "$gameFileName.wasm"
+  }
+}
+
+html5 {
+  // The page title comes from project.toml. Set more web options here, for example devServerPort = 8090.
+}
+
+dependencies {
+  implementation(project(":core"))
+  implementation(libs.bundles.html5)
+{{- if not .Kotlin}}
+  annotationProcessor(libs.bundles.html5Processors)
+{{- end}}
+}
+{{- if .Kotlin}}
+
+// Kotlin runs annotation processors through kapt, which a package can apply to this module.
+plugins.withId("org.jetbrains.kotlin.kapt") {
+  dependencies {
+    "kapt"(libs.bundles.html5Processors)
+  }
+}
+{{- end}}

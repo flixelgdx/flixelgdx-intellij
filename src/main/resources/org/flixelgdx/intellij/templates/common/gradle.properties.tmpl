@@ -1,0 +1,11 @@
+org.gradle.jvmargs=-Xms32m -Xmx2g -Dfile.encoding=UTF-8
+org.gradle.daemon=true
+org.gradle.parallel=true
+org.gradle.caching=true
+{{- if .Kotlin}}
+
+kotlin.code.style=official
+{{- end}}
+
+# The FlixelGDX Android backend uses AndroidX libraries.
+android.useAndroidX=true

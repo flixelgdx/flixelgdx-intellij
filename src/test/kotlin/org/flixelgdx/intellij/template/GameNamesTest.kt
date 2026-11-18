@@ -21,27 +21,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.flixelgdx.intellij.wizard
+package org.flixelgdx.intellij.template
 
-import com.google.gson.JsonParser
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
-class NewProjectResultTest {
+class GameNamesTest {
 
   @Test
-  fun readsNotesAndInstalled() {
-    val data = JsonParser.parseString(
-      """
-      {"dir":"/p/g","installed":[{"package":"a"},{"package":"b"}],
-       "notes":[{"package":"b","module":"core","text":"Read me."},{"text":"No package."},{"text":" "}],
-       "future":1}
-      """.trimIndent(),
-    ).asJsonObject
-    val parsed = NewProjectResult.parse(data)
-    assertEquals("/p/g", parsed.dir)
-    assertEquals(2, parsed.installed)
-    assertEquals(listOf("b: Read me.", "No package."), parsed.notes)
-    assertEquals(NewProjectResult(null, 0, emptyList()), NewProjectResult.parse(null))
+  fun classNameJoinsWordsAndEndsWithGame() {
+    assertEquals("MyCoolGame", GameNames.className("My Cool Game"))
+    assertEquals("SpaceRaceGame", GameNames.className("Space Race"))
+    assertEquals("JavaGame", GameNames.className("java game"))
+    assertEquals("Game", GameNames.className("2048"))
+    assertEquals("Game", GameNames.className("!!!"))
+  }
+
+  @Test
+  fun slugIsLowercaseWithHyphens() {
+    assertEquals("space-race", GameNames.slug("Space Race!"))
+    assertEquals("java-game", GameNames.slug("  Java   Game "))
+    assertEquals("game", GameNames.slug("!!!"))
   }
 }

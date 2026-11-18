@@ -1,0 +1,80 @@
+plugins {
+  id("flixelgdx.{{if .Kotlin}}kotlin-jvm{{else}}java{{end}}")
+  application
+}
+
+val gameFileName = "{{.Slug}}"
+val isMacOs = System.getProperty("os.name", "").lowercase().contains("mac")
+val heapJvmArgs = listOf("-Xms8M", "-Xmx1G")
+// WebGPU and SDL call native code, which Java only allows quietly when native access is enabled.
+val nativeAccessJvmArgs = listOf("--enable-native-access=ALL-UNNAMED")
+
+application {
+  mainClass = "{{.Package}}.backend.desktop.DesktopLauncher{{if .Kotlin}}Kt{{end}}"
+  applicationDefaultJvmArgs = heapJvmArgs + nativeAccessJvmArgs
+}
+
+dependencies {
+  implementation(project(":core"))
+  implementation(libs.bundles.desktop)
+{{- if not .Kotlin}}
+  annotationProcessor(libs.bundles.desktopProcessors)
+{{- end}}
+}
+{{- if .Kotlin}}
+
+// Kotlin runs annotation processors through kapt, which a package can apply to this module.
+plugins.withId("org.jetbrains.kotlin.kapt") {
+  dependencies {
+    "kapt"(libs.bundles.desktopProcessors)
+  }
+}
+{{- end}}
+
+tasks.withType<JavaExec>().configureEach {
+  // The game looks for the assets folder in the working directory.
+  workingDir = rootProject.projectDir
+  jvmArgs(heapJvmArgs + nativeAccessJvmArgs)
+  if (isMacOs) {
+    jvmArgs("-XstartOnFirstThread")
+  }
+  outputs.upToDateWhen { false }
+}
+
+tasks.register<JavaExec>("debug") {
+  group = ApplicationPlugin.APPLICATION_GROUP
+  description = "Runs the game in debug mode with the framework's debugging tools enabled."
+  mainClass = application.mainClass
+  classpath = sourceSets.main.get().runtimeClasspath
+  systemProperty("flixel.mode", "debug")
+}
+
+// Builds one jar that holds the game, every library and the assets folder.
+tasks.jar {
+  archiveFileName = "$gameFileName-$version.jar"
+  duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+  dependsOn(configurations.runtimeClasspath)
+  from(configurations.runtimeClasspath.map { cp -> cp.map { if (it.isDirectory) it else zipTree(it) } })
+  from(rootProject.file("assets"))
+  exclude("module-info.class", "**/module-info.class")
+  exclude("META-INF/INDEX.LIST", "META-INF/*.SF", "META-INF/*.DSA", "META-INF/*.RSA", "META-INF/maven/**")
+  manifest {
+    attributes("Main-Class" to application.mainClass, "Enable-Native-Access" to "ALL-UNNAMED")
+  }
+  doLast {
+    archiveFile.get().asFile.setExecutable(true, false)
+  }
+}
+
+tasks.startScripts {
+  classpath = files(tasks.jar)
+}
+
+distributions {
+  main {
+    contents {
+      val runtimeClasspath = configurations.runtimeClasspath
+      exclude { it.file in runtimeClasspath.get().files }
+    }
+  }
+}

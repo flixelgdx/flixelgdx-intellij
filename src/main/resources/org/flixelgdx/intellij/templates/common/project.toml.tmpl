@@ -1,0 +1,39 @@
+# This file describes your game. The FlixelGDX build reads it, so this is the one
+# place to change the title, version, window size and platforms.
+# You can edit it by hand or from the FlixelGDX menu of your IDE. Your comments are kept.
+
+# Where the game runs. Pick from "desktop", "html5" and "android".
+# This key has to stay above the first [table] heading.
+platforms = [{{.PlatformList}}]
+
+[app]
+# The name of the game. It is used for the window title and for file and folder
+# names, so it can only use plain letters, numbers, spaces and simple punctuation.
+title    = "{{toml .Title}}"
+# The Java package of your code, written in lowercase like com.example.mygame.
+package  = "{{.Package}}"
+# Your name or studio. The same file name rules as the title apply.
+company  = "{{toml .Company}}"
+# The game version. It must start with a number, like 0.1.0.
+version  = "{{toml .Version}}"
+# The language of your code, "java" or "kotlin".
+language = "{{.Language}}"
+
+[window]
+# The size of the game window in pixels.
+width      = {{.Width}}
+height     = {{.Height}}
+# How many frames the game tries to draw each second.
+framerate  = 60
+# Wait for the screen to refresh before drawing the next frame. This avoids tearing.
+vsync      = true
+# Start the game in fullscreen.
+fullscreen = false
+
+# Optional: draw the game at a fixed size and stretch it to the window.
+# Remove the # in front of the lines below to use it.
+# [render]
+# resolution  = [0, 0]   # width and height, 0 means the window size, false turns it off
+# scale       = 1.0     # quality of the picture, higher is sharper but slower
+# smooth      = true    # false keeps pixels crisp, which is best for pixel art
+# transparent = false   # true lets the window show what is behind it

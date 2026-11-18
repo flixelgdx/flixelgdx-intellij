@@ -1,0 +1,30 @@
+package {{.Package}};
+
+import org.flixelgdx.FlixelState;
+
+/**
+ * The first screen of your game.
+ *
+ * <p>A state is one screen of the game, such as a menu or a level. Put everything that belongs to the
+ * screen in here and switch to another state when it is time to move on.
+ */
+public class PlayState extends FlixelState {
+
+  /** Called once, when the state starts. */
+  @Override
+  public void create() {
+    super.create();
+    // Create your sprites and text here, then add them to the state.
+  }
+
+  /**
+   * Called every frame.
+   *
+   * @param elapsed The seconds that passed since the last frame.
+   */
+  @Override
+  public void update(float elapsed) {
+    super.update(elapsed);
+    // Put the logic of your game here. It runs many times a second.
+  }
+}

@@ -1,0 +1,73 @@
+{{if .Kotlin -}}
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
+{{end -}}
+plugins {
+  // The Gradle plugins this module needs. Add a line here when a library asks for one.
+  id("com.android.application")
+{{- if .Kotlin}}
+  id("org.jetbrains.kotlin.android")
+{{- end}}
+}
+
+android {
+  namespace = "{{.Package}}.backend"
+  compileSdk = 36
+
+  defaultConfig {
+    applicationId = "{{.Package}}"
+    minSdk = 26
+    targetSdk = 35
+    versionCode = 1
+    versionName = version.toString()
+    multiDexEnabled = true
+  }
+
+  compileOptions {
+    // The game is written for Java 25. Android's own tools turn the newer language features
+    // into ones every supported phone understands.
+    isCoreLibraryDesugaringEnabled = true
+    sourceCompatibility = JavaVersion.VERSION_25
+    targetCompatibility = JavaVersion.VERSION_25
+  }
+
+  sourceSets {
+    named("main") {
+      // The same assets folder the desktop and web builds use.
+      assets.srcDir(rootProject.file("assets"))
+    }
+  }
+}
+
+java {
+  toolchain {
+    languageVersion.set(JavaLanguageVersion.of(25))
+    vendor.set(JvmVendorSpec.ADOPTIUM)
+  }
+}
+{{- if .Kotlin}}
+
+kotlin {
+  compilerOptions {
+    jvmTarget = JvmTarget.JVM_25
+  }
+}
+{{- end}}
+
+dependencies {
+  coreLibraryDesugaring(libs.bundles.androidDesugar)
+  implementation(project(":core"))
+  implementation(libs.bundles.android)
+{{- if not .Kotlin}}
+  annotationProcessor(libs.bundles.androidProcessors)
+{{- end}}
+}
+{{- if .Kotlin}}
+
+// Kotlin runs annotation processors through kapt, which a package can apply to this module.
+plugins.withId("org.jetbrains.kotlin.kapt") {
+  dependencies {
+    "kapt"(libs.bundles.androidProcessors)
+  }
+}
+{{- end}}

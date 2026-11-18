@@ -1,0 +1,21 @@
+plugins {
+  id("flixelgdx.{{if .Kotlin}}kotlin-jvm{{else}}java{{end}}")
+  `java-library`
+}
+
+dependencies {
+  // Everything your game code needs. Add libraries to the core bundle in gradle/libs.versions.toml.
+  api(libs.bundles.core)
+{{- if not .Kotlin}}
+  annotationProcessor(libs.bundles.coreProcessors)
+{{- end}}
+}
+{{- if .Kotlin}}
+
+// Kotlin runs annotation processors through kapt, which a package can apply to this module.
+plugins.withId("org.jetbrains.kotlin.kapt") {
+  dependencies {
+    "kapt"(libs.bundles.coreProcessors)
+  }
+}
+{{- end}}

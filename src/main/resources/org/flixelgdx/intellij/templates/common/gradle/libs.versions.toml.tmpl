@@ -1,0 +1,70 @@
+# The version catalog lists every dependency of the project in one place.
+# Gradle turns each entry into an accessor you can use in build files, such as
+# libs.flixelgdx.core. You can edit this file by hand or from the FlixelGDX menu of your IDE.
+# Your comments are kept.
+
+# One entry per library family. Change a number here to upgrade the whole family.
+# Example: flixelgdx = "0.7.2"
+[versions]
+flixelgdx = "{{.FlixelVersion}}"
+{{- if .Kotlin}}
+kotlin-gradle-plugin = "2.3.21"
+{{- end}}
+{{- if .HasPlatform "android"}}
+desugar_jdk_libs = "2.1.5"
+r8 = "8.13.25"
+{{- end}}
+{{- if .HasPlatform "html5"}}
+teavm-gradle-plugin = "0.13.0"
+{{- end}}
+{{- if .HasPlatform "android"}}
+gradle = "8.11.0"
+{{- end}}
+{{- if .Kotlin}}
+flixelgdx-ktx = "{{.KtxVersion}}"
+{{- end}}
+
+# One entry per library, pointing at a version above.
+# Example: flixelgdx-core = { module = "org.flixelgdx:flixelgdx-core", version.ref = "flixelgdx" }
+[libraries]
+flixelgdx-core = { module = "org.flixelgdx:flixelgdx-core", version.ref = "flixelgdx" }
+{{- if .Kotlin}}
+kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin-gradle-plugin" }
+{{- end}}
+{{- if .HasPlatform "desktop"}}
+flixelgdx-desktop = { module = "org.flixelgdx:flixelgdx-desktop", version.ref = "flixelgdx" }
+{{- end}}
+{{- if .HasPlatform "html5"}}
+flixelgdx-html5 = { module = "org.flixelgdx:flixelgdx-html5", version.ref = "flixelgdx" }
+{{- end}}
+{{- if .HasPlatform "android"}}
+flixelgdx-android = { module = "org.flixelgdx:flixelgdx-android", version.ref = "flixelgdx" }
+desugar_jdk_libs = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugar_jdk_libs" }
+r8 = { module = "com.android.tools:r8", version.ref = "r8" }
+{{- end}}
+{{- if .HasPlatform "html5"}}
+teavm-gradle-plugin = { module = "org.teavm:teavm-gradle-plugin", version.ref = "teavm-gradle-plugin" }
+flixelgdx-html5-plugin = { module = "org.flixelgdx:flixelgdx-html5-plugin", version.ref = "flixelgdx" }
+{{- end}}
+{{- if .HasPlatform "android"}}
+gradle = { module = "com.android.tools.build:gradle", version.ref = "gradle" }
+{{- end}}
+{{- if .Kotlin}}
+flixelgdx-ktx-core = { module = "org.flixelgdx:flixelgdx-ktx-core", version.ref = "flixelgdx-ktx" }
+{{- end}}
+
+# Groups of libraries that a module uses together. The names are core, desktop,
+# html5 and android, plus the same names ending in Processors (annotation
+# processors), androidDesugar and buildsrc (Gradle plugins).
+# Example: core = ["flixelgdx-core"]
+[bundles]
+core = ["flixelgdx-core"{{if .Kotlin}}, "flixelgdx-ktx-core"{{end}}]
+desktop = [{{if .HasPlatform "desktop"}}"flixelgdx-desktop"{{end}}]
+html5 = [{{if .HasPlatform "html5"}}"flixelgdx-html5"{{end}}]
+android = [{{if .HasPlatform "android"}}"flixelgdx-android"{{end}}]
+coreProcessors = []
+desktopProcessors = []
+html5Processors = []
+androidProcessors = []
+androidDesugar = [{{if .HasPlatform "android"}}"desugar_jdk_libs"{{end}}]
+buildsrc = [{{.BuildsrcBundle}}]

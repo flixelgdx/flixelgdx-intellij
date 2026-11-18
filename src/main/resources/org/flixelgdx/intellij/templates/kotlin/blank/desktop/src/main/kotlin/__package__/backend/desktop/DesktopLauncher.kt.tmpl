@@ -1,0 +1,9 @@
+package {{.Package}}.backend.desktop
+
+import {{.Package}}.{{.Class}}
+import org.flixelgdx.backend.desktop.FlixelDesktopLauncher
+
+/** Starts the game in a desktop window. */
+fun main() {
+  FlixelDesktopLauncher.launch({{.Class}}())
+}

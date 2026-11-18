@@ -93,4 +93,9 @@ tasks {
   wrapper {
     gradleVersion = "9.5.1"
   }
+
+  test {
+    // Pass -Pgolden.update=true to rewrite the golden files of the game templates after a deliberate change.
+    providers.gradleProperty("golden.update").orNull?.let { systemProperty("golden.update", it) }
+  }
 }
