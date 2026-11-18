@@ -7,6 +7,7 @@
   <depends>com.intellij.modules.java</depends>
   <depends>org.jetbrains.plugins.gradle</depends>
   <depends>org.jetbrains.plugins.textmate</depends>
+  <depends>org.toml.lang</depends>
 
   <extensions defaultExtensionNs="com.intellij">
     <notificationGroup id="FlixelGDX" displayType="BALLOON"/>
@@ -86,15 +87,11 @@
       <action id="org.flixelgdx.intellij.AddLibrary"
               class="org.flixelgdx.intellij.actions.AddLibraryAction"
               text="Add Library..."
-              description="Add a library to the FlixelGDX project with flxgdx"/>
-      <action id="org.flixelgdx.intellij.AddPlugin"
-              class="org.flixelgdx.intellij.actions.AddPluginAction"
-              text="Add Plugin..."
-              description="Add a Gradle plugin to the FlixelGDX project with flxgdx"/>
-      <action id="org.flixelgdx.intellij.RemovePackage"
-              class="org.flixelgdx.intellij.actions.RemovePackageAction"
-              text="Remove Library or Plugin..."
-              description="Remove an installed library or plugin with flxgdx"/>
+              description="Add Maven coordinates to the version catalog and a module bundle"/>
+      <action id="org.flixelgdx.intellij.RemoveLibrary"
+              class="org.flixelgdx.intellij.actions.RemoveLibraryAction"
+              text="Remove Library..."
+              description="Remove a library from the version catalog and its bundles"/>
       <separator/>
       <action id="org.flixelgdx.intellij.AddPlatform"
               class="org.flixelgdx.intellij.actions.AddPlatformAction"
@@ -126,7 +123,7 @@
       <action id="org.flixelgdx.intellij.Upgrade"
               class="org.flixelgdx.intellij.actions.UpgradeAction"
               text="Upgrade..."
-              description="Upgrade the installed packages to their latest release"/>
+              description="Upgrade FlixelGDX to its latest release on Maven Central"/>
       <action id="org.flixelgdx.intellij.RunDoctor"
               class="org.flixelgdx.intellij.doctor.RunDoctorAction"
               text="Run Doctor"
