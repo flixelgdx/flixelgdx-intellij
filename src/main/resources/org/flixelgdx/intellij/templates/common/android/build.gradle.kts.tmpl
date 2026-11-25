@@ -15,11 +15,12 @@ android {
   compileSdk = 36
 
   defaultConfig {
-    applicationId = "{{package}}"
+    // These three come from project.toml, so change them there.
+    applicationId = game.packageName
     minSdk = 26
     targetSdk = 35
-    versionCode = 1
-    versionName = version.toString()
+    versionCode = game.build
+    versionName = game.version
     multiDexEnabled = true
   }
 
