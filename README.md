@@ -9,9 +9,10 @@ and WGSL shader editing. It needs no extra command-line tools.
 ## What it does
 
 - Adds **FlixelGDX** to File > New > Project. The wizard asks for the game title, company, version, package, window
-  size, language (Java or Kotlin), platforms (Desktop, Web, Android), whether to create a Git repository, and under
-  Advanced the framework version and the template. Fields are checked while you type with the same rules as the
-  FlixelGDX build, and the package follows the company and title. Creating the project finds the latest framework
+  size, language (Java or Kotlin), platforms (Desktop, Web, Android), the template, the framework version, and whether
+  to create a Git repository. Under Advanced, people who work on the framework itself can take it from their Maven
+  local repository or build it from a local clone as a composite build, for quick test games. Fields are checked while
+  you type with the same rules as the FlixelGDX build, and the package follows the company and title. Creating the project finds the latest framework
   release on Maven Central (unless you typed a version), renders every file from the templates bundled with the
   plugin, writes them at once, and imports the result as a Gradle project. Kotlin games also get the Kotlin extension
   of the framework.

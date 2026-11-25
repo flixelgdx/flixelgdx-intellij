@@ -4,7 +4,7 @@
 
 ### Added
 
-- A New Project wizard under File > New > Project that creates a FlixelGDX game from templates bundled with the plugin and imports it as a Gradle project. It asks for the title, company, version, package, window size, language (Java or Kotlin), platforms and a Git repository, and finds the latest framework release on Maven Central unless a version is typed under Advanced. Kotlin games also get the Kotlin extension of the framework.
+- A New Project wizard under File > New > Project that creates a FlixelGDX game from templates bundled with the plugin and imports it as a Gradle project. It asks for the title, company, version, package, window size, language (Java or Kotlin), platforms, template, framework version and a Git repository, and finds the latest framework release on Maven Central unless a version is typed. Under Advanced, the framework can instead come from the Maven local repository or from a local clone as a composite build, for testing changes to the framework. Kotlin games also get the Kotlin extension of the framework.
 - A FlixelGDX menu under Tools and in the project view with Add Library, Remove Library, Add Platform, Remove Platform, Install Debugger, Open Debugger and Upgrade.
 - Add Library and Remove Library, which edit `gradle/libs.versions.toml` and its bundles while keeping comments and layout. Gradle plugins that need an `id("...")` line in a module are still added to that module by hand.
 - Add Platform, which creates the module folder from the platform's templates, adds the catalog entries the platform needs and enables it in `project.toml`, and Remove Platform, which disables it and can delete the folder.

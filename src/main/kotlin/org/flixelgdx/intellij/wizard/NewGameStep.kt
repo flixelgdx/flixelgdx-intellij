@@ -29,6 +29,7 @@ import com.intellij.ide.wizard.GitNewProjectWizardStep
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.ModalityState
 import com.intellij.openapi.components.service
+import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
 import com.intellij.openapi.project.Project
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBTextField
@@ -40,6 +41,8 @@ import com.intellij.ui.dsl.builder.bindItem
 import com.intellij.ui.dsl.builder.bindSelected
 import com.intellij.ui.dsl.builder.bindText
 import com.intellij.ui.dsl.builder.columns
+import com.intellij.ui.dsl.listCellRenderer.textListCellRenderer
+import org.flixelgdx.intellij.template.FrameworkSource
 import org.flixelgdx.intellij.template.GameLanguage
 import org.flixelgdx.intellij.template.GameTemplates
 import java.nio.file.Files
@@ -51,6 +54,9 @@ import java.nio.file.Path
  * Fields check themselves while the person types, using the same rules as the FlixelGDX build
  * ([ProjectValidation]). The package follows the company and the title until the person edits it. When Create is
  * chosen, [setupProject] hands a [NewProjectSpec] to [NewProjectRunner].
+ *
+ * The template and the framework version sit with the other settings. The Advanced group holds the choices for
+ * people who work on the framework itself: where the framework comes from, and the folder of a local clone.
  *
  * Anything that touches the disk (the Android SDK search and the folder check) runs on a pooled thread and reports
  * back on the EDT.
@@ -71,6 +77,9 @@ class NewGameStep(private val parent: GitNewProjectWizardStep) : AbstractNewProj
   private val androidProp = propertyGraph.property(false)
   private val frameworkVersionProp = propertyGraph.property("")
   private val templateProp = propertyGraph.property(GameTemplates.DEFAULT)
+  private val sourceProp = propertyGraph.property(FrameworkSource.MAVEN_CENTRAL)
+  private val frameworkPathProp = propertyGraph.property("")
+  private val cloneProp = propertyGraph.property(false)
   private val androidWarnProp = propertyGraph.property(false)
   private val folderShownProp = propertyGraph.property(false)
 
@@ -102,6 +111,7 @@ class NewGameStep(private val parent: GitNewProjectWizardStep) : AbstractNewProj
     companyProp.afterChange { derivePackage() }
     packageProp.afterChange { if (!deriving) packageEdited = true }
     androidProp.afterChange { updateAndroidWarning() }
+    sourceProp.afterChange { cloneProp.set(it == FrameworkSource.LOCAL_CLONE) }
   }
 
   override fun setupUI(builder: Panel) {
@@ -153,15 +163,29 @@ class NewGameStep(private val parent: GitNewProjectWizardStep) : AbstractNewProj
         label(ANDROID_WARNING)
       }.visibleIf(androidWarnProp)
 
+      row("Template:") {
+        comboBox(GameTemplates.names(GameLanguage.JAVA)).bindItem(templateProp)
+      }
+      row("Framework version:") {
+        textField().bindText(frameworkVersionProp).columns(COLUMNS)
+          .comment("A version such as 0.7.2. Leave empty for the latest release on Maven Central.")
+          .checked { frameworkVersionProblem(it) }
+      }
+
       collapsibleGroup("Advanced") {
-        row("Framework version:") {
-          textField().bindText(frameworkVersionProp).columns(COLUMNS)
-            .comment("A version such as 0.7.2. Leave empty for the latest release on Maven Central.")
-            .checked { frameworkVersionProblem(it) }
+        row("Framework source:") {
+          comboBox(FrameworkSource.entries, textListCellRenderer { it?.label }).bindItem(sourceProp)
+            .comment("For working on FlixelGDX itself. Most games use Maven Central.")
         }
-        row("Template:") {
-          comboBox(GameTemplates.names(GameLanguage.JAVA)).bindItem(templateProp)
-        }
+        row("Framework clone:") {
+          textFieldWithBrowseButton(
+            FileChooserDescriptorFactory.createSingleFolderDescriptor().withTitle("Select the FlixelGDX Clone"),
+          ).bindText(frameworkPathProp).align(AlignX.FILL)
+            .comment("The folder of your FlixelGDX clone. The game builds the framework from it as a composite build.")
+            .validationOnApply { field ->
+              if (cloneProp.get() && field.text.isBlank()) error("Pick the folder of your FlixelGDX clone.") else null
+            }
+        }.visibleIf(cloneProp)
       }
     }
     detectSdk()
@@ -183,6 +207,8 @@ class NewGameStep(private val parent: GitNewProjectWizardStep) : AbstractNewProj
       android = androidProp.get(),
       frameworkVersion = frameworkVersionProp.get(),
       template = templateProp.get(),
+      source = sourceProp.get(),
+      frameworkPath = frameworkPathProp.get(),
     )
     project.service<NewProjectRunner>().create(spec)
   }
