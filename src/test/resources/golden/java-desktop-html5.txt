@@ -85,6 +85,15 @@ downloads everything else the first time, so the first build is slow.
 
 Use `./gradlew :desktop:debug` to start the desktop game with the framework's debugging tools.
 
+If something does not build, run `./gradlew doctor`. It checks your setup and `project.toml`, and says how to fix
+each problem it finds.
+
+## Release a new build
+
+Before you give a build to players, even a small fix, run `./gradlew bumpBuild`. It raises `build` in
+`project.toml` by one.
+Change `version` there too when the update deserves a new version name.
+
 ## Add libraries
 
 Add the library to `[libraries]` in `gradle/libs.versions.toml`, then add its name to the bundle of the module that
@@ -439,6 +448,9 @@ package  = "com.teststudio.javagame"
 company  = "Test Studio"
 # The game version. It must start with a number, like 0.1.0.
 version  = "0.1.0"
+# A whole number that goes up by one for every build you give to players, even a small fix.
+# Android and Google Play compare it to know which build is newer. Run ./gradlew bumpBuild to raise it.
+build    = 1
 # The language of your code, "java" or "kotlin".
 language = "java"
 
@@ -460,6 +472,18 @@ fullscreen = false
 # scale       = 1.0     # quality of the picture, higher is sharper but slower
 # smooth      = true    # false keeps pixels crisp, which is best for pixel art
 # transparent = false   # true lets the window show what is behind it
+
+# Optional: your own constants. Each one becomes a constant in Project.Defines,
+# for example demo = false becomes Project.Defines.DEMO.
+# [defines]
+# demo          = false
+# enable_cheats = false
+
+# Optional: profiles change a few values for one build. Pick one by adding
+# -Pflixel.profile=dev to a Gradle command.
+# [profile.dev]
+# window.fullscreen     = false
+# defines.enable_cheats = true
 === settings.gradle.kts (mode 644)
 pluginManagement {
   repositories {
