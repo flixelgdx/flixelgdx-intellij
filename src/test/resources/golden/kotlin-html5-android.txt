@@ -504,8 +504,9 @@ fullscreen = false
 # demo          = false
 # enable_cheats = false
 
-# Optional: profiles change a few values for one build. Each profile gets its own
-# tasks, such as ./gradlew :desktop:runDev, or add -Pflixel.profile=dev to any task.
+# Optional: profiles change a few values for one build. Each profile gets a task
+# named after it that starts the game, such as ./gradlew :desktop:dev, or add
+# -Pflixel.profile=dev to any other task.
 # app.mode can only be set in a profile, so a build without one always starts in release mode.
 # [profile.dev]
 # app.mode              = "debug"
