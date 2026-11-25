@@ -40,6 +40,15 @@ downloads everything else the first time, so the first build is slow.
 {{if desktop}}
 Use `./gradlew :desktop:debug` to start the desktop game with the framework's debugging tools.
 {{end}}
+If something does not build, run `./gradlew doctor`. It checks your setup and `project.toml`, and says how to fix
+each problem it finds.
+
+## Release a new build
+
+Before you give a build to players, even a small fix, run `./gradlew bumpBuild`. It raises `build` in
+`project.toml` by one{{if android}}, which Android and Google Play need to tell a newer build from an older one{{end}}.
+Change `version` there too when the update deserves a new version name.
+
 ## Add libraries
 
 Add the library to `[libraries]` in `gradle/libs.versions.toml`, then add its name to the bundle of the module that
