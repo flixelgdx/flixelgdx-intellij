@@ -38,6 +38,7 @@ import kotlinx.coroutines.withContext
 import org.flixelgdx.intellij.game.Notifier
 import org.flixelgdx.intellij.maven.MavenCentral
 import org.flixelgdx.intellij.runconfig.RunConfigSync
+import org.flixelgdx.intellij.template.FrameworkSource
 import org.flixelgdx.intellij.template.GameLanguage
 import org.flixelgdx.intellij.template.GameTemplates
 import org.flixelgdx.intellij.template.ProjectWriter
@@ -63,7 +64,8 @@ class NewProjectRunner(private val project: Project, private val scope: Coroutin
    *
    * The framework version is the one typed in the wizard, or else the latest release on Maven Central. A Kotlin game
    * also gets the latest release of the Kotlin extension; when that lookup fails, it uses the framework version, since
-   * the two are released together. Failures are shown as an error notification and leave the folder as it was.
+   * the two are released together. When the game builds the framework from a local clone, the clone is checked first.
+   * Failures are shown as an error notification and leave the folder as it was.
    *
    * Call it from any thread; it only schedules work.
    */
@@ -75,6 +77,7 @@ class NewProjectRunner(private val project: Project, private val scope: Coroutin
         if (TargetFolder.hasForeignFiles(listEntries(spec.dir))) {
           throw IOException("The folder ${spec.dir} is not empty. Pick an empty folder or another name.")
         }
+        if (spec.source == FrameworkSource.LOCAL_CLONE) checkClone(spec.frameworkPath.trim())
         indicator.text = "Finding the FlixelGDX version"
         val flixel = spec.typedFrameworkVersion ?: latest(MavenCentral.FRAMEWORK_CORE, indicator)
         val ktx = if (spec.language == GameLanguage.KOTLIN) {
@@ -108,10 +111,19 @@ class NewProjectRunner(private val project: Project, private val scope: Coroutin
     } catch (e: IOException) {
       throw IOException(
         "Could not find the latest FlixelGDX version on Maven Central (${e.message}). " +
-          "Check your connection, or type a version under Advanced in the wizard.",
+          "Check your connection, or type a framework version in the wizard.",
         e,
       )
     }
+
+  private fun checkClone(path: String) {
+    val dir = runCatching { Path.of(path) }.getOrNull()
+    if (dir == null || !Files.isRegularFile(dir.resolve("settings.gradle.kts"))) {
+      throw IOException(
+        "The folder $path is not a clone of FlixelGDX. Pick the folder that holds its settings.gradle.kts.",
+      )
+    }
+  }
 
   private fun listEntries(dir: Path): List<String> {
     if (!Files.isDirectory(dir)) return emptyList()

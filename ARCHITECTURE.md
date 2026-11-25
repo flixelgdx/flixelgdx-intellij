@@ -77,7 +77,9 @@ Everything lives in one Gradle module, under `src/main/kotlin/org/flixelgdx/inte
   (the plugin's notifications) and `GradleRefresh`.
 - **`wizard`**: The FlixelGDX entry in File > New > Project. `NewGameStep` collects the settings and validates
   them with `ProjectValidation` (the same rules as the framework's settings plugin), `NewProjectSpec` holds the
-  choices, and `NewProjectRunner` creates the files and imports the result. Git uses the platform's own wizard step.
+  choices, and `NewProjectRunner` creates the files and imports the result. `FrameworkSource` (in `template`) says
+  where the game gets the framework from; the Maven local and local clone choices only change the rendered
+  `settings.gradle.kts`. Git uses the platform's own wizard step.
   `AndroidSdk` finds an installed Android SDK.
 - **`actions`**: The Tools > FlixelGDX menu. `GameAction` is the base class that shows an action only in FlixelGDX
   projects. The dialogs only collect values; the actions plan the edits with the `toml` package.

@@ -23,6 +23,7 @@
  */
 package org.flixelgdx.intellij.wizard
 
+import org.flixelgdx.intellij.template.FrameworkSource
 import org.flixelgdx.intellij.template.GameLanguage
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -67,6 +68,14 @@ class NewProjectSpecTest {
     assertNull(base().copy(frameworkVersion = "  ").typedFrameworkVersion)
     assertEquals("0.8.0", base().copy(frameworkVersion = " v0.8.0 ").typedFrameworkVersion)
     assertEquals("0.8.0", base().copy(frameworkVersion = "0.8.0").typedFrameworkVersion)
+  }
+
+  @Test
+  fun clonePathOnlyCountsForALocalClone() {
+    val clone = base().copy(source = FrameworkSource.LOCAL_CLONE, frameworkPath = " C:\\dev\\flixelgdx ")
+    assertEquals("C:/dev/flixelgdx", clone.templateData("0.7.2", "0.7.2").frameworkPath)
+    val local = clone.copy(source = FrameworkSource.MAVEN_LOCAL)
+    assertEquals("", local.templateData("0.7.2", "0.7.2").frameworkPath)
   }
 
   @Test

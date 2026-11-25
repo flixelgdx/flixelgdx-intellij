@@ -1,5 +1,13 @@
 pluginManagement {
+{{- if compositeBuild}}
+  // Builds the FlixelGDX Gradle plugins from your local clone of the framework.
+  includeBuild("{{frameworkPath | kotlin}}")
+{{- end}}
   repositories {
+{{- if mavenLocal}}
+    // Uses the framework you published with ./gradlew publishToMavenLocal first.
+    mavenLocal()
+{{- end}}
     gradlePluginPortal()
     google()
     mavenCentral()
@@ -16,9 +24,17 @@ plugins {
 dependencyResolutionManagement {
   repositoriesMode = RepositoriesMode.FAIL_ON_PROJECT_REPOS
   repositories {
+{{- if mavenLocal}}
+    mavenLocal()
+{{- end}}
     mavenCentral()
     google()
   }
 }
 
 rootProject.name = "{{folder | kotlin}}"
+{{- if compositeBuild}}
+
+// Builds the framework from your local clone, so your changes to it show up without publishing.
+includeBuild("{{frameworkPath | kotlin}}")
+{{- end}}

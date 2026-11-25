@@ -93,6 +93,32 @@ class GameTemplatesTest {
     assertTrue(!bat.replace("\r\n", "").contains("\n"))
   }
 
+  @Test
+  fun localCloneIsIncludedTwice() {
+    val data = data(GameLanguage.JAVA, listOf("desktop"))
+      .copy(source = FrameworkSource.LOCAL_CLONE, frameworkPath = "C:/dev/flixel\"gdx")
+    val settings = settings(data)
+    assertEquals(2, settings.split("includeBuild(\"C:/dev/flixel\\\"gdx\")").size - 1)
+    assertTrue(settings.contains("pluginManagement {\n  // Builds"))
+    assertTrue(!settings.contains("mavenLocal()"))
+  }
+
+  @Test
+  fun mavenLocalComesFirstInBothRepositoryLists() {
+    val settings = settings(data(GameLanguage.JAVA, listOf("desktop")).copy(source = FrameworkSource.MAVEN_LOCAL))
+    assertEquals(2, settings.split("mavenLocal()\n    gradlePluginPortal()", "mavenLocal()\n    mavenCentral()").size - 1)
+    assertTrue(!settings.contains("includeBuild"))
+  }
+
+  @Test
+  fun backslashesInTheClonePathBecomeSlashes() {
+    val data = GameTemplateData.of(
+      "T", "C", "0.1.0", "com.c.t", GameLanguage.JAVA, listOf("desktop"), "1.2.3", "1.2.3", "t", 640, 360,
+      FrameworkSource.LOCAL_CLONE, "C:\\dev\\flixelgdx",
+    )
+    assertEquals("C:/dev/flixelgdx", data.frameworkPath)
+  }
+
   @Test(expected = IllegalArgumentException::class)
   fun unknownTemplateIsRefused() {
     GameTemplates.render(data(GameLanguage.JAVA, listOf("desktop")), "platformer")
@@ -111,6 +137,9 @@ class GameTemplatesTest {
     width = 640,
     height = 360,
   )
+
+  private fun settings(data: GameTemplateData): String =
+    GameTemplates.render(data, "blank").single { it.path == "settings.gradle.kts" }.text()
 
   /** Writes every file as text in the same format and order as the golden files: folder by folder, like a walk. */
   private fun snapshot(files: List<GameFile>): String {

@@ -34,6 +34,21 @@ enum class GameLanguage(val id: String) {
 }
 
 /**
+ * Where a new game gets the framework from.
+ *
+ * Most games use [MAVEN_CENTRAL]. The other two are for people who work on the framework itself and want a quick test
+ * game: [MAVEN_LOCAL] reads what `./gradlew publishToMavenLocal` published, and [LOCAL_CLONE] builds the framework
+ * from a local clone as a Gradle composite build, so changes show up without publishing.
+ *
+ * @property label the name shown in the New Project wizard.
+ */
+enum class FrameworkSource(val label: String) {
+  MAVEN_CENTRAL("Maven Central"),
+  MAVEN_LOCAL("Maven local repository"),
+  LOCAL_CLONE("Local clone (composite build)"),
+}
+
+/**
  * Everything the game templates can read, already checked and derived.
  *
  * Build it with [of] so the class name and the file name slug are derived the same way every time.
@@ -51,6 +66,9 @@ enum class GameLanguage(val id: String) {
  * @property slug a lowercase file name made from the title, used for the web files and the desktop jar.
  * @property width the window width in pixels.
  * @property height the window height in pixels.
+ * @property source where the game gets the framework from.
+ * @property frameworkPath the folder of the framework clone, with forward slashes; only used by
+ *   [FrameworkSource.LOCAL_CLONE].
  */
 data class GameTemplateData(
   val title: String,
@@ -66,6 +84,8 @@ data class GameTemplateData(
   val slug: String,
   val width: Int,
   val height: Int,
+  val source: FrameworkSource = FrameworkSource.MAVEN_CENTRAL,
+  val frameworkPath: String = "",
 ) {
 
   /** Whether the game is written in Kotlin. */
@@ -89,6 +109,9 @@ data class GameTemplateData(
     put("slug", slug)
     put("width", width)
     put("height", height)
+    put("mavenLocal", source == FrameworkSource.MAVEN_LOCAL)
+    put("compositeBuild", source == FrameworkSource.LOCAL_CLONE)
+    put("frameworkPath", frameworkPath)
     put("platformList", platforms.joinToString(", ") { "\"$it\"" })
     put("buildSrcBundle", buildSrcBundle().joinToString(", ") { "\"$it\"" })
     for (platform in GameTemplates.PLATFORMS) put(platform, hasPlatform(platform))
@@ -116,7 +139,8 @@ data class GameTemplateData(
      * Builds the data for a new game, deriving the class name from the title and the slug from the title.
      *
      * The platforms are put in the usual order and duplicates are dropped, so the files never depend on the order in
-     * which the person ticked the boxes.
+     * which the person ticked the boxes. Backslashes in [frameworkPath] become forward slashes, which Gradle reads on
+     * every system.
      */
     fun of(
       title: String,
@@ -130,6 +154,8 @@ data class GameTemplateData(
       folder: String,
       width: Int,
       height: Int,
+      source: FrameworkSource = FrameworkSource.MAVEN_CENTRAL,
+      frameworkPath: String = "",
     ): GameTemplateData = GameTemplateData(
       title = title,
       company = company,
@@ -144,6 +170,8 @@ data class GameTemplateData(
       slug = GameNames.slug(title),
       width = width,
       height = height,
+      source = source,
+      frameworkPath = frameworkPath.replace('\\', '/'),
     )
   }
 }

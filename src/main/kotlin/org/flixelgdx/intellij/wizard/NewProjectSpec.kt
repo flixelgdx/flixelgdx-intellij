@@ -23,6 +23,7 @@
  */
 package org.flixelgdx.intellij.wizard
 
+import org.flixelgdx.intellij.template.FrameworkSource
 import org.flixelgdx.intellij.template.GameLanguage
 import org.flixelgdx.intellij.template.GameTemplateData
 import org.flixelgdx.intellij.template.GameTemplates
@@ -54,6 +55,8 @@ import java.nio.file.Path
  * @property android whether to build for Android.
  * @property frameworkVersion the framework version as typed; blank means the latest release on Maven Central.
  * @property template the template to start from.
+ * @property source where the game gets the framework from.
+ * @property frameworkPath the folder of a local framework clone, as typed; only used by [FrameworkSource.LOCAL_CLONE].
  */
 data class NewProjectSpec(
   val dir: Path,
@@ -69,6 +72,8 @@ data class NewProjectSpec(
   val android: Boolean = false,
   val frameworkVersion: String = "",
   val template: String = GameTemplates.DEFAULT,
+  val source: FrameworkSource = FrameworkSource.MAVEN_CENTRAL,
+  val frameworkPath: String = "",
 ) {
 
   /** The platform names in the usual order. */
@@ -104,6 +109,8 @@ data class NewProjectSpec(
     folder = dir.fileName?.toString() ?: title,
     width = width,
     height = height,
+    source = source,
+    frameworkPath = if (source == FrameworkSource.LOCAL_CLONE) frameworkPath.trim() else "",
   )
 
   companion object {
